@@ -1,0 +1,186 @@
+.nav {
+    width: 100%;
+    box-shadow: 0px 4px 5px 0px rgba(20, 20, 20, 0.3);
+    background-color: white;
+    height: 11vh;
+}
+
+.navDark {
+    background-color: #2F2F2F;
+}
+
+.navContent {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 25px 10px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, rgba(40, 47, 104, 1) 44%, rgba(215, 41, 46, 1) 66%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: pointer;
+}
+
+.logoDark h1 {
+    background: none;
+    -webkit-text-fill-color: white;
+    color: white;
+}
+
+.navButtons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.colorModeButtons {
+    display: flex;
+    border: 1px solid rgb(212, 212, 212);
+    border-radius: 3px;
+}
+
+.colorModeButtonsDark {
+    border: 1px solid rgb(70, 70, 70);
+}
+
+.colorModeButton {
+    border: none;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.lightModeBtn {
+    background-color: #53c9ff;
+}
+
+.lightModeBtnInactive {
+    background-color: #ebebeb;
+}
+
+.darkModeBtn {
+    background-color: #ebebeb;
+}
+
+.darkModeBtnActive {
+    background-color: #272757;
+}
+
+.darkModeBtn img,
+.darkModeBtnActive img {
+    transform: rotatey(180deg);
+}
+
+.colorModeButton img {
+    width: 25px;
+}
+
+.languageButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.languageButtons img {
+    width: 30px;
+}
+
+.userIcon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.userIcon img {
+    width: 40px;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    z-index: 1000;
+}
+
+.dropdownItem {
+    padding: 12px 15px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.dropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdownItem:first-child {
+    border-radius: 5px 5px 0 0;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdownItem:last-child {
+    border-radius: 0 0 5px 5px;
+}
+
+@media screen and (min-width: 768px) {
+    .nav {
+        padding: 0 30px;
+        height: 9vh;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .nav {
+        height: 9vh;
+    }
+
+    .navContent {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    html {
+        font-size: 120%;
+    }
+
+    .colorModeButton img {
+        width: 30px;
+    }
+
+    .languageButtons img {
+        width: 35px;
+    }
+
+    .userIcon img {
+        width: 50px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .logo h1 {
+        font-size: 1.8rem;
+    }
+
+    .navButtons {
+        gap: 40px;
+    }
+}

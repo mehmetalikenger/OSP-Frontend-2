@@ -1,0 +1,203 @@
+.container {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.vectors {
+    position: absolute;
+    z-index: 0;
+    width: 100%;
+    display: none;
+}
+
+.vectors img {
+    position: absolute;
+}
+
+.vectors .vectorLeft {
+    left: 0;
+}
+
+.vectors .vectorRight {
+    right: 0;
+    top: 350;
+}
+
+.loginMain {
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.logo {
+    text-align: center;
+    margin-top: 80px;
+}
+
+.logo h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, rgba(40, 47, 104, 1) 44%, rgba(215, 41, 46, 1) 66%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.loginContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
+.loginContainer h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+}
+
+.loginContainer form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 60px;
+    width: 100%;
+    gap: 30px;
+}
+
+.loginContainer form input {
+    border: none;
+    border-bottom: 1px solid black;
+    outline: none;
+    padding: 5px 0;
+    font-size: 1rem;
+    background-color: transparent;
+}
+
+.passwordArea {
+    display: flex;
+    align-items: flex-end;
+}
+
+.passwordArea input {
+    flex: 1;
+}
+
+.passwordEye {
+    padding-bottom: 5px;
+    border-bottom: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+.passwordArea img {
+    width: 20px;
+    height: auto;
+}
+
+.forgotPassword {
+    text-decoration: none;
+    color: #484848;
+    font-size: 0.9rem;
+}
+
+.forgotPassword:hover {
+    text-decoration: underline;
+}
+
+.submitButton {
+    align-self: center;
+    padding: 7px 30px;
+    cursor: pointer;
+    border: none;
+    background-color: #D9D9D9;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.submitButton:hover {
+    background-color: #484848;
+    color: #ebebeb;
+}
+
+.bottomLogo {
+    width: 30%;
+    margin-top: auto;
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.bottomLogo img {
+    width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+    .loginMain {
+        margin-top: 80px;
+    }
+
+    .loginContainer {
+        width: 45%;
+    }
+
+    .bottomLogo {
+        width: 20%;
+        margin-bottom: 50px;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+
+    .logo h1 {
+        font-size: 2.5rem;
+    }
+
+    html {
+        font-size: 110%;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .vectors {
+        display: flex;
+    }
+
+    .logo h1 {
+        font-size: 3rem;
+    }
+
+    .loginContainer {
+        width: 25%;
+    }
+
+    .bottomLogo {
+        width: 10%;
+    }
+}
+
+@media screen and (min-width: 2000px) {
+    .vectors {
+        display: flex;
+    }
+
+    .logo h1 {
+        font-size: 2.7rem;
+    }
+
+    .loginContainer {
+        width: 20%;
+    }
+
+    .bottomLogo {
+        width: 6%;
+    }
+
+    .passwordEye img {
+        width: 20px;
+    }
+}
