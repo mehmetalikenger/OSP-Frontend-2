@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -34,7 +35,9 @@ export default function Navbar() {
         <nav className={`${styles.nav} ${isDarkMode ? styles.navDark : ''}`}>
             <div className={styles.navContent}>
                 <div className={`${styles.logo} ${isDarkMode ? styles.logoDark : ''}`}>
-                    <h1>OffiSelect</h1>
+                    <Link href="/chiller" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <h1>OffiSelect</h1>
+                    </Link>
                 </div>
                 <div className={styles.navButtons}>
                     <div className={`${styles.colorModeButtons} ${isDarkMode ? styles.colorModeButtonsDark : ''}`}>

@@ -10,7 +10,7 @@
 }
 
 .header {
-    padding-top: 50px;
+    margin-top: 50px;
     font-weight: 350;
     font-size: 1.7rem;
 }
@@ -67,7 +67,7 @@
     justify-content: space-between;
     border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 20px;
+    padding: 20px 40px;
     align-items: start;
     height: 100%;
 }
@@ -75,10 +75,11 @@
 .productInfo {
     display: flex;
     flex-grow: 1;
+    width: 100%;
 }
 
 .productTitle {
-    width: 40%;
+    width: 47%;
 }
 
 .productTitle h3 {
@@ -88,18 +89,18 @@
 }
 
 .productImage {
-    width: 60%;
+    width: 50%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 }
 
 .productImage img {
-    width: 70%;
+    width: 90%;
 }
 
 .viewBtn {
-    margin-top: 20px;
+    margin-top: 40px;
     padding: 5px 20px;
     border: none;
     border-radius: 5px;
@@ -147,7 +148,7 @@
 
     .bottomLogo {
         bottom: 15px;
-        right: 15px;
+        right: 40px;
         width: 18%;
     }
 }
@@ -212,7 +213,7 @@
 
     .products {
         grid-template-columns: 1fr 1fr;
-        width: 55%;
+        max-width: 1300px;
         margin-top: 70px;
     }
 
