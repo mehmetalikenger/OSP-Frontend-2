@@ -1,4 +1,7 @@
 .nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     width: 100%;
     box-shadow: 0px 4px 5px 0px rgba(20, 20, 20, 0.3);
     background-color: white;
@@ -7,6 +10,11 @@
     justify-content: center;
     align-items: center;
     padding: 0 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.navHidden {
+    transform: translateY(-100%);
 }
 
 .navDark {
@@ -22,7 +30,7 @@
 }
 
 .logo h1 {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
     font-weight: 800;
     background: linear-gradient(90deg, rgba(40, 47, 104, 1) 44%, rgba(215, 41, 46, 1) 66%);
     -webkit-background-clip: text;
@@ -42,49 +50,66 @@
     gap: 20px;
 }
 
-.colorModeButtons {
-    display: flex;
-    border: 1px solid rgb(212, 212, 212);
-    border-radius: 3px;
-}
-
-.colorModeButtonsDark {
-    border: 1px solid rgb(70, 70, 70);
-}
-
-.colorModeButton {
-    border: none;
-    width: 50%;
+.toggleContainer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 5px;
+    gap: 12px;
+    user-select: none;
+}
+
+.toggleContainer * {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.toggleIcon {
+    width: 22px;
+    height: 22px;
     cursor: pointer;
 }
 
-.lightModeBtn {
-    background-color: #53c9ff;
+.toggleIconMoon {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    transform: rotateY(180deg);
 }
 
-.lightModeBtnInactive {
-    background-color: #ebebeb;
+.toggleTrack {
+    position: relative;
+    width: 58px;
+    height: 28px;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    padding: 3px;
+    cursor: pointer;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+
 }
 
-.darkModeBtn {
-    background-color: #ebebeb;
+.toggleTrackDark {
+    background-color: #1e1e1e;
+    box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
 }
 
-.darkModeBtnActive {
-    background-color: #272757;
+.toggleHandle {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.25), 0px -1px 3px rgba(255, 255, 255, 0.2);
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
 }
 
-.darkModeBtn img,
-.darkModeBtnActive img {
-    transform: rotatey(180deg);
-}
-
-.colorModeButton img {
-    width: 25px;
+.toggleHandleDark {
+    transform: translateX(30px);
+    background-color: #888888;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.6), 0px -1px 3px rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 .languageButtons {
@@ -94,7 +119,7 @@
 }
 
 .languageButtons img {
-    width: 30px;
+    width: 28px;
 }
 
 .userIcon {
@@ -104,7 +129,7 @@
 }
 
 .userIcon img {
-    width: 40px;
+    width: 37px;
 }
 
 .dropdownMenu {
@@ -162,27 +187,22 @@
         padding-bottom: 30px;
     }
 
-    html {
-        font-size: 120%;
-    }
-
-    .colorModeButton img {
-        width: 30px;
+    .toggleIcon,
+    .toggleIconMoon {
+        width: 25px;
+        height: 25px;
     }
 
     .languageButtons img {
-        width: 35px;
+        width: 30px;
     }
 
     .userIcon img {
-        width: 50px;
+        width: 40px;
     }
 }
 
 @media screen and (min-width: 1200px) {
-    .logo h1 {
-        font-size: 1.8rem;
-    }
 
     .navButtons {
         gap: 40px;
