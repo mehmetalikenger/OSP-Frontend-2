@@ -8,7 +8,7 @@ export default function Navbar() {
     const [language, setLanguage] = useState<'en' | 'de'>('en');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
-    
+
     const userMenuRef = useRef<HTMLDivElement>(null);
     const lastScrollY = useRef(0);
 
@@ -49,7 +49,7 @@ export default function Navbar() {
                 setIsUserMenuOpen(false);
             }
         }
-        
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -59,33 +59,34 @@ export default function Navbar() {
     return (
         <nav className={`${styles.nav} ${isDarkMode ? styles.navDark : ''} ${!isVisible ? styles.navHidden : ''}`}>
             <div className={styles.navContent}>
-                <div className={`${styles.logo} ${isDarkMode ? styles.logoDark : ''}`}>
+                <div className={styles.logo}>
                     <Link href="/chiller" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <h1>OffiSelect</h1>
+                        <img src="/logo/logo-2.png" alt="OSP Logo" className={styles.logoLight} />
+                        <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
                     </Link>
                 </div>
                 <div className={styles.navButtons}>
                     <div className={styles.toggleContainer}>
-                        <img 
-                            src="/icons/light-mode-icon.png" 
-                            alt="Sun" 
+                        <img
+                            src="/icons/light-mode-icon.png"
+                            alt="Sun"
                             className={styles.toggleIcon}
-                            onClick={() => setIsDarkMode(false)} 
+                            onClick={() => setIsDarkMode(false)}
                         />
-                        <div 
-                            className={`${styles.toggleTrack} ${isDarkMode ? styles.toggleTrackDark : ''}`} 
+                        <div
+                            className={`${styles.toggleTrack} ${isDarkMode ? styles.toggleTrackDark : ''}`}
                             onClick={() => setIsDarkMode(!isDarkMode)}
                         >
                             <div className={`${styles.toggleHandle} ${isDarkMode ? styles.toggleHandleDark : ''}`}></div>
                         </div>
-                        <img 
-                            src="/icons/dark-mode-icon.png" 
-                            alt="Moon" 
+                        <img
+                            src="/icons/dark-mode-icon.png"
+                            alt="Moon"
                             className={styles.toggleIconMoon}
-                            onClick={() => setIsDarkMode(true)} 
+                            onClick={() => setIsDarkMode(true)}
                         />
                     </div>
-                    <div 
+                    <div
                         className={styles.languageButtons}
                         onClick={() => setLanguage(prev => prev === 'en' ? 'de' : 'en')}
                         style={{ cursor: 'pointer' }}

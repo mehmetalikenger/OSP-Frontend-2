@@ -29,19 +29,37 @@
     padding: 25px 0px;
 }
 
-.logo h1 {
-    font-size: 1.45rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, rgba(40, 47, 104, 1) 44%, rgba(215, 41, 46, 1) 66%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    cursor: pointer;
+.logo {
+    display: flex;
+    align-items: center;
 }
 
-.logoDark h1 {
-    background: none;
-    -webkit-text-fill-color: white;
-    color: white;
+.logoLight, .logoDark {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.logoLight:hover, .logoDark:hover {
+    opacity: 0.9;
+}
+
+.logoLight {
+    display: block;
+}
+
+.logoDark {
+    display: none;
+}
+
+:global(.dark-mode) .logoLight {
+    display: none;
+}
+
+:global(.dark-mode) .logoDark {
+    display: block;
 }
 
 .navButtons {

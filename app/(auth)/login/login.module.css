@@ -44,12 +44,26 @@
     margin-top: 80px;
 }
 
-.logo h1 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, rgba(40, 47, 104, 1) 44%, rgba(215, 41, 46, 1) 66%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.logoLight {
+    display: inline-block;
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logoDark {
+    display: none;
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+}
+
+:global(.dark-mode) .logoLight {
+    display: none;
+}
+
+:global(.dark-mode) .logoDark {
+    display: inline-block;
 }
 
 .loginContainer {

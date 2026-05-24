@@ -14,7 +14,8 @@ export default function LoginPage() {
       </div>
       <div className={styles.loginMain}>
         <div className={styles.logo}>
-          <h1>OffiSelect</h1>
+          <img src="/logo/logo-2.png" alt="OSP Logo" className={styles.logoLight} />
+          <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
         </div>
         <div className={styles.loginContainer}>
           {isForgotMode ? (
@@ -26,8 +27,8 @@ export default function LoginPage() {
                 </p>
                 <input type="email" placeholder="Email" required />
                 <button className={styles.submitButton} type="submit">Send Reset Link</button>
-                <span 
-                  className={styles.forgotPassword} 
+                <span
+                  className={styles.forgotPassword}
                   onClick={() => setIsForgotMode(false)}
                   style={{ cursor: 'pointer', textAlign: 'center', marginTop: '10px' }}
                 >
@@ -43,15 +44,15 @@ export default function LoginPage() {
                 <div className={styles.passwordArea}>
                   <input type={showPassword ? "text" : "password"} placeholder="Password" required />
                   <div className={styles.passwordEye} onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
-                    <img 
-                      src="/icons/pass-eye.png" 
-                      alt="Eye" 
-                      style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} 
+                    <img
+                      src="/icons/pass-eye.png"
+                      alt="Eye"
+                      style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }}
                     />
                   </div>
                 </div>
-                <span 
-                  className={styles.forgotPassword} 
+                <span
+                  className={styles.forgotPassword}
                   onClick={() => setIsForgotMode(true)}
                   style={{ cursor: 'pointer' }}
                 >
