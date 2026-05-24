@@ -44,7 +44,7 @@ export default function HeatPumpsPage() {
                             <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
                         </div>
                     </div>
-                    <button className={styles.viewBtn}>
+                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/air-cooled-heat-pumps')}>
                         View
                     </button>
                 </div>
@@ -57,7 +57,7 @@ export default function HeatPumpsPage() {
                             <img src="../images/products/569547.png" alt="Water Cooled Heat Pump" />
                         </div>
                     </div>
-                    <button className={styles.viewBtn}>
+                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/water-cooled-heat-pumps')}>
                         View
                     </button>
                 </div>

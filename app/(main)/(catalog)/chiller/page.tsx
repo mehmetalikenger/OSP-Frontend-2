@@ -57,7 +57,7 @@ export default function ChillerPage() {
                             <img src="../images/products/569547.png" alt="Water Cooled Chiller" />
                         </div>
                     </div>
-                    <button className={styles.viewBtn}>
+                    <button className={styles.viewBtn} onClick={() => router.push('/chiller/water-cooled-chillers')}>
                         View
                     </button>
                 </div>
