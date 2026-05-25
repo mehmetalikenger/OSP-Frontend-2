@@ -1,0 +1,291 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.containerFirst {
+    width: 60%;
+    padding: 20px 20px 20px 10px;
+    box-shadow: 1px 1px 3px #5a5a5a;
+    min-height: 100vh;
+    z-index: 1;
+    transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+    .containerFirst {
+        width: 40%;
+        padding-left: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .containerFirst {
+        width: 30%;
+    }
+}
+
+.containerFirstClosed {
+    width: 80px;
+    padding: 20px 10px;
+}
+
+.topIcon {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.backIcon {
+    width: 24px;
+    cursor: pointer;
+    transition: transform 0.4s ease-in-out;
+}
+
+.backIconReversed {
+    width: 24px;
+    cursor: pointer;
+    transform: rotate(180deg);
+    transition: transform 0.4s ease-in-out;
+}
+
+.containerFirstClosed .topIcon {
+    justify-content: center;
+}
+
+.userInfo {
+    width: 100%;
+    margin-top: 40px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.profilePic {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.profilePic img {
+    width: 120px;
+    transition: width 0.4s ease-in-out;
+}
+
+.containerFirstClosed .userInfo {
+    align-items: center;
+}
+
+.containerFirstClosed .profilePic {
+    justify-content: center;
+}
+
+.containerFirstClosed .profilePic img {
+    width: 32px;
+}
+
+.userName {
+    width: 100%;
+    text-align: left;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .userName {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+}
+
+.userName h2 {
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 10px;
+}
+
+.infoLine {
+    width: 100%;
+    margin-top: 10px;
+    height: 3px;
+    background-color: #d8d8d8;
+    border-radius: 10px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .infoLine {
+    opacity: 0;
+}
+
+.menuOptions {
+    margin-top: 20px;
+}
+
+.containerFirstClosed .menuOptions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.option {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-top: 20px;
+    cursor: pointer;
+    align-items: center;
+    padding: 7px;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.optionIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
+.optionIcon img {
+    width: 20px;
+    transition: width 0.3s ease-in-out;
+}
+
+.containerFirstClosed .option {
+    gap: 0;
+    width: fit-content;
+    padding: 7px;
+}
+
+.containerFirstClosed .optionIcon img {
+    width: 24px;
+}
+
+.option p {
+    font-size: 14px;
+    color: black;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .option p {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.optionActive {
+    background-color: #C4D9FF;
+}
+
+.optionActive p {
+    color: #282F68;
+}
+
+.containerSecond {
+    flex: 1;
+    min-height: 100vh;
+}
+
+/* Dark Mode Styles */
+:global(.dark-mode) .containerSecond {
+    background-color: #373737;
+}
+
+:global(.dark-mode) .userName h2 {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .option:not(.optionActive) p {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .infoLine {
+    background-color: #3a3a3a;
+}
+
+:global(.dark-mode) .containerFirst {
+    background-color: #262626;
+    box-shadow: none;
+}
+
+.darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .darkIcon {
+    display: block;
+}
+
+:global(.dark-mode) .lightIcon {
+    display: none;
+}
+
+@media (min-width: 1200px) {
+
+    .containerFirst,
+    .containerFirstClosed {
+        width: 20% !important;
+        padding: 20px 20px 20px 40px !important;
+    }
+
+    .topIcon {
+        display: none !important;
+    }
+
+    .containerFirstClosed .userInfo {
+        align-items: flex-start !important;
+    }
+
+    .containerFirstClosed .profilePic {
+        justify-content: flex-start !important;
+    }
+
+    .containerFirstClosed .profilePic img {
+        width: 120px !important;
+        margin-left: 0 !important;
+    }
+
+    .containerFirstClosed .userName,
+    .containerFirstClosed .option p {
+        opacity: 1 !important;
+        width: 100% !important;
+        height: auto !important;
+        pointer-events: auto !important;
+    }
+
+    .containerFirstClosed .infoLine {
+        opacity: 1 !important;
+    }
+
+    .containerFirstClosed .userName h2 {
+        margin-top: 10px !important;
+    }
+
+    .containerFirstClosed .menuOptions {
+        align-items: stretch !important;
+        display: block !important;
+    }
+
+    .containerFirstClosed .option {
+        width: 100% !important;
+        padding: 7px !important;
+        gap: 15px !important;
+    }
+
+    .containerFirstClosed .optionIcon img {
+        width: 20px !important;
+    }
+}
+
+@media (min-width: 2000px) {
+
+    .containerFirst,
+    .containerFirstClosed {
+        width: 15% !important;
+    }
+}

@@ -34,7 +34,8 @@
     align-items: center;
 }
 
-.logoLight, .logoDark {
+.logoLight,
+.logoDark {
     height: 42px;
     width: auto;
     object-fit: contain;
@@ -42,7 +43,8 @@
     transition: opacity 0.2s ease;
 }
 
-.logoLight:hover, .logoDark:hover {
+.logoLight:hover,
+.logoDark:hover {
     opacity: 0.9;
 }
 
@@ -171,7 +173,7 @@
     border: none;
     text-align: left;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #333;
 }
 
@@ -231,4 +233,22 @@
     .nav {
         height: 100px;
     }
+}
+
+/* Dark Mode Styles */
+:global(.dark-mode) .dropdownMenu {
+    background-color: #373737;
+    border-color: #444;
+}
+
+:global(.dark-mode) .dropdownItem {
+    color: white;
+}
+
+:global(.dark-mode) .dropdownItem:hover {
+    background-color: #474747;
+}
+
+:global(.dark-mode) .dropdownItem:first-child {
+    border-bottom: 1px solid #444;
 }

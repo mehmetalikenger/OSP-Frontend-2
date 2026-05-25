@@ -97,7 +97,7 @@ export default function Navbar() {
                         <img src={isDarkMode ? "/icons/user-icon-second.png" : "/icons/user-icon.png"} alt="User" style={{ cursor: 'pointer' }} />
                         {isUserMenuOpen && (
                             <div className={styles.dropdownMenu}>
-                                <button className={styles.dropdownItem}>Profile</button>
+                                <Link href="/profile" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Profile</Link>
                                 <button className={styles.dropdownItem}>Log out</button>
                             </div>
                         )}
