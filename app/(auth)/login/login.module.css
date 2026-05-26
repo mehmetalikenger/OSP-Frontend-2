@@ -46,14 +46,14 @@
 
 .logoLight {
     display: inline-block;
-    height: 80px;
+    height: 55px;
     width: auto;
     object-fit: contain;
 }
 
 .logoDark {
     display: none;
-    height: 80px;
+    height: 50px;
     width: auto;
     object-fit: contain;
 }
@@ -181,6 +181,10 @@
 
     .loginContainer {
         width: 25%;
+    }
+
+    .logoLight {
+        height: 65px;
     }
 
     .bottomLogo {

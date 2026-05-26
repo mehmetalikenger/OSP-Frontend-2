@@ -1,0 +1,512 @@
+.projectsContainer {
+    margin-top: 20px;
+}
+
+.project {
+    border-radius: 5px;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.arrow {
+    width: 100%;
+    display: flex;
+    justify-content: right;
+}
+
+.arrow img {
+    width: 20px;
+    rotate: 90deg;
+    cursor: pointer;
+    transition: rotate 0.3s ease;
+}
+
+.arrowOpen img {
+    rotate: -90deg;
+}
+
+.projectHeader {
+    margin-top: 20px;
+}
+
+.projectName {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    width: fit-content;
+}
+
+.projectName h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    padding-right: 20px;
+    /* Reserves space for the floating edit icon */
+    line-height: 1.2;
+}
+
+.projectNameInput {
+    font-size: 1.1rem;
+    font-weight: inherit;
+    color: black;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #C2C2C2;
+    outline: none;
+    padding: 0;
+    width: 200px;
+    font-family: inherit;
+    margin: 0;
+    line-height: 1.2;
+}
+
+:global(.dark-mode) .projectNameInput {
+    color: white;
+    border-bottom-color: #5C5C5C;
+}
+
+:global(.dark-mode) .projectName h2 {
+    color: white;
+}
+
+.editIcon {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+.editIcon img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.dates {
+    margin-top: 15px;
+}
+
+.date {
+    margin-top: 7px;
+    display: flex;
+    gap: 4px;
+}
+
+.dateTitle {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.dateValue {
+    font-size: 0.9rem;
+}
+
+.headerLine {
+    border: 1px solid #c0c0c0;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.projectBody {
+    margin-top: 30px;
+}
+
+.informationRow {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.informationRow label {
+    font-size: 0.8rem;
+}
+
+.informationRow input {
+    font-size: 0.9rem;
+    padding: 5px;
+    outline: none;
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+}
+
+.informationRow input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #C2C2C2;
+}
+
+.informationRow textarea {
+    font-size: 0.9rem;
+    padding: 5px;
+    outline: none;
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+    height: 100px;
+    resize: none;
+}
+
+.informationRow textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #C2C2C2;
+}
+
+.saveBtn {
+    margin: 25px 0 0 0;
+    padding: 5px 17px;
+    border-radius: 5px;
+    border: none;
+    background-color: #D7292E;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+    background-color: #e43c41;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.seperator {
+    height: 2px;
+    width: 100%;
+    background-color: #dddddd;
+    border-radius: 5px;
+    margin-top: 30px;
+}
+
+.unitContainer {
+    margin-top: 30px;
+}
+
+/* Mobile */
+.unit {
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+.unit .closeBtn {
+    width: 100%;
+    display: flex;
+    justify-content: right;
+}
+
+.closeBtn img {
+    width: 20px;
+    cursor: pointer;
+}
+
+.unitName {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.unitName p {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.unitImage {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.unitImage img {
+    width: 50%;
+}
+
+.unitDocument {
+    background-color: rgb(215, 148, 41, 0.36);
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+.unitDocument:hover {
+    background-color: rgba(215, 148, 41, 0.5);
+}
+
+.documentIcon {
+    display: flex;
+    align-items: center;
+}
+
+.documentIcon img {
+    width: 20px;
+}
+
+.unitDocument p {
+    font-size: 0.8rem;
+    color: #B57000;
+    text-decoration: underline;
+}
+
+.projectClose {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.projectClose:hover {
+    background-color: white;
+    border-color: #c0c0c0;
+    box-shadow: none;
+}
+
+.projectClose .projectName {}
+
+.projectClose .projectName h2 {
+    font-size: 0.9rem;
+}
+
+.projectClose .arrow {
+    width: auto;
+}
+
+.projectClose .dates {
+    display: none;
+}
+
+@media screen and (min-width:768px) {
+
+    .projectHeader {
+        display: flex;
+        justify-content: space-between;
+        padding: 0;
+    }
+
+    .dates {
+        display: flex;
+        gap: 15px
+    }
+
+    .headerLine {
+        margin-top: 10px;
+    }
+
+    .contactInformation {
+        width: 50%;
+        max-width: 600px;
+    }
+
+    .unitsMobile {
+        display: none;
+    }
+
+    .unitDetails {
+        display: flex;
+        width: 100%;
+    }
+
+    .unitInfo {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        align-items: flex-start;
+    }
+
+    .unitName {
+        width: 100%;
+    }
+
+    .unitImage {
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .unitImage img {
+        width: 70%;
+    }
+
+    .unitDocument {
+        align-items: center;
+        justify-content: flex-start;
+        padding-right: 20px;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+
+    .unitsDesktop {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .unit {
+        margin-top: 0;
+    }
+
+    .editIcon img {
+        width: 15px;
+    }
+}
+
+@media screen and (min-width: 1500px) {
+
+    .unitsDesktop {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .unitInfo {
+        width: 60%;
+    }
+
+    .unitImage {
+        width: 40%;
+    }
+
+    .unitImage img {
+        width: 80%;
+    }
+
+    .editIcon img {
+        width: 16px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .toast {
+        right: 40px;
+        padding: 20px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* Light/Dark Icon Toggling */
+.darkIcon {
+    display: none !important;
+}
+
+.lightIcon {
+    display: block !important;
+}
+
+:global(.dark-mode) .darkIcon {
+    display: block !important;
+}
+
+:global(.dark-mode) .lightIcon {
+    display: none !important;
+}
+
+/* Complete Dark Mode Colors and Borders for Projects Page */
+:global(.dark-mode) .unit {
+    background-color: #333333;
+    border-color: #5C5C5C;
+}
+
+:global(.dark-mode) .unitName p {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .seperator {
+    background-color: #4A4A4A;
+}
+
+:global(.dark-mode) .informationRow label {
+    color: #b0b0b0;
+}
+
+:global(.dark-mode) .informationRow input,
+:global(.dark-mode) .informationRow textarea {
+    background-color: #333333;
+    border-color: #5C5C5C;
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .informationRow input:focus,
+:global(.dark-mode) .informationRow textarea:focus {
+    border-color: #5C5C5C;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+:global(.dark-mode) .dateValue {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .dateTitle {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .unitDocument p {
+    color: #fcb33f;
+}
+
+:global(.dark-mode) .project {
+    background-color: #262626;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+:global(.dark-mode) .projectClose {
+    border-color: #3C3C3C;
+}
+
+:global(.dark-mode) .projectClose:hover {
+    background-color: #262626;
+    border: 1px solid #555555;
+    box-shadow: none;
+}
+
+:global(.dark-mode) .headerLine {
+    border-color: #4A4A4A;
+}
+
+:global(.dark-mode) .unitDocument {
+    background-color: rgba(252, 179, 63, 0.15);
+}
+
+:global(.dark-mode) .unitDocument:hover {
+    background-color: rgba(252, 179, 63, 0.25);
+}
+
+
+.desktopName {
+    display: block;
+}
+
+.mobileName {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    .desktopName {
+        display: none;
+    }
+
+    .mobileName {
+        display: block;
+    }
+}

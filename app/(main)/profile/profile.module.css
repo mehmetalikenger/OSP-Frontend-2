@@ -2,6 +2,7 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    position: relative;
 }
 
 .containerFirst {
@@ -9,15 +10,20 @@
     padding: 20px 20px 20px 10px;
     box-shadow: 1px 1px 3px #5a5a5a;
     min-height: 100vh;
-    z-index: 1;
+    z-index: 100;
     transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
     overflow: hidden;
     white-space: nowrap;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background-color: white;
 }
 
 @media (min-width: 768px) {
     .containerFirst {
-        width: 40%;
+        width: 35%;
         padding-left: 40px;
     }
 }
@@ -74,7 +80,7 @@
 }
 
 .profilePic img {
-    width: 120px;
+    width: 100px;
     transition: width 0.4s ease-in-out;
 }
 
@@ -106,14 +112,14 @@
 .userName h2 {
     font-size: 16px;
     font-weight: 400;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .infoLine {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     height: 3px;
-    background-color: #d8d8d8;
+    background-color: #e6e6e6;
     border-radius: 10px;
     transition: opacity 0.3s ease-in-out;
 }
@@ -167,7 +173,7 @@
 }
 
 .option p {
-    font-size: 14px;
+    font-size: 0.9rem;
     color: black;
     transition: opacity 0.3s ease-in-out;
 }
@@ -186,9 +192,52 @@
     color: #282F68;
 }
 
+.subOptionsArea {
+    display: flex;
+    margin-left: 20px;
+    margin-top: 15px;
+}
+
+.subOption {
+    cursor: pointer;
+}
+
+.subOption p {
+    font-size: 0.9rem;
+    color: #474747;
+    transition: color 0.2s ease;
+}
+
+.subOption:hover p {
+    color: #282F68;
+}
+
+.subOptionActive p {
+    color: #282F68;
+    font-weight: 600;
+}
+
+.containerFirstClosed .subOptionsArea {
+    display: none;
+}
+
+.options {
+    margin-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.optionsLine {
+    width: 3px;
+    background-color: #c2c2c2;
+    border-radius: 10px;
+}
+
 .containerSecond {
     flex: 1;
     min-height: 100vh;
+    position: relative;
 }
 
 /* Dark Mode Styles */
@@ -202,6 +251,15 @@
 
 :global(.dark-mode) .option:not(.optionActive) p {
     color: #d9d7d7;
+}
+
+:global(.dark-mode) .subOption:not(.subOptionActive) p {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .subOptionActive p,
+:global(.dark-mode) .subOption:hover p {
+    color: #C4D9FF;
 }
 
 :global(.dark-mode) .infoLine {
@@ -229,7 +287,8 @@
 
     .containerFirst,
     .containerFirstClosed {
-        width: 20% !important;
+        position: static !important;
+        width: 18% !important;
         padding: 20px 20px 20px 40px !important;
     }
 
@@ -245,6 +304,7 @@
         justify-content: flex-start !important;
     }
 
+    .containerFirst .profilePic img,
     .containerFirstClosed .profilePic img {
         width: 120px !important;
         margin-left: 0 !important;
@@ -262,13 +322,18 @@
         opacity: 1 !important;
     }
 
+    .containerFirst .userName h2,
     .containerFirstClosed .userName h2 {
-        margin-top: 10px !important;
+        margin-top: 15px !important;
     }
 
     .containerFirstClosed .menuOptions {
         align-items: stretch !important;
         display: block !important;
+    }
+
+    .containerFirstClosed .subOptionsArea {
+        display: flex !important;
     }
 
     .containerFirstClosed .option {
@@ -280,12 +345,46 @@
     .containerFirstClosed .optionIcon img {
         width: 20px !important;
     }
+
+    .option:not(.optionActive):hover {
+        background-color: #eef2f7;
+    }
+}
+
+:global(.dark-mode) .option:not(.optionActive):hover {
+    background-color: #333333;
 }
 
 @media (min-width: 2000px) {
 
     .containerFirst,
     .containerFirstClosed {
-        width: 15% !important;
+        width: 12% !important;
+    }
+}
+
+.sidebarPlaceholder {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    cursor: pointer;
+}
+
+@media (min-width: 1200px) {
+    .sidebarPlaceholder {
+        display: none !important;
+    }
+
+    .overlay {
+        display: none !important;
     }
 }

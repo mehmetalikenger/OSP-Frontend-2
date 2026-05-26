@@ -36,7 +36,7 @@
 
 .logoLight,
 .logoDark {
-    height: 42px;
+    height: 32px;
     width: auto;
     object-fit: contain;
     cursor: pointer;
@@ -195,6 +195,11 @@
         padding: 0 40px;
         height: 9vh;
     }
+
+    .logoLight,
+    .logoDark {
+        height: 35px;
+    }
 }
 
 @media screen and (min-width: 1024px) {
@@ -220,12 +225,22 @@
     .userIcon img {
         width: 40px;
     }
+
+    .logoLight,
+    .logoDark {
+        height: 38px;
+    }
 }
 
 @media screen and (min-width: 1200px) {
 
     .navButtons {
         gap: 40px;
+    }
+
+    .logoLight,
+    .logoDark {
+        height: 42px;
     }
 }
 
