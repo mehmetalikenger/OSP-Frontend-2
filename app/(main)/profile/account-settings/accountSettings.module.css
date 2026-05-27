@@ -60,16 +60,16 @@
     margin: 15px 0 5px 15px;
     padding: 5px 17px;
     border-radius: 5px;
-    border: none;
-    background-color: #D7292E;
-    color: white;
+    border: 1px solid #D7292E;
+    background-color: transparent;
+    color: #D7292E;
     font-size: 0.8rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
 .saveButton:hover {
-    background-color: #e43c41;
+    background-color: rgba(215, 41, 46, 0.08);
 }
 
 .deleteAccountContainer {
@@ -95,15 +95,16 @@
     margin-top: 20px;
     padding: 8px 15px;
     border-radius: 5px;
-    border: none;
-    background-color: #D7292E;
-    color: white;
+    border: 1px solid #D7292E;
+    background-color: transparent;
+    color: #D7292E;
     font-size: 0.8rem;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .deleteButton:hover {
-    background-color: #C7292E;
+    background-color: rgba(215, 41, 46, 0.08);
 }
 
 :global(.dark-mode) .pageContentContainer {
@@ -115,14 +116,14 @@
 }
 
 :global(.dark-mode) .field label {
-    color: #d9d7d7;
+    color: #909090;
 }
 
 :global(.dark-mode) .field input,
 :global(.dark-mode) .adressInput {
     background-color: #5C5C5C;
     border: none;
-    color: white;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .line {
@@ -183,16 +184,16 @@
 .cancelButton {
     padding: 8px 15px;
     border-radius: 5px;
-    border: none;
-    background-color: #8E8E8E;
-    color: #ffffff;
+    border: 1px solid #8E8E8E;
+    background-color: transparent;
+    color: #8E8E8E;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .cancelButton:hover {
-    background-color: #767676;
+    background-color: rgba(142, 142, 142, 0.1);
 }
 
 :global(.dark-mode) .deleteWarning {
@@ -206,12 +207,12 @@
 
 :global(.dark-mode) .deleteWarning input {
     background-color: #262626;
-    color: white;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .cancelButton {
     background-color: #4A4A4A;
-    color: #d9d7d7;
+    color: #909090;
 }
 
 :global(.dark-mode) .cancelButton:hover {

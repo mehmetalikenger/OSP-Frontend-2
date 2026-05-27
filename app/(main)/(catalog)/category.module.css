@@ -110,10 +110,10 @@ body {
 .viewBtn {
     margin-top: 30px;
     padding: 5px 20px;
-    border: none;
+    border: 1px solid #d7292e;
     border-radius: 5px;
-    color: white;
-    background-color: #d7292e;
+    color: #d7292e;
+    background-color: transparent;
     font-size: 0.8rem;
 }
 
@@ -187,10 +187,10 @@ body {
 .calcBtn {
     margin-top: 30px;
     padding: 8px 20px;
-    border: none;
+    border: 1px solid #d7292e;
     border-radius: 5px;
-    color: white;
-    background-color: #d7292e;
+    color: #d7292e;
+    background-color: transparent;
     font-size: 0.8rem;
 }
 
@@ -233,27 +233,28 @@ body {
 }
 
 :global(.dark-mode) .header {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .product {
     background-color: #373737;
+    border-color: #4a4a4a;
 }
 
 :global(.dark-mode) .productTitle h3 {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .specTitle h4 {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .specValue p {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .productTitle h2 {
-    color: #e9e9e9;
+    color: #c0c0c0;
 }
 
 .modalOverlay {
@@ -287,27 +288,27 @@ body {
 }
 
 :global(.dark-mode) .unitName h2 {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .unitDesc p {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs h3 {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .unitSpecs ul li {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specTitle {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specValue {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 .closeBtn {
@@ -493,7 +494,7 @@ body {
     }
 
     .viewBtn:hover {
-        background-color: #e43c41;
+        background-color: rgba(215, 41, 46, 0.08);
         cursor: pointer;
     }
 
@@ -514,7 +515,7 @@ body {
     }
 
     .calcBtn:hover {
-        background-color: #e43c41;
+        background-color: rgba(215, 41, 46, 0.08);
     }
 
     .bottomLogo {

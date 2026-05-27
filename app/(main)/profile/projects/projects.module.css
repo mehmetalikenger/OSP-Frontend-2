@@ -44,6 +44,7 @@
     padding-right: 20px;
     /* Reserves space for the floating edit icon */
     line-height: 1.2;
+    color: #2a2a2a;
 }
 
 .projectNameInput {
@@ -62,12 +63,12 @@
 }
 
 :global(.dark-mode) .projectNameInput {
-    color: white;
+    color: #c0c0c0;
     border-bottom-color: #5C5C5C;
 }
 
 :global(.dark-mode) .projectName h2 {
-    color: white;
+    color: #c0c0c0;
 }
 
 .editIcon {
@@ -98,10 +99,12 @@
 .dateTitle {
     font-weight: 500;
     font-size: 0.9rem;
+    color: #4a4a4a;
 }
 
 .dateValue {
     font-size: 0.9rem;
+    color: #4a4a4a;
 }
 
 .headerLine {
@@ -123,6 +126,7 @@
 
 .informationRow label {
     font-size: 0.8rem;
+    color: #4a4a4a;
 }
 
 .informationRow input {
@@ -159,16 +163,16 @@
     margin: 25px 0 0 0;
     padding: 5px 17px;
     border-radius: 5px;
-    border: none;
-    background-color: #D7292E;
-    color: white;
+    border: 1px solid #D7292E;
+    background-color: transparent;
+    color: #D7292E;
     font-size: 0.8rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
 .saveBtn:hover {
-    background-color: #e43c41;
+    background-color: rgba(215, 41, 46, 0.08);
 }
 
 .toast {
@@ -222,6 +226,7 @@
 .unitName p {
     font-size: 0.9rem;
     font-weight: 500;
+    color: #2a2a2a;
 }
 
 .unitImage {
@@ -428,7 +433,7 @@
 }
 
 :global(.dark-mode) .unitName p {
-    color: #d9d7d7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .seperator {
@@ -436,14 +441,14 @@
 }
 
 :global(.dark-mode) .informationRow label {
-    color: #b0b0b0;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .informationRow input,
 :global(.dark-mode) .informationRow textarea {
     background-color: #333333;
     border-color: #5C5C5C;
-    color: #d9d7d7;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .informationRow input:focus,
@@ -454,15 +459,15 @@
 }
 
 :global(.dark-mode) .dateValue {
-    color: #d9d7d7;
+    color: #909090;
 }
 
 :global(.dark-mode) .dateTitle {
-    color: #d9d7d7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitDocument p {
-    color: #fcb33f;
+    color: #f7ab32;
 }
 
 :global(.dark-mode) .project {

@@ -53,7 +53,7 @@ export default function ChillersPage() {
                                                 <h2>OffiTec Modular High-Capacity Air-Cooled Industrial Chiller Unit</h2>
                                             </div>
                                             <div className={styles.productImage}>
-                                                <img src="/images/products/745729.png" alt="Air Cooled Chiller" />
+                                                <img src="/images/products/824186.png" alt="Air Cooled Chiller" />
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -98,7 +98,7 @@ export default function ChillersPage() {
                                                 <h2>OffiTec Modular High-Capacity Water-Cooled Industrial Chiller Unit</h2>
                                             </div>
                                             <div className={styles.productImage}>
-                                                <img src="/images/products/569547.png" alt="Water Cooled Chiller" />
+                                                <img src="/images/products/824186.png" alt="Water Cooled Chiller" />
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -167,7 +167,7 @@ export default function ChillersPage() {
                                             </div>
                                         </div>
                                         <div className={styles.productImage}>
-                                            <img src="/images/products/745729.png" alt="Air Cooled Chiller" />
+                                            <img src="/images/products/824186.png" alt="Air Cooled Chiller" />
                                         </div>
                                     </div>
                                     <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>

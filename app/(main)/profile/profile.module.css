@@ -246,15 +246,15 @@
 }
 
 :global(.dark-mode) .userName h2 {
-    color: #d9d7d7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .option:not(.optionActive) p {
-    color: #d9d7d7;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .subOption:not(.subOptionActive) p {
-    color: #d9d7d7;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .subOptionActive p,

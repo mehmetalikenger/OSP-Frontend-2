@@ -257,7 +257,7 @@
 }
 
 :global(.dark-mode) .dropdownItem {
-    color: white;
+    color: #a0a0a0;
 }
 
 :global(.dark-mode) .dropdownItem:hover {

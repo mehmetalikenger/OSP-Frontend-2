@@ -106,10 +106,10 @@ body {
 .viewBtn {
     margin-top: 15px;
     padding: 5px 20px;
-    border: none;
+    border: 1px solid #d7292e;
     border-radius: 5px;
-    color: white;
-    background-color: #d7292e;
+    color: #d7292e;
+    background-color: transparent;
     font-size: 0.8rem;
 }
 
@@ -183,10 +183,10 @@ body {
 .calcBtn {
     margin-top: 30px;
     padding: 8px 20px;
-    border: none;
+    border: 1px solid #d7292e;
     border-radius: 5px;
-    color: white;
-    background-color: #d7292e;
+    color: #d7292e;
+    background-color: transparent;
     font-size: 0.8rem;
 }
 
@@ -229,27 +229,28 @@ body {
 }
 
 :global(.dark-mode) .header {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .product {
     background-color: #262626;
+    border-color: #4a4a4a;
 }
 
 :global(.dark-mode) .productTitle h3 {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .specTitle h4 {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .specValue p {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .productTitle h2 {
-    color: #e9e9e9;
+    color: #c0c0c0;
 }
 
 .modalOverlay {
@@ -283,31 +284,31 @@ body {
 }
 
 :global(.dark-mode) .unitName h2 {
-    color: #e9e9e9;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .unitDesc p {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs h3 {
-    color: #D9D7D7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .unitSpecs ul li {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specTitle {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specValue {
-    color: #D9D7D7;
+    color: #909090;
 }
 
 :global(.dark-mode) .unitSpecs ul li span {
-    color: #d9d7d7;
+    color: #909090;
 }
 
 .closeBtn {
@@ -376,6 +377,10 @@ body {
         width: 100%;
     }
 
+    .viewBtn {
+        margin-top: 30px;
+    }
+
     .unitDetailContainer {
         padding: 0 30px;
     }
@@ -417,6 +422,18 @@ body {
 @media screen and (min-width: 1024px) {
     .products {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .productInfo {
+        width: 65%;
+    }
+
+    .productImage {
+        width: 33%;
+    }
+
+    .viewBtn {
+        margin-top: 30px;
     }
 
     .unitDetailsMobile {
@@ -476,16 +493,8 @@ body {
         width: 100%;
     }
 
-    .productInfo {
-        width: 60%;
-    }
-
-    .productImage {
-        width: 30%;
-    }
-
     .viewBtn:hover {
-        background-color: #e43c41;
+        background-color: rgba(215, 41, 46, 0.08);
         cursor: pointer;
     }
 
@@ -506,13 +515,23 @@ body {
     }
 
     .calcBtn:hover {
-        background-color: #e43c41;
+        background-color: rgba(215, 41, 46, 0.08);
     }
 
     .bottomLogo {
         bottom: 40px;
         right: 40px;
         width: 8%;
+    }
+}
+
+@media screen and (min-width:1600px) {
+    .productInfo {
+        width: 60%;
+    }
+
+    .productImage {
+        width: 30%;
     }
 }
 

@@ -58,7 +58,7 @@
 }
 
 :global(.dark-mode) .header h1 {
-    color: #d9d7d7;
+    color: #c0c0c0;
 }
 
 :global(.dark-mode) .headerLine {
