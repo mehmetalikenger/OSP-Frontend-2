@@ -132,8 +132,13 @@
     color: #c0c0c0;
 }
 
+:global(body.dark-mode) {
+    background-color: rgb(27 27 27);
+}
+
 :global(.dark-mode) .product {
-    background-color: #373737;
+    background-color: #272727;
+    border-color: #4f4f4f;
 }
 
 :global(.dark-mode) .productTitle h3 {

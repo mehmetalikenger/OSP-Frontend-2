@@ -35,7 +35,7 @@ export default function Navbar() {
     }, []);
 
     useEffect(() => {
-        document.body.style.backgroundColor = isDarkMode ? '#262626' : 'white';
+        document.body.style.backgroundColor = isDarkMode ? '#1b1b1b' : 'white';
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
         } else {

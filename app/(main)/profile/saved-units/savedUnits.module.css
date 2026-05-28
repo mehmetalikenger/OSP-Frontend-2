@@ -280,7 +280,7 @@ body {
 }
 
 :global(.dark-mode) .unitDetails {
-    background-color: #2F2F2F;
+    background-color: #272727;
 }
 
 :global(.dark-mode) .unitName h2 {
@@ -468,7 +468,7 @@ body {
     }
 
     .unitImage {
-        width: 40%;
+        width: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -500,6 +500,7 @@ body {
 
     .unitDetails {
         height: 80vh;
+        width: 50%;
     }
 
     .closeBtn {
@@ -550,6 +551,10 @@ body {
         right: 40px;
         width: 10%;
         max-width: 150px;
+    }
+
+    .unitDetails {
+        width: 40%;
     }
 }
 

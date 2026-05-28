@@ -108,7 +108,7 @@
 }
 
 :global(.dark-mode) .pageContentContainer {
-    background-color: #373737;
+    background-color: rgb(27 27 27);
 }
 
 :global(.dark-mode) .container {

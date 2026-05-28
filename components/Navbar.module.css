@@ -18,7 +18,8 @@
 }
 
 .navDark {
-    background-color: #2F2F2F;
+    background-color: #272727;
+    box-shadow: 0px 4px 5px 0px #1b1b1b;
 }
 
 .navContent {
@@ -252,7 +253,7 @@
 
 /* Dark Mode Styles */
 :global(.dark-mode) .dropdownMenu {
-    background-color: #373737;
+    background-color: rgb(27 27 27);
     border-color: #444;
 }
 

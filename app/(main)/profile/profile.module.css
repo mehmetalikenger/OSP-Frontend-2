@@ -242,7 +242,7 @@
 
 /* Dark Mode Styles */
 :global(.dark-mode) .containerSecond {
-    background-color: #373737;
+    background-color: #1b1b1b;
 }
 
 :global(.dark-mode) .userName h2 {

@@ -236,9 +236,13 @@ body {
     color: #c0c0c0;
 }
 
+:global(body.dark-mode) {
+    background-color: rgb(27 27 27);
+}
+
 :global(.dark-mode) .product {
-    background-color: #373737;
-    border-color: #4a4a4a;
+    background-color: #272727;
+    border-color: #4f4f4f;
 }
 
 :global(.dark-mode) .productTitle h3 {
@@ -284,7 +288,7 @@ body {
 }
 
 :global(.dark-mode) .unitDetails {
-    background-color: #2F2F2F;
+    background-color: #272727;
 }
 
 :global(.dark-mode) .unitName h2 {
@@ -500,6 +504,7 @@ body {
 
     .unitDetails {
         height: 80vh;
+        width: 50%;
     }
 
     .closeBtn {
@@ -548,5 +553,9 @@ body {
         right: 40px;
         width: 10%;
         max-width: 150px;
+    }
+
+    .unitDetails {
+        width: 40%;
     }
 }
