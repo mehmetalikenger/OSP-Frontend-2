@@ -1,0 +1,343 @@
+.container {
+    background-color: #EDEDED;
+    min-height: 89dvh;
+    position: relative;
+    padding: 30px 10px 50px 10px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header h1 {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.headerBullet {
+    width: 20px;
+    height: 5px;
+    background-color: gray;
+    border-radius: 10px;
+}
+
+.headerLine {
+    margin-top: 8px;
+    width: 100%;
+    height: 2px;
+    background-color: #c9c9c9;
+    border-radius: 5px;
+}
+
+.modelContainer {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 20px 15px;
+    border-radius: 5px;
+}
+
+.modelContainer h2 {
+    font-size: 1rem;
+    font-weight: 550;
+}
+
+.modelContainer p {
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.sectionContainer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.section:not(:last-child) .sectionButton {
+    border-bottom: 1px solid #EDEDED;
+}
+
+.section:first-child .sectionButton {
+    border-radius: 5px 5px 0 0;
+}
+
+.section:last-child .sectionButton {
+    border-radius: 0 0 5px 5px;
+}
+
+.sectionButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 20px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.buttonContent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sectionIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    /* Fixed width to align titles perfectly */
+}
+
+.sectionIcon img {
+    height: 20px;
+    object-fit: contain;
+}
+
+.darkIcon {
+    display: none;
+}
+
+.lightIcon {
+    display: block;
+}
+
+.sectionButton h2 {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sectionArrow {
+    width: 20px;
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.sectionContent {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+    margin-bottom: 20px;
+}
+
+.input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input:first-child {
+    margin-top: 30px;
+}
+
+.coolingSectionHeader {
+    margin: 30px 0 10px 0;
+    background-color: #282F68;
+    padding: 5px 10px;
+    border-radius: 0 5px 5px 0;
+}
+
+.coolingSectionHeader h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ffffff;
+}
+
+.divider {
+    margin-top: 30px;
+    width: 100%;
+    height: 1px;
+    background-color: #cecece;
+}
+
+.bottomLogo {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    width: 25%;
+    background-color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottomLogo img {
+    width: 100%;
+    height: auto;
+}
+
+@media screen and (min-width: 768px) {
+    .container {
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+
+    .bottomLogo {
+        bottom: 15px;
+        right: 40px;
+        width: 15%;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .container {
+        padding-top: 90px;
+    }
+
+    .main {
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    .bottomLogo {
+        width: 12%;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .bottomLogo {
+        bottom: 40px;
+        right: 40px;
+        width: 8%;
+    }
+}
+
+@media screen and (min-width: 2000px) {
+    .bottomLogo {
+        bottom: 40px;
+        right: 40px;
+        width: 10%;
+        max-width: 150px;
+    }
+}
+
+/* Active Section specific overrides */
+.active {
+    background-color: #C4D9FF !important;
+}
+
+.active h2 {
+    color: #282F68 !important;
+}
+
+.active .sectionArrow {
+    transform: rotate(270deg) !important;
+}
+
+.active .darkIcon {
+    display: none !important;
+}
+
+.active .lightIcon {
+    display: block !important;
+}
+
+/* Dark Mode Overrides */
+:global(.dark-mode) .container {
+    background-color: #1b1b1b;
+}
+
+:global(.dark-mode) .modelContainer {
+    background-color: #262626;
+}
+
+:global(.dark-mode) .modelContainer h2,
+:global(.dark-mode) .header h1,
+:global(.dark-mode) .sectionButton h2 {
+    color: #c0c0c0;
+}
+
+:global(.dark-mode) .modelContainer p {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .headerLine {
+    background-color: #4A4A4A;
+}
+
+:global(.dark-mode) .sectionButton {
+    background-color: #262626;
+}
+
+:global(.dark-mode) .section:not(:last-child) .sectionButton {
+    border-bottom: 1px solid #3C3C3C;
+}
+
+:global(.dark-mode) .darkIcon {
+    display: block;
+}
+
+:global(.dark-mode) .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .headerBullet {
+    background-color: #777CA7;
+}
+
+/* Calculation Form Modal Styles */
+.sectionContent {
+    display: flex;
+    flex-direction: column;
+    padding: 0 15px 20px 15px;
+    background-color: #fff;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.input {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.input label {
+    font-size: 0.85rem;
+    color: #323232;
+}
+
+.input input {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+    outline: none;
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+}
+
+.calcBtn {
+    margin-top: 30px;
+    padding: 12px;
+    background-color: #282F68;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+}
+
+.calcBtn:hover {
+    background-color: #1a1e4b;
+}
+
+:global(.dark-mode) .sectionContent {
+    background-color: #262626;
+}
+
+:global(.dark-mode) .input label {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .input input {
+    background-color: #5C5C5C;
+    border: none;
+    color: #d6d6d6;
+}
+
+:global(.dark-mode) .coolingSectionHeader {
+    border-color: #3C3C3C;
+}
