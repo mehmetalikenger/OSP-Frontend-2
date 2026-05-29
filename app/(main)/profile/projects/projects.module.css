@@ -63,8 +63,8 @@
 }
 
 :global(.dark-mode) .projectNameInput {
-    color: #c0c0c0;
-    border-bottom-color: #5C5C5C;
+    color: #d6d6d6;
+    border-bottom-color: #d6d6d6;
 }
 
 :global(.dark-mode) .projectName h2 {
@@ -125,7 +125,7 @@
 }
 
 .informationRow label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #4a4a4a;
 }
 
@@ -166,7 +166,7 @@
     border: 1px solid #D7292E;
     background-color: transparent;
     color: #D7292E;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
@@ -224,7 +224,7 @@
 }
 
 .unitName p {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #2a2a2a;
 }
@@ -263,7 +263,7 @@
 }
 
 .unitDocument p {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #B57000;
     text-decoration: underline;
 }
@@ -448,22 +448,22 @@
 :global(.dark-mode) .informationRow textarea {
     background-color: #333333;
     border-color: #5C5C5C;
-    color: #a0a0a0;
+    color: #d6d6d6;
 }
 
 :global(.dark-mode) .informationRow input:focus,
 :global(.dark-mode) .informationRow textarea:focus {
-    border-color: #5C5C5C;
+    border-color: #d6d6d6;
     outline: none !important;
     box-shadow: none !important;
 }
 
 :global(.dark-mode) .dateValue {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .dateTitle {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .unitDocument p {

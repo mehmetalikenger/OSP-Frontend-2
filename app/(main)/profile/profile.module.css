@@ -250,11 +250,11 @@
 }
 
 :global(.dark-mode) .option:not(.optionActive) p {
-    color: #a0a0a0;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .subOption:not(.subOptionActive) p {
-    color: #a0a0a0;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .subOptionActive p,

@@ -110,7 +110,7 @@ body {
     border-radius: 5px;
     color: #d7292e;
     background-color: transparent;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .bottomLogo {
@@ -187,7 +187,7 @@ body {
     border-radius: 5px;
     color: #d7292e;
     background-color: transparent;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .unitSpecs {
@@ -242,11 +242,11 @@ body {
 }
 
 :global(.dark-mode) .specTitle h4 {
-    color: #909090;
+    color: #b2b2b2;
 }
 
 :global(.dark-mode) .specValue p {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .productTitle h2 {
@@ -288,7 +288,7 @@ body {
 }
 
 :global(.dark-mode) .unitDesc p {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .unitSpecs h3 {
@@ -296,19 +296,19 @@ body {
 }
 
 :global(.dark-mode) .unitSpecs ul li {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specTitle {
-    color: #909090;
+    color: #b2b2b2;
 }
 
 :global(.dark-mode) .unitSpecs ul li .specValue {
-    color: #909090;
+    color: #aeaeae;
 }
 
 :global(.dark-mode) .unitSpecs ul li span {
-    color: #909090;
+    color: #aeaeae;
 }
 
 .closeBtn {

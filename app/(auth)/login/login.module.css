@@ -229,7 +229,7 @@
 
 :global(.dark-mode) .loginContainer form input {
     border-bottom: 1px solid #eeeeee;
-    color: #ffffff;
+    color: #d6d6d6;
 }
 
 :global(.dark-mode) .passwordEye {

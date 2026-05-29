@@ -19,7 +19,7 @@
 .comboboxInput {
     display: block;
     width: 100%;
-    padding: 8px 32px 8px 12px;
+    padding: 5px 32px 5px 12px;
     font-size: 0.85rem;
     font-family: var(--font-open-sans), 'Open Sans', sans-serif;
     border: 1px solid #C2C2C2;
@@ -109,9 +109,9 @@
 
 /* Dark Mode Support */
 :global(.dark-mode) .comboboxInput {
-    background-color: #262626;
+    background-color: #383838;
     border-color: #5C5C5C;
-    color: #d9d7d7;
+    color: #d6d6d6;
 }
 
 :global(.dark-mode) .comboboxInput:focus {
@@ -150,7 +150,7 @@
 
 @media screen and (min-width: 1200px) {
     .comboboxInput {
-        padding: 10px 36px 10px 14px;
+        padding: 5px 36px 5px 14px;
         font-size: 0.9rem;
     }
 
@@ -163,7 +163,7 @@
 
 @media screen and (min-width: 2000px) {
     .comboboxInput {
-        padding: 12px 42px 12px 16px;
+        padding: 5px 42px 5px 16px;
         font-size: 0.95rem;
     }
 

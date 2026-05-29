@@ -9,6 +9,8 @@ input,
 textarea,
 select {
   font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 body {
@@ -17,6 +19,12 @@ body {
 
 body.dark-mode {
   background-color: #1b1b1b;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  color: #d6d6d6;
 }
 
 @media screen and (max-width: 768px) {}
