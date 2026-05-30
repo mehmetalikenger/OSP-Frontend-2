@@ -38,26 +38,26 @@ export default function HeatPumpsPage() {
                 <div className={styles.product}>
                     <div className={styles.productInfo}>
                         <div className={styles.productTitle}>
-                            <h3>Air Cooled Heat Pumps</h3>
+                            <h3>Air to Water Heat Pumps</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                            <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                         </div>
                     </div>
-                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/air-cooled-heat-pumps')}>
+                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/air-to-water-heat-pumps')}>
                         View
                     </button>
                 </div>
                 <div className={styles.product}>
                     <div className={styles.productInfo}>
                         <div className={styles.productTitle}>
-                            <h3>Water Cooled Heat Pumps</h3>
+                            <h3>Water to Water Heat Pumps</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/569547.png" alt="Water Cooled Heat Pump" />
+                            <img src="../images/products/569547.png" alt="Water to Water Heat Pump" />
                         </div>
                     </div>
-                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/water-cooled-heat-pumps')}>
+                    <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/water-to-water-heat-pumps')}>
                         View
                     </button>
                 </div>

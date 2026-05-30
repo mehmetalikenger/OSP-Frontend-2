@@ -7,8 +7,8 @@ import styles from "../savedUnits.module.css";
 export default function HeatPumpsPage() {
     const { selectedType } = useContext(SavedUnitsContext);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-    const [airCooledList, setAirCooledList] = useState([1, 2, 3]);
-    const [waterCooledList, setWaterCooledList] = useState([1, 2, 3]);
+    const [airToWaterList, setairToWaterList] = useState([1, 2, 3]);
+    const [waterToWaterList, setwaterToWaterList] = useState([1, 2, 3]);
 
     useEffect(() => {
         if (isDetailsOpen) {
@@ -22,23 +22,23 @@ export default function HeatPumpsPage() {
     }, [isDetailsOpen]);
 
     const handleRemoveAir = (id: number) => {
-        setAirCooledList(prev => prev.filter(item => item !== id));
+        setairToWaterList(prev => prev.filter(item => item !== id));
     };
 
     const handleRemoveWater = (id: number) => {
-        setWaterCooledList(prev => prev.filter(item => item !== id));
+        setwaterToWaterList(prev => prev.filter(item => item !== id));
     };
 
-    const isAirCooled = selectedType === "Air to Water";
+    const isAirToWater = selectedType === "Air to Water";
 
     return (
         <>
             <div className={styles.container} style={{ minHeight: "auto", paddingBottom: "50px" }}>
                 {/* Mobile Products */}
                 <div className={`${styles.products} ${styles.productsMobile}`}>
-                    {isAirCooled ? (
-                        // Air Cooled Heat Pumps
-                        airCooledList.map((id) => (
+                    {isAirToWater ? (
+                        // Air to Water Heat Pumps
+                        airToWaterList.map((id) => (
                             <div className={styles.product} key={`hp-air-mobile-${id}`}>
                                 <div className={styles.removeBtnContainer}>
                                     <div className={styles.closeBtn} onClick={() => handleRemoveAir(id)}>
@@ -50,10 +50,10 @@ export default function HeatPumpsPage() {
                                     <div className={styles.productDetails}>
                                         <div className={styles.productInfo}>
                                             <div className={styles.productTitle}>
-                                                <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                                <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                             </div>
                                             <div className={styles.productImage}>
-                                                <img src="/images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                                <img src="/images/products/745729.png" alt="Air to Water Heat Pump" />
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -82,8 +82,8 @@ export default function HeatPumpsPage() {
                             </div>
                         ))
                     ) : (
-                        // Water Cooled Heat Pumps
-                        waterCooledList.map((id) => (
+                        // Water to Water Heat Pumps
+                        waterToWaterList.map((id) => (
                             <div className={styles.product} key={`hp-water-mobile-${id}`}>
                                 <div className={styles.removeBtnContainer}>
                                     <div className={styles.closeBtn} onClick={() => handleRemoveWater(id)}>
@@ -95,10 +95,10 @@ export default function HeatPumpsPage() {
                                     <div className={styles.productDetails}>
                                         <div className={styles.productInfo}>
                                             <div className={styles.productTitle}>
-                                                <h2>OffiTec Modular High-Capacity Water-Cooled Heat Pump Unit</h2>
+                                                <h2>OffiTec Modular High-Capacity Water-to-Water Heat Pump Unit</h2>
                                             </div>
                                             <div className={styles.productImage}>
-                                                <img src="/images/products/569547.png" alt="Water Cooled Heat Pump" />
+                                                <img src="/images/products/569547.png" alt="Water to Water Heat Pump" />
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -131,9 +131,9 @@ export default function HeatPumpsPage() {
 
                 {/* Desktop Products */}
                 <div className={`${styles.products} ${styles.productsDesktop}`}>
-                    {isAirCooled ? (
-                        // Air Cooled Heat Pumps
-                        airCooledList.map((id) => (
+                    {isAirToWater ? (
+                        // Air to Water Heat Pumps
+                        airToWaterList.map((id) => (
                             <div className={styles.product} key={`hp-air-desktop-${id}`}>
                                 <div className={styles.removeBtnContainer}>
                                     <div className={styles.closeBtn} onClick={() => handleRemoveAir(id)}>
@@ -145,7 +145,7 @@ export default function HeatPumpsPage() {
                                     <div className={styles.productDetails}>
                                         <div className={styles.productInfo}>
                                             <div className={styles.productTitle}>
-                                                <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                                <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -167,7 +167,7 @@ export default function HeatPumpsPage() {
                                             </div>
                                         </div>
                                         <div className={styles.productImage}>
-                                            <img src="/images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                            <img src="/images/products/745729.png" alt="Air to Water Heat Pump" />
                                         </div>
                                     </div>
                                     <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
@@ -177,8 +177,8 @@ export default function HeatPumpsPage() {
                             </div>
                         ))
                     ) : (
-                        // Water Cooled Heat Pumps
-                        waterCooledList.map((id) => (
+                        // Water to Water Heat Pumps
+                        waterToWaterList.map((id) => (
                             <div className={styles.product} key={`hp-water-desktop-${id}`}>
                                 <div className={styles.removeBtnContainer}>
                                     <div className={styles.closeBtn} onClick={() => handleRemoveWater(id)}>
@@ -190,7 +190,7 @@ export default function HeatPumpsPage() {
                                     <div className={styles.productDetails}>
                                         <div className={styles.productInfo}>
                                             <div className={styles.productTitle}>
-                                                <h2>OffiTec Modular High-Capacity Water-Cooled Heat Pump Unit</h2>
+                                                <h2>OffiTec Modular High-Capacity Water-to-Water Heat Pump Unit</h2>
                                             </div>
                                             <div className={styles.productSpecs}>
                                                 <div className={styles.spec}>
@@ -212,7 +212,7 @@ export default function HeatPumpsPage() {
                                             </div>
                                         </div>
                                         <div className={styles.productImage}>
-                                            <img src="/images/products/569547.png" alt="Water Cooled Heat Pump" />
+                                            <img src="/images/products/569547.png" alt="Water to Water Heat Pump" />
                                         </div>
                                     </div>
                                     <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
@@ -238,22 +238,22 @@ export default function HeatPumpsPage() {
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
                                 <h2>
-                                    {isAirCooled
-                                        ? "OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit"
-                                        : "OffiTec Modular High-Capacity Water-Cooled Heat Pump Unit"}
+                                    {isAirToWater
+                                        ? "OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit"
+                                        : "OffiTec Modular High-Capacity Water-to-Water Heat Pump Unit"}
                                 </h2>
                             </div>
                             <div className={styles.unitImage}>
                                 <img
-                                    src={isAirCooled ? "/images/products/745729.png" : "/images/products/569547.png"}
-                                    alt={isAirCooled ? "Air Cooled Heat Pump" : "Water Cooled Heat Pump"}
+                                    src={isAirToWater ? "/images/products/745729.png" : "/images/products/569547.png"}
+                                    alt={isAirToWater ? "Air to Water Heat Pump" : "Water to Water Heat Pump"}
                                 />
                             </div>
                             <div className={styles.unitDesc}>
                                 <p>
-                                    {isAirCooled
-                                        ? "The OffiTec modular high-capacity air-cooled heat pump unit is engineered for large industrial facilities, process heating and cooling lines, and high-flow HVAC applications. It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling, ensuring rapid payback times and low operating costs."
-                                        : "The OffiTec modular high-capacity water-cooled heat pump unit is engineered for large industrial facilities, process heating and cooling lines, data centers, and high-flow HVAC applications. Working in tandem with geothermal wells, waste heat channels, or industrial cooling loops, it delivers the industry's highest COP and extremely stable operations year-round."}
+                                    {isAirToWater
+                                        ? "The OffiTec modular high-capacity Air-to-Water heat pump unit is engineered for large industrial facilities, process heating and cooling lines, and high-flow HVAC applications. It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling, ensuring rapid payback times and low operating costs."
+                                        : "The OffiTec modular high-capacity Water-to-Water heat pump unit is engineered for large industrial facilities, process heating and cooling lines, data centers, and high-flow HVAC applications. Working in tandem with geothermal wells, waste heat channels, or industrial cooling loops, it delivers the industry's highest COP and extremely stable operations year-round."}
                                 </p>
                             </div>
                             <div className={styles.btnIcons}>
@@ -272,12 +272,12 @@ export default function HeatPumpsPage() {
                                 <ul>
                                     <li>
                                         <span className={styles.specTitle}>Capacity Range:</span>
-                                        <span className={styles.specValue}>{isAirCooled ? "80 to 1200 kW" : "90 to 1450 kW"}</span>
+                                        <span className={styles.specValue}>{isAirToWater ? "80 to 1200 kW" : "90 to 1450 kW"}</span>
                                     </li>
                                     <li>
                                         <span className={styles.specTitle}>Design:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Long modular frame with multi-fan top sections"
                                                 : "High-rigidity water-to-water modular frame"}
                                         </span>
@@ -285,7 +285,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Ambient Temperature Range:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "-20°C to 43°C"
                                                 : "Indoor plant installation, stable heat source link"}
                                         </span>
@@ -293,7 +293,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Options:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Defrost optimization, integrated water pump, buffer tank, etc"
                                                 : "Geothermal optimization, multi-stage recovery, soft starter"}
                                         </span>
@@ -301,7 +301,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Benefits:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "High heating COP, dual mode (heating/cooling), flexible"
                                                 : "Incredible energy savings, zero weather dependency, long life"}
                                         </span>
@@ -309,7 +309,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Advantages:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Low noise, zero combustion emissions, extremely reliable"
                                                 : "Ultra-quiet indoor operation, minimal maintenance, premium durability"}
                                         </span>
@@ -328,23 +328,23 @@ export default function HeatPumpsPage() {
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
                                 <h2>
-                                    {isAirCooled
-                                        ? "OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit"
-                                        : "OffiTec Modular High-Capacity Water-Cooled Heat Pump Unit"}
+                                    {isAirToWater
+                                        ? "OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit"
+                                        : "OffiTec Modular High-Capacity Water-to-Water Heat Pump Unit"}
                                 </h2>
                             </div>
                             <div className={styles.unitInfo}>
                                 <div className={styles.unitDesc}>
                                     <p>
-                                        {isAirCooled
-                                            ? "The OffiTec modular high-capacity air-cooled heat pump unit is engineered for large industrial facilities, process heating and cooling lines, and high-flow HVAC applications. It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling, ensuring rapid payback times and low operating costs."
-                                            : "The OffiTec modular high-capacity water-cooled heat pump unit is engineered for large industrial facilities, process heating and cooling lines, data centers, and high-flow HVAC applications. Working in tandem with geothermal wells, waste heat channels, or industrial cooling loops, it delivers the industry's highest COP and extremely stable operations year-round."}
+                                        {isAirToWater
+                                            ? "The OffiTec modular high-capacity Air-to-Water heat pump unit is engineered for large industrial facilities, process heating and cooling lines, and high-flow HVAC applications. It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling, ensuring rapid payback times and low operating costs."
+                                            : "The OffiTec modular high-capacity Water-to-Water heat pump unit is engineered for large industrial facilities, process heating and cooling lines, data centers, and high-flow HVAC applications. Working in tandem with geothermal wells, waste heat channels, or industrial cooling loops, it delivers the industry's highest COP and extremely stable operations year-round."}
                                     </p>
                                 </div>
                                 <div className={styles.unitImage}>
                                     <img
-                                        src={isAirCooled ? "/images/products/745729.png" : "/images/products/569547.png"}
-                                        alt={isAirCooled ? "Air Cooled Heat Pump" : "Water Cooled Heat Pump"}
+                                        src={isAirToWater ? "/images/products/745729.png" : "/images/products/569547.png"}
+                                        alt={isAirToWater ? "Air to Water Heat Pump" : "Water to Water Heat Pump"}
                                     />
                                 </div>
                             </div>
@@ -364,12 +364,12 @@ export default function HeatPumpsPage() {
                                 <ul>
                                     <li>
                                         <span className={styles.specTitle}>Capacity Range:</span>
-                                        <span className={styles.specValue}>{isAirCooled ? "80 to 1200 kW" : "90 to 1450 kW"}</span>
+                                        <span className={styles.specValue}>{isAirToWater ? "80 to 1200 kW" : "90 to 1450 kW"}</span>
                                     </li>
                                     <li>
                                         <span className={styles.specTitle}>Design:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Long modular frame with multi-fan top sections"
                                                 : "High-rigidity water-to-water modular frame"}
                                         </span>
@@ -377,7 +377,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Ambient Temperature Range:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "-20°C to 43°C"
                                                 : "Indoor plant installation, stable heat source link"}
                                         </span>
@@ -385,7 +385,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Options:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Defrost optimization, integrated water pump, buffer tank, etc"
                                                 : "Geothermal optimization, multi-stage recovery, soft starter"}
                                         </span>
@@ -393,7 +393,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Benefits:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "High heating COP, dual mode (heating/cooling), flexible"
                                                 : "Incredible energy savings, zero weather dependency, long life"}
                                         </span>
@@ -401,7 +401,7 @@ export default function HeatPumpsPage() {
                                     <li>
                                         <span className={styles.specTitle}>Advantages:</span>
                                         <span className={styles.specValue}>
-                                            {isAirCooled
+                                            {isAirToWater
                                                 ? "Low noise, zero combustion emissions, extremely reliable"
                                                 : "Ultra-quiet indoor operation, minimal maintenance, premium durability"}
                                         </span>

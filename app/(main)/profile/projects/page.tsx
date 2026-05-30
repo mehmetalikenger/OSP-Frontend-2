@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import sharedStyles from "../sharedProfile.module.css";
 import styles from "./projects.module.css";
 
@@ -14,6 +14,18 @@ export default function ProjectsPage() {
     const [isEditingName, setIsEditingName] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (isCreateModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isCreateModalOpen]);
 
     const formatMobileProjectName = (name: string) => {
         return name.split(" ").map(word => {
@@ -46,9 +58,17 @@ export default function ProjectsPage() {
                 </div>
             )}
             <div className={sharedStyles.header}>
-                <div className={sharedStyles.headerContent}>
-                    <div className={sharedStyles.headerBullet}></div>
-                    <h1>Projects</h1>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className={sharedStyles.headerContent}>
+                        <div className={sharedStyles.headerBullet}></div>
+                        <h1>Projects</h1>
+                    </div>
+                    <button 
+                        className={styles.createProjectBtn} 
+                        onClick={() => setIsCreateModalOpen(true)}
+                    >
+                        Create Project
+                    </button>
                 </div>
                 <div className={sharedStyles.headerLine}></div>
             </div>
@@ -289,6 +309,46 @@ export default function ProjectsPage() {
                     </div>
                 )}
             </div>
+
+            {isCreateModalOpen && (
+                <div className={styles.modalOverlay} onClick={() => setIsCreateModalOpen(false)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalCloseBtn} onClick={() => setIsCreateModalOpen(false)}>
+                            <img src="/icons/closeBtn.png" className={styles.lightIcon} alt="Close" />
+                            <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
+                        </div>
+                        <div className={styles.createModalContent}>
+                            <h2>Create Project</h2>
+                            <div className={styles.projectForm}>
+                                <div className={styles.formRow}>
+                                    <label>Project Name</label>
+                                    <input type="text" />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <label>Address</label>
+                                    <textarea />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <label>Country</label>
+                                    <input type="text" />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <label>City</label>
+                                    <input type="text" />
+                                </div>
+                                <div className={styles.formRow}>
+                                    <label>Phone</label>
+                                    <input type="text" />
+                                </div>
+                                <div className={styles.formActions}>
+                                    <button className={styles.btnSecondary} onClick={() => setIsCreateModalOpen(false)}>Cancel</button>
+                                    <button className={styles.btnPrimary} onClick={() => setIsCreateModalOpen(false)}>Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

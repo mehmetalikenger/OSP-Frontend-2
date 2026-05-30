@@ -515,3 +515,171 @@
         display: block;
     }
 }
+
+/* Modal Styles for Create Project */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    position: relative;
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+:global(.dark-mode) .modalContent {
+    background: #272727;
+    color: #e0e0e0;
+}
+
+.modalCloseBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.modalCloseBtn img {
+    width: 100%;
+}
+
+.modalCloseBtn .darkIcon { display: none; }
+:global(.dark-mode) .modalCloseBtn .lightIcon { display: none; }
+:global(.dark-mode) .modalCloseBtn .darkIcon { display: block; }
+
+.createModalContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.createModalContent h2 {
+    font-size: 1.2rem;
+    color: #282f68;
+    margin-bottom: 20px;
+}
+
+:global(.dark-mode) .createModalContent h2 {
+    color: #dfdfdf;
+}
+
+.projectForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formRow {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.formRow label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #666;
+}
+
+:global(.dark-mode) .formRow label {
+    color: #a0a0a0;
+}
+
+.formRow input, .formRow textarea {
+    padding: 8px 12px;
+    border: 1px solid #cecece;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+}
+
+.formRow textarea {
+    resize: none;
+    min-height: 80px;
+}
+
+:global(.dark-mode) .formRow input, :global(.dark-mode) .formRow textarea {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #dfdfdf;
+}
+
+.formActions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.formActions button {
+    flex: 1;
+}
+
+.btnPrimary, .btnSecondary {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.btnPrimary {
+    background-color: transparent;
+    color: #d7292e;
+    border: 1px solid #d7292e;
+}
+
+.btnPrimary:hover {
+    background-color: rgba(215, 41, 46, 0.08);
+}
+
+.btnSecondary {
+    background-color: transparent;
+    color: #282f68;
+    border: 1px solid #282f68;
+}
+
+.btnSecondary:hover {
+    background-color: rgba(40, 47, 104, 0.15);
+}
+
+:global(.dark-mode) .btnSecondary {
+    color: #dfdfdf;
+    border: 1px solid #dfdfdf;
+}
+
+:global(.dark-mode) .btnSecondary:hover {
+    background-color: rgba(223, 223, 223, 0.1);
+}
+
+.createProjectBtn {
+    background-color: transparent;
+    color: #d7292e;
+    border: 1px solid #d7292e;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.createProjectBtn:hover {
+    background-color: rgba(215, 41, 46, 0.08);
+}

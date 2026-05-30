@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../../category.module.css";
 
 export default function AirCooledChillersPage() {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         if (isDetailsOpen) {
@@ -396,7 +398,7 @@ export default function AirCooledChillersPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
@@ -460,7 +462,7 @@ export default function AirCooledChillersPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>

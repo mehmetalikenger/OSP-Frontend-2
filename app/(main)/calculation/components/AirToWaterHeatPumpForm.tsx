@@ -4,7 +4,7 @@ import { useState } from "react";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
 
-export default function AirCooledChillerForm() {
+export default function AirToWaterHeatPumpForm() {
     const [isModalsOpen, setIsModalsOpen] = useState(false);
 
     return (
@@ -32,6 +32,21 @@ export default function AirCooledChillerForm() {
                 <label htmlFor="waterInletTemperature">Water Inlet Temperature (°C)</label>
                 <input type="number" id="waterInletTemperature" />
             </div>
+            <div className={`${styles.sectionHeader} ${styles.heatingSectionHeader}`}>
+                <h3>Heating</h3>
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="dryBulbAmbientTemperature">Dry Bulb Ambient Temperature (°C)</label>
+                <input type="number" id="dryBulbAmbientTemperature" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="wetBulbAmbientTemperature">Wet Bulb Ambient Temperature (°C)</label>
+                <input type="number" id="wetBulbAmbientTemperature" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="waterInletTemperature">Water Inlet Temperature (°C)</label>
+                <input type="number" id="waterInletTemperature" />
+            </div>
             <div className={styles.input}>
                 <label htmlFor="waterOutletTemperature">Water Outlet Temperature (°C)</label>
                 <input type="number" id="waterOutletTemperature" />
@@ -52,10 +67,6 @@ export default function AirCooledChillerForm() {
             <div className={styles.input}>
                 <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
                 <input type="number" id="heightAboveSeaLevel" />
-            </div>
-            <div className={styles.input}>
-                <label htmlFor="minAmbientTemperature">Min. Ambient Temperature (°C)</label>
-                <input type="number" id="minAmbientTemperature" />
             </div>
             <button className={styles.calcBtn} onClick={() => setIsModalsOpen(true)}>
                 Calculate

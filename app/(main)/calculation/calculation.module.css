@@ -2,7 +2,7 @@
     background-color: #EDEDED;
     min-height: 89dvh;
     position: relative;
-    padding: 30px 10px 50px 10px;
+    padding: 30px 10px 60px 10px;
 }
 
 .header {
@@ -130,17 +130,28 @@
     margin-top: 30px;
 }
 
-.coolingSectionHeader {
+.sectionHeader {
     margin: 30px 0 10px 0;
-    background-color: #282F68;
     padding: 5px 10px;
     border-radius: 0 5px 5px 0;
 }
 
-.coolingSectionHeader h3 {
+.sectionHeader h3 {
     font-size: 1rem;
     font-weight: 400;
     color: #ffffff;
+}
+
+.coolingSectionHeader {
+    background-color: #282F68;
+}
+
+.condenserSectionHeader {
+    background-color: #ec6516;
+}
+
+.heatingSectionHeader {
+    background-color: #d7292e;
 }
 
 .divider {
@@ -148,6 +159,53 @@
     width: 100%;
     height: 1px;
     background-color: #cecece;
+    border-radius: 5px;
+}
+
+.documentsContainer {
+    padding: 30px 0 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.document {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.document a {
+    text-decoration: none;
+    color: #282F68;
+    font-size: 0.9rem;
+}
+
+.document a:hover {
+    text-decoration: underline;
+}
+
+:global(.dark-mode) .document a {
+    color: #dfdfdf;
+    text-decoration: underline;
+}
+
+.imagesContainer {
+    padding: 30px 0 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    justify-content: center;
+    align-items: center;
+}
+
+.image {
+    height: 150px;
+}
+
+.image img {
+    height: 100%;
+    object-fit: contain;
 }
 
 .bottomLogo {
@@ -167,51 +225,6 @@
 .bottomLogo img {
     width: 100%;
     height: auto;
-}
-
-@media screen and (min-width: 768px) {
-    .container {
-        padding-right: 40px;
-        padding-left: 40px;
-    }
-
-    .bottomLogo {
-        bottom: 15px;
-        right: 40px;
-        width: 15%;
-    }
-}
-
-@media screen and (min-width: 1024px) {
-    .container {
-        padding-top: 90px;
-    }
-
-    .main {
-        width: 70%;
-        margin: 0 auto;
-    }
-
-    .bottomLogo {
-        width: 12%;
-    }
-}
-
-@media screen and (min-width: 1200px) {
-    .bottomLogo {
-        bottom: 40px;
-        right: 40px;
-        width: 8%;
-    }
-}
-
-@media screen and (min-width: 2000px) {
-    .bottomLogo {
-        bottom: 40px;
-        right: 40px;
-        width: 10%;
-        max-width: 150px;
-    }
 }
 
 /* Active Section specific overrides */
@@ -310,18 +323,28 @@
 
 .calcBtn {
     margin-top: 30px;
-    padding: 12px;
-    background-color: #282F68;
+    padding: 10px 50px;
+    background-color: #282f68;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     transition: background-color 0.2s ease;
+    align-self: flex-end;
 }
 
 .calcBtn:hover {
     background-color: #1a1e4b;
+}
+
+:global(.dark-mode) .calcBtn {
+    background-color: rgb(196, 217, 255);
+    color: #282f68;
+}
+
+:global(.dark-mode) .calcBtn:hover {
+    background-color: rgb(176, 197, 235);
 }
 
 :global(.dark-mode) .sectionContent {
@@ -340,4 +363,660 @@
 
 :global(.dark-mode) .coolingSectionHeader {
     border-color: #3C3C3C;
+}
+
+.fullscreenModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+:global(.dark-mode) .fullscreenModal {
+    background-color: #262626;
+}
+
+.imageWrapper {
+    width: 90%;
+    height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fullscreenImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.2s ease-in-out;
+    transform-origin: center;
+}
+
+.fullscreenImage img {
+    height: 100%;
+}
+
+.fullscreenClose {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fullscreenClose .lightIcon {
+    width: 100%;
+}
+
+.fullscreenClose .darkIcon {
+    display: none;
+    width: 100%;
+}
+
+:global(.dark-mode) .fullscreenClose .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .fullscreenClose .darkIcon {
+    display: block;
+}
+
+
+.fullscreenControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+    z-index: 1001;
+}
+
+.arrowLeft,
+.arrowRight {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    padding: 10px;
+}
+
+.arrowLeft:hover,
+.arrowRight:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+}
+
+:global(.dark-mode) .arrowLeft:hover,
+:global(.dark-mode) .arrowRight:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.arrowRight img {
+    transform: rotate(180deg);
+}
+
+.arrowLeft .lightIcon,
+.arrowRight .lightIcon {
+    width: 100%;
+}
+
+.arrowLeft .darkIcon,
+.arrowRight .darkIcon {
+    display: none;
+    width: 100%;
+}
+
+:global(.dark-mode) .arrowLeft .lightIcon,
+:global(.dark-mode) .arrowRight .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .arrowLeft .darkIcon,
+:global(.dark-mode) .arrowRight .darkIcon {
+    display: block;
+    filter: brightness(0.8);
+    transition: filter 0.2s ease;
+}
+
+:global(.dark-mode) .arrowLeft:hover .darkIcon,
+:global(.dark-mode) .arrowRight:hover .darkIcon {
+    filter: brightness(1);
+}
+
+.unitSpecs {
+    margin-top: 30px;
+    padding-bottom: 20px;
+}
+
+.unitSpecs h3 {
+    font-size: 0.95rem;
+    color: #383838;
+}
+
+.unitSpecs ul {
+    list-style-position: outside;
+    padding-left: 20px;
+}
+
+.unitSpecs ul li .specTitle {
+    color: #4e4e4e;
+    font-weight: 600;
+}
+
+.unitSpecs ul li:not(:first-child) {
+    margin-top: 7px;
+    font-size: 0.9rem;
+}
+
+.unitSpecs ul li::marker {
+    color: #d7292e;
+    font-size: 0.85em;
+}
+
+.unitSpecs ul li span {
+    font-size: 0.9rem;
+    color: #4e4e4e;
+}
+
+.unitSpecs ul li span:first-child {
+    margin-right: 7px;
+}
+
+:global(.dark-mode) .unitSpecs h3 {
+    color: #c0c0c0;
+}
+
+:global(.dark-mode) .unitSpecs ul li {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .unitSpecs ul li .specTitle {
+    color: #b2b2b2;
+}
+
+:global(.dark-mode) .unitSpecs ul li .specValue {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .unitSpecs ul li span {
+    color: #aeaeae;
+}
+
+/* Modals */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    position: relative;
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+:global(.dark-mode) .modalContent {
+    background: #272727;
+    color: #e0e0e0;
+}
+
+.modalCloseBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.modalCloseBtn img {
+    width: 100%;
+}
+
+.modalCloseBtn .darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .modalCloseBtn .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .modalCloseBtn .darkIcon {
+    display: block;
+}
+
+/* Result Modal */
+.resultModalContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.documentHeader {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.documentIconWrapper {
+    width: 24px;
+}
+
+.documentIconWrapper img {
+    width: 100%;
+}
+
+.documentIconWrapper .darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .documentIconWrapper .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .documentIconWrapper .darkIcon {
+    display: block;
+}
+
+.resultModalContent h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #282f68;
+}
+
+:global(.dark-mode) .resultModalContent h3 {
+    color: #dfdfdf;
+}
+
+.resultActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 15px;
+    width: 100%;
+}
+
+.btnPrimary,
+.btnSecondary {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.btnPrimary {
+    background-color: transparent;
+    color: #d7292e;
+    border: 1px solid #d7292e;
+}
+
+.btnPrimary:hover {
+    background-color: rgba(215, 41, 46, 0.08);
+}
+
+.btnSecondary {
+    background-color: transparent;
+    color: #282f68;
+    border: 1px solid #282f68;
+}
+
+.btnSecondary:hover {
+    background-color: rgba(40, 47, 104, 0.15);
+}
+
+:global(.dark-mode) .btnSecondary {
+    color: #dfdfdf;
+    border: 1px solid #dfdfdf;
+}
+
+:global(.dark-mode) .btnSecondary:hover {
+    background-color: rgba(223, 223, 223, 0.1);
+}
+
+.resultActions button {
+    flex: 1;
+}
+
+/* Projects Modal */
+.projectsModalContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.projectsModalContent h2 {
+    font-size: 1.2rem;
+    color: #282f68;
+    margin-bottom: 20px;
+}
+
+:global(.dark-mode) .projectsModalContent h2 {
+    color: #dfdfdf;
+}
+
+.projectsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.projectItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border: 1px solid #cecece;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+:global(.dark-mode) .projectItem {
+    border-color: #444;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #cecece;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+:global(.dark-mode) .checkbox {
+    border-color: #555;
+}
+
+.checkboxChecked {
+    background-color: #282f68;
+    border-color: #282f68;
+}
+
+:global(.dark-mode) .checkboxChecked {
+    background-color: rgb(196, 217, 255);
+    border-color: rgb(196, 217, 255);
+}
+
+.tick {
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+:global(.dark-mode) .tick {
+    background-color: #282f68;
+}
+
+.modalFooter {
+    margin-top: 25px;
+    width: 100%;
+}
+
+.modalFooter button {
+    width: 100%;
+}
+
+/* Create Project Modal */
+.createModalContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.createModalContent h2 {
+    font-size: 1.2rem;
+    color: #282f68;
+    margin-bottom: 20px;
+}
+
+:global(.dark-mode) .createModalContent h2 {
+    color: #dfdfdf;
+}
+
+.projectForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formRow {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.formRow label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #666;
+}
+
+:global(.dark-mode) .formRow label {
+    color: #a0a0a0;
+}
+
+.formRow input,
+.formRow textarea {
+    padding: 8px 12px;
+    border: 1px solid #cecece;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+}
+
+.formRow textarea {
+    resize: none;
+    min-height: 80px;
+}
+
+:global(.dark-mode) .formRow input,
+:global(.dark-mode) .formRow textarea {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #dfdfdf;
+}
+
+.formActions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.formActions button {
+    flex: 1;
+}
+
+@media screen and (min-width: 768px) {
+    .container {
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+
+    .bottomLogo {
+        bottom: 15px;
+        right: 40px;
+        width: 15%;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .sectionContent {
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-bottom: 40px;
+    }
+
+    .container {
+        padding-top: 90px;
+    }
+
+    .main {
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    .bottomLogo {
+        width: 12%;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .main {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        grid-template-rows: auto auto auto repeat(5, auto) 1fr;
+        column-gap: 50px;
+        align-items: start;
+        width: 100%;
+        margin: 0;
+        padding-bottom: 100px;
+    }
+
+    .header {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .headerLine {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .modelContainer {
+        grid-column: 1;
+        grid-row: 3;
+    }
+
+    .sectionContainer,
+    .section {
+        display: contents;
+    }
+
+    .sectionButton {
+        grid-column: 1;
+    }
+
+    .section:first-child .sectionButton {
+        margin-top: 20px;
+    }
+
+    .sectionContent {
+        grid-column: 2;
+        grid-row: 3 / span 10;
+        border-radius: 5px;
+        margin-top: 20px;
+        margin-bottom: 0;
+        padding-top: 30px;
+        padding-bottom: 50px;
+    }
+
+    .imagesContainer {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .fullscreenControls {
+        margin-top: 80px;
+    }
+
+    .divider {
+        height: 3px;
+    }
+
+    .bottomLogo {
+        bottom: 40px;
+        right: 40px;
+        width: 8%;
+    }
+
+    .active .sectionArrow {
+        transform: rotate(180deg) !important;
+    }
+
+    .sectionContent {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .fullscreenControls {
+        margin-top: 60px;
+    }
+
+    .arrowLeft,
+    .arrowRight {
+        width: 45px;
+    }
+}
+
+@media screen and (min-width: 1500px) {
+    .sectionContent {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+@media screen and (min-width: 2000px) {
+    .sectionContent {
+        width: 60%;
+        padding-left: 50px;
+        padding-right: 50px;
+        margin: 0 auto;
+    }
+
+    .fullscreenControls {
+        margin-top: 60px;
+    }
+
+    .arrowLeft,
+    .arrowRight {
+        width: 50px;
+    }
+
+    .bottomLogo {
+        bottom: 40px;
+        right: 40px;
+        width: 10%;
+        max-width: 150px;
+    }
 }

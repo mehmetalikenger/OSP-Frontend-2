@@ -4,19 +4,11 @@ import { useState } from "react";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
 
-export default function AirCooledChillerForm() {
+export default function WaterCooledChillerForm() {
     const [isModalsOpen, setIsModalsOpen] = useState(false);
 
     return (
         <div className={styles.sectionContent}>
-            <div className={styles.input}>
-                <label htmlFor="glycolMixture">Glycol Mixture</label>
-                <input type="number" id="glycolMixture" />
-            </div>
-            <div className={styles.input}>
-                <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                <input type="number" id="mixtureRatio" />
-            </div>
             <div className={styles.input}>
                 <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
                 <input type="number" id="distanceForSound" />
@@ -25,8 +17,24 @@ export default function AirCooledChillerForm() {
                 <h3>Cooling</h3>
             </div>
             <div className={styles.input}>
-                <label htmlFor="dryBulbAmbientTemperature">Dry Bulb Ambient Temperature (°C)</label>
-                <input type="number" id="dryBulbAmbientTemperature" />
+                <label htmlFor="waterInletTemperature">Water Inlet Temperature (°C)</label>
+                <input type="number" id="waterInletTemperature" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="waterOutletTemperature">Water Outlet Temperature (°C)</label>
+                <input type="number" id="waterOutletTemperature" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="glycolMixture">Glycol Mixture (%)</label>
+                <input type="number" id="glycolMixture" />
+            </div>
+            <div className={styles.divider}></div>
+            <div className={styles.input}>
+                <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
+                <input type="number" id="mixtureRatio" />
+            </div>
+            <div className={`${styles.sectionHeader} ${styles.condenserSectionHeader}`}>
+                <h3>Condenser</h3>
             </div>
             <div className={styles.input}>
                 <label htmlFor="waterInletTemperature">Water Inlet Temperature (°C)</label>
@@ -35,6 +43,19 @@ export default function AirCooledChillerForm() {
             <div className={styles.input}>
                 <label htmlFor="waterOutletTemperature">Water Outlet Temperature (°C)</label>
                 <input type="number" id="waterOutletTemperature" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="glycolMixture">Glycol Mixture (%)</label>
+                <input type="number" id="glycolMixture" />
+            </div>
+            <div className={styles.divider}></div>
+            <div className={styles.input}>
+                <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
+                <input type="number" id="mixtureRatio" />
+            </div>
+            <div className={styles.input}>
+                <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
+                <input type="number" id="foulingFactor" />
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
@@ -46,16 +67,12 @@ export default function AirCooledChillerForm() {
                 <input type="number" id="deltaT" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
-                <input type="number" id="foulingFactor" />
+                <label htmlFor="foulingFactor2">Fouling Factor (m²K/W)</label>
+                <input type="number" id="foulingFactor2" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
                 <input type="number" id="heightAboveSeaLevel" />
-            </div>
-            <div className={styles.input}>
-                <label htmlFor="minAmbientTemperature">Min. Ambient Temperature (°C)</label>
-                <input type="number" id="minAmbientTemperature" />
             </div>
             <button className={styles.calcBtn} onClick={() => setIsModalsOpen(true)}>
                 Calculate

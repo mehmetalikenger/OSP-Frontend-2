@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import sharedStyles from "../sharedProfile.module.css";
 import Combobox from "./Combobox";
@@ -15,14 +15,23 @@ export const SavedUnitsContext = createContext<{
 
 export default function SavedUnitsLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const [selectedType, setSelectedType] = useState("Air to Water");
+    const [selectedType, setSelectedType] = useState("");
 
     let title = "Saved Units";
+    let comboboxOptions = ["Air to Water", "Water to Water"];
     if (pathname.includes("/chillers")) {
         title = "Chillers";
+        comboboxOptions = ["Air Cooled", "Water Cooled"];
     } else if (pathname.includes("/heat-pumps")) {
         title = "Heat Pumps";
+        comboboxOptions = ["Air to Water", "Water to Water"];
     }
+
+    useEffect(() => {
+        if (!comboboxOptions.includes(selectedType)) {
+            setSelectedType(comboboxOptions[0]);
+        }
+    }, [pathname, selectedType]);
 
     return (
         <SavedUnitsContext.Provider value={{ selectedType, setSelectedType }}>
@@ -34,9 +43,9 @@ export default function SavedUnitsLayout({ children }: { children: React.ReactNo
                             <h1>{title}</h1>
                         </div>
                         <Combobox
-                            value={selectedType}
+                            value={selectedType || comboboxOptions[0]}
                             onChange={setSelectedType}
-                            options={["Air to Water", "Water to Water"]}
+                            options={comboboxOptions}
                         />
                     </div>
                     <div className={sharedStyles.headerLine}></div>

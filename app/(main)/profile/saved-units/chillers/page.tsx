@@ -29,7 +29,7 @@ export default function ChillersPage() {
         setWaterCooledList(prev => prev.filter(item => item !== id));
     };
 
-    const isAirCooled = selectedType === "Air to Water";
+    const isAirCooled = selectedType === "Air Cooled";
 
     return (
         <>

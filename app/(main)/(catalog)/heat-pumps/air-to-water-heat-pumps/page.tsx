@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../../category.module.css";
 
-export default function AirCooledHeatPumpsPage() {
+export default function AirToWaterHeatPumpsPage() {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         if (isDetailsOpen) {
@@ -20,7 +22,7 @@ export default function AirCooledHeatPumpsPage() {
         <>
             <div className={styles.container}>
                 <div className={styles.category}>
-                    <h1>Air Cooled Heat Pumps</h1>
+                    <h1>Air to Water Heat Pumps</h1>
                 </div>
                 {/* Mobile Products */}
                 <div className={`${styles.products} ${styles.productsMobile}`}>
@@ -28,10 +30,10 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productImage}>
-                                    <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                    <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -62,10 +64,10 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productImage}>
-                                    <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                    <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -96,10 +98,10 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productImage}>
-                                    <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                    <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -133,7 +135,7 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -155,7 +157,7 @@ export default function AirCooledHeatPumpsPage() {
                                 </div>
                             </div>
                             <div className={styles.productImage}>
-                                <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                             </div>
                         </div>
                         <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
@@ -166,7 +168,7 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -188,7 +190,7 @@ export default function AirCooledHeatPumpsPage() {
                                 </div>
                             </div>
                             <div className={styles.productImage}>
-                                <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                             </div>
                         </div>
                         <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
@@ -199,7 +201,7 @@ export default function AirCooledHeatPumpsPage() {
                         <div className={styles.productDetails}>
                             <div className={styles.productInfo}>
                                 <div className={styles.productTitle}>
-                                    <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                                    <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                                 </div>
                                 <div className={styles.productSpecs}>
                                     <div className={styles.spec}>
@@ -221,7 +223,7 @@ export default function AirCooledHeatPumpsPage() {
                                 </div>
                             </div>
                             <div className={styles.productImage}>
-                                <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                             </div>
                         </div>
                         <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
@@ -242,13 +244,13 @@ export default function AirCooledHeatPumpsPage() {
                     </div>
                     <div className={styles.unitDetailContainer}>
                         <div className={styles.unitName}>
-                            <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                            <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                         </div>
                         <div className={styles.unitImage}>
-                            <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                            <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                         </div>
                         <div className={styles.unitDesc}>
-                            <p>The OffiTec modular high-capacity air-cooled heat pump unit is engineered for large industrial facilities,
+                            <p>The OffiTec modular high-capacity air-to-water heat pump unit is engineered for large industrial facilities,
                                 process heating and cooling lines, and high-flow HVAC applications.
                                 It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling,
                                 ensuring rapid payback times and low operating costs.</p>
@@ -262,7 +264,7 @@ export default function AirCooledHeatPumpsPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-to-water-heat-pump')}>Calculate</button>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
@@ -304,17 +306,17 @@ export default function AirCooledHeatPumpsPage() {
                     </div>
                     <div className={styles.unitDetailContainer}>
                         <div className={styles.unitName}>
-                            <h2>OffiTec Modular High-Capacity Air-Cooled Heat Pump Unit</h2>
+                            <h2>OffiTec Modular High-Capacity Air-to-Water Heat Pump Unit</h2>
                         </div>
                         <div className={styles.unitInfo}>
                             <div className={styles.unitDesc}>
-                                <p>The OffiTec modular high-capacity air-cooled heat pump unit is engineered for large industrial facilities,
+                                <p>The OffiTec modular high-capacity air-to-water heat pump unit is engineered for large industrial facilities,
                                     process heating and cooling lines, and high-flow HVAC applications.
                                     It utilizes advanced thermodynamic cycles to provide clean, high-efficiency heating and cooling,
                                     ensuring rapid payback times and low operating costs.</p>
                             </div>
                             <div className={styles.unitImage}>
-                                <img src="../images/products/745729.png" alt="Air Cooled Heat Pump" />
+                                <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
                             </div>
                         </div>
                         <div className={styles.btnIcons}>
@@ -326,7 +328,7 @@ export default function AirCooledHeatPumpsPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-to-water-heat-pump')}>Calculate</button>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
