@@ -1,0 +1,434 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    height: 89dvh;
+}
+
+.containerFirst {
+    width: 60%;
+    padding: 20px 20px 60px 10px;
+    box-shadow: 1px 1px 3px #5a5a5a;
+    height: 100%;
+    z-index: 100;
+    transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: nowrap;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+}
+
+@media (min-width: 768px) {
+    .containerFirst {
+        width: 35%;
+        padding-left: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .containerFirst {
+        width: 30%;
+    }
+}
+
+.containerFirstClosed {
+    width: 80px;
+    padding: 20px 10px;
+    height: 100%;
+}
+
+.topIcon {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.backIcon {
+    width: 24px;
+    cursor: pointer;
+    transition: transform 0.4s ease-in-out;
+}
+
+.backIconReversed {
+    width: 24px;
+    cursor: pointer;
+    transform: rotate(180deg);
+    transition: transform 0.4s ease-in-out;
+}
+
+.containerFirstClosed .topIcon {
+    justify-content: center;
+}
+
+.userInfo {
+    width: 100%;
+    margin-top: 40px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.profilePic {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.profilePic img {
+    width: 100px;
+    transition: width 0.4s ease-in-out;
+}
+
+.containerFirstClosed .userInfo {
+    align-items: center;
+}
+
+.containerFirstClosed .profilePic {
+    justify-content: center;
+}
+
+.containerFirstClosed .profilePic img {
+    width: 32px;
+}
+
+.userName {
+    width: 100%;
+    text-align: left;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .userName {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+}
+
+.userName h2 {
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 15px;
+}
+
+.infoLine {
+    width: 100%;
+    margin-top: 15px;
+    height: 3px;
+    background-color: #e6e6e6;
+    border-radius: 10px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .infoLine {
+    opacity: 0;
+}
+
+.menuOptions {
+    margin-top: 20px;
+}
+
+.containerFirstClosed .menuOptions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.option {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-top: 20px;
+    cursor: pointer;
+    align-items: center;
+    padding: 7px;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.optionIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
+.optionIcon img {
+    width: 20px;
+    transition: width 0.3s ease-in-out;
+}
+
+.containerFirstClosed .option {
+    gap: 0;
+    width: fit-content;
+    padding: 7px;
+}
+
+.containerFirstClosed .optionIcon img {
+    width: 24px;
+}
+
+.option p {
+    font-size: 0.9rem;
+    color: black;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .option p {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.optionActive {
+    background-color: #C4D9FF;
+}
+
+.optionActive p {
+    color: #282F68;
+}
+
+.subOptionsArea {
+    display: flex;
+    margin-left: 20px;
+    margin-top: 15px;
+}
+
+.subOption {
+    cursor: pointer;
+}
+
+.subOption p {
+    font-size: 0.9rem;
+    color: #474747;
+    transition: color 0.2s ease;
+}
+
+.subOption:hover p {
+    color: #282F68;
+}
+
+.subOptionActive p {
+    color: #282F68;
+    font-weight: 600;
+}
+
+.containerFirstClosed .subOptionsArea {
+    display: none;
+}
+
+.options {
+    margin-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.optionsLine {
+    width: 3px;
+    background-color: #c2c2c2;
+    border-radius: 10px;
+}
+
+.containerSecond {
+    flex: 1;
+    height: 100%;
+    position: relative;
+}
+
+/* Dark Mode Styles */
+:global(.dark-mode) .containerSecond {
+    background-color: #1b1b1b;
+}
+
+:global(.dark-mode) .userName h2 {
+    color: #c0c0c0;
+}
+
+:global(.dark-mode) .option:not(.optionActive) p {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .subOption:not(.subOptionActive) p {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .subOptionActive p,
+:global(.dark-mode) .subOption:hover p {
+    color: #C4D9FF;
+}
+
+:global(.dark-mode) .infoLine {
+    background-color: #3a3a3a;
+}
+
+:global(.dark-mode) .containerFirst {
+    background-color: #262626;
+    box-shadow: none;
+}
+
+.darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .darkIcon {
+    display: block;
+}
+
+:global(.dark-mode) .lightIcon {
+    display: none;
+}
+
+@media (min-width: 1200px) {
+
+    .containerFirst,
+    .containerFirstClosed {
+        position: static !important;
+        width: 18% !important;
+        padding: 20px 20px 20px 40px !important;
+    }
+
+    .topIcon {
+        display: none !important;
+    }
+
+    .containerFirstClosed .userInfo {
+        align-items: flex-start !important;
+    }
+
+    .containerFirstClosed .profilePic {
+        justify-content: flex-start !important;
+    }
+
+    .containerFirst .profilePic img,
+    .containerFirstClosed .profilePic img {
+        width: 120px !important;
+        margin-left: 0 !important;
+    }
+
+    .containerFirstClosed .userName,
+    .containerFirstClosed .option p {
+        opacity: 1 !important;
+        width: 100% !important;
+        height: auto !important;
+        pointer-events: auto !important;
+    }
+
+    .containerFirstClosed .infoLine {
+        opacity: 1 !important;
+    }
+
+    .containerFirst .userName h2,
+    .containerFirstClosed .userName h2 {
+        margin-top: 15px !important;
+    }
+
+    .containerFirstClosed .menuOptions {
+        align-items: stretch !important;
+        display: block !important;
+    }
+
+    .containerFirstClosed .subOptionsArea {
+        display: flex !important;
+    }
+
+    .containerFirstClosed .option {
+        width: 100% !important;
+        padding: 7px !important;
+        gap: 15px !important;
+    }
+
+    .containerFirstClosed .optionIcon img {
+        width: 20px !important;
+    }
+
+    .option:not(.optionActive):hover {
+        background-color: #eef2f7;
+    }
+}
+
+:global(.dark-mode) .option:not(.optionActive):hover {
+    background-color: #333333;
+}
+
+@media (min-width: 2000px) {
+
+    .containerFirst,
+    .containerFirstClosed {
+        width: 12% !important;
+    }
+}
+
+.sidebarPlaceholder {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    cursor: pointer;
+}
+
+@media (min-width: 1200px) {
+    .sidebarPlaceholder {
+        display: none !important;
+    }
+
+    .overlay {
+        display: none !important;
+    }
+}
+
+.arrow {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.arrow img {
+    height: 14px;
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.optionActive .arrow img {
+    transform: rotate(270deg);
+}
+
+.containerFirstClosed .arrow {
+    display: none;
+}
+
+.divider {
+    height: 1px;
+    background-color: #e7e7e7;
+    border-radius: 5px;
+    margin: 30px 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.containerFirstClosed .divider {
+    opacity: 0;
+}
+
+@media (min-width: 1200px) {
+    .containerFirstClosed .arrow {
+        display: flex !important;
+    }
+
+    .containerFirstClosed .divider {
+        opacity: 1 !important;
+    }
+}
