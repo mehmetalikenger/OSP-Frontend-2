@@ -76,7 +76,13 @@ export default function ProductAccordion({
     ];
 
     const toggleSection = (section: string) => {
+        const isDesktop = window.innerWidth >= 1200;
         const isOpening = activeSection !== section;
+
+        if (isDesktop && !isOpening) {
+            return;
+        }
+
         setActiveSection(isOpening ? section : null);
 
         if (isOpening) {
