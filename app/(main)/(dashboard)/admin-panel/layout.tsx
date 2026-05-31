@@ -25,6 +25,17 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         activeOption = "Edit Component";
     }
 
+    useEffect(() => {
+        if (window.innerWidth >= 1200) {
+            const element = document.getElementById(`option-${activeOption}`);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            }
+        }
+    }, [activeOption]);
+
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
@@ -89,7 +100,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                     <div className={styles.divider}></div>
 
                     {/* ADD UNIT */}
-                    <div className={styles.optionArea}>
+                    <div className={styles.optionArea} id="option-Add Unit">
                         <div
                             className={`${styles.option} ${activeOption === "Add Unit" ? styles.optionActive : ""}`}
                             onClick={() => handleOptionClick("/admin-panel/add-unit/chiller", true)}
@@ -132,7 +143,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                     </div>
 
                     {/* EDIT UNIT */}
-                    <div className={styles.optionArea}>
+                    <div className={styles.optionArea} id="option-Edit Unit">
                         <div
                             className={`${styles.option} ${activeOption === "Edit Unit" ? styles.optionActive : ""}`}
                             onClick={() => handleOptionClick("/admin-panel/edit-unit/chiller", true)}
@@ -177,7 +188,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                     <div className={styles.divider}></div>
 
                     {/* ADD COMPONENT */}
-                    <div className={styles.optionArea}>
+                    <div className={styles.optionArea} id="option-Add Component">
                         <div
                             className={`${styles.option} ${activeOption === "Add Component" ? styles.optionActive : ""}`}
                             onClick={() => handleOptionClick("/admin-panel/add-component/compressor", true)}
@@ -217,7 +228,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                     </div>
 
                     {/* EDIT COMPONENT */}
-                    <div className={styles.optionArea}>
+                    <div className={styles.optionArea} id="option-Edit Component">
                         <div
                             className={`${styles.option} ${activeOption === "Edit Component" ? styles.optionActive : ""}`}
                             onClick={() => handleOptionClick("/admin-panel/edit-component/compressor", true)}

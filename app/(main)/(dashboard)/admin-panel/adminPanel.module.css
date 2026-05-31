@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: row;
     position: relative;
-    height: 89dvh;
+    height: 91dvh;
 }
 
 .containerFirst {
@@ -22,22 +22,9 @@
     background-color: white;
 }
 
-@media (min-width: 768px) {
-    .containerFirst {
-        width: 35%;
-        padding-left: 40px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .containerFirst {
-        width: 30%;
-    }
-}
-
 .containerFirstClosed {
-    width: 80px;
-    padding: 20px 10px;
+    width: 80px !important;
+    padding: 20px 10px !important;
     height: 100%;
 }
 
@@ -285,13 +272,26 @@
     display: none;
 }
 
+@media (min-width: 768px) {
+    .containerFirst {
+        width: 35%;
+        padding-left: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .containerFirst {
+        width: 30%;
+    }
+}
+
 @media (min-width: 1200px) {
 
     .containerFirst,
     .containerFirstClosed {
         position: static !important;
-        width: 18% !important;
-        padding: 20px 20px 20px 40px !important;
+        width: 20% !important;
+        padding: 20px 20px 60px 40px !important;
     }
 
     .topIcon {
