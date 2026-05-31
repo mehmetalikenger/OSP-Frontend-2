@@ -1,22 +1,15 @@
-"use client";
-import { useState, useEffect } from "react";
+﻿"use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../category.module.css";
+import { useScrollLock } from "@/hooks/useScrollLock";
+import BookmarkToggle from "@/components/BookmarkToggle";
 
 export default function AirCooledChillersPage() {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        if (isDetailsOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [isDetailsOpen]);
+    useScrollLock(isDetailsOpen);
 
     return (
         <>
@@ -56,9 +49,12 @@ export default function AirCooledChillersPage() {
                             </div>
 
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -90,9 +86,12 @@ export default function AirCooledChillersPage() {
                             </div>
 
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -124,9 +123,12 @@ export default function AirCooledChillersPage() {
                             </div>
 
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -158,9 +160,12 @@ export default function AirCooledChillersPage() {
                             </div>
 
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -192,9 +197,12 @@ export default function AirCooledChillersPage() {
                             </div>
 
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                 </div>
                 {/* Desktop Products */}
@@ -228,9 +236,12 @@ export default function AirCooledChillersPage() {
                                 <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
                             </div>
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -261,9 +272,12 @@ export default function AirCooledChillersPage() {
                                 <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
                             </div>
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -294,9 +308,12 @@ export default function AirCooledChillersPage() {
                                 <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
                             </div>
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -327,9 +344,12 @@ export default function AirCooledChillersPage() {
                                 <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
                             </div>
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                     <div className={styles.product}>
                         <div className={styles.productDetails}>
@@ -360,9 +380,12 @@ export default function AirCooledChillersPage() {
                                 <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
                             </div>
                         </div>
-                        <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
-                            View
-                        </button>
+                        <div className={styles.productBottom}>
+                            <button className={styles.viewBtn} onClick={() => setIsDetailsOpen(true)}>
+                                View
+                            </button>
+                            <BookmarkToggle />
+                        </div>
                     </div>
                 </div>
                 <div className={styles.bottomLogo}>
@@ -398,7 +421,10 @@ export default function AirCooledChillersPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
+                            <div className={styles.modalActions}>
+                                <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
+                                <BookmarkToggle />
+                            </div>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
@@ -462,7 +488,10 @@ export default function AirCooledChillersPage() {
                                 <img src="../icons/tune.png" alt="Unit icon" />
                                 <img src="../icons/tune.png" alt="Unit icon" />
                             </div>
-                            <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
+                            <div className={styles.modalActions}>
+                                <button className={styles.calcBtn} onClick={() => router.push('/calculation/air-cooled-chiller')}>Calculate</button>
+                                <BookmarkToggle />
+                            </div>
                         </div>
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>

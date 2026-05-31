@@ -8,7 +8,7 @@
 }
 
 .containerIcon {
-    width: 20%;
+    width: 23%;
     background-color: #C4D9FF;
     display: flex;
     align-items: center;
@@ -235,21 +235,21 @@
     }
 
     .containerIcon {
-        width: 10%;
+        width: 11%;
     }
 }
 
 @media screen and (min-width: 1024px) {
 
     .containerIcon {
-        width: 6%;
+        width: 8.5%;
     }
 }
 
 @media screen and (min-width: 1200px) {
 
     .containerIcon {
-        width: 4.5%;
+        width: 7%;
     }
 
     .toast {
@@ -259,7 +259,13 @@
     }
 }
 
-@media screen and (min-width: 1440px) {
+@media screen and (min-width: 1600px) {
+    .containerIcon {
+        width: 5%;
+    }
+}
+
+@media screen and (min-width: 2000px) {
     .containerIcon {
         width: 3.5%;
     }

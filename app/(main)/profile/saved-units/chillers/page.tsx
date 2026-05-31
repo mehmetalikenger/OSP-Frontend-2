@@ -1,25 +1,20 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
 import { SavedUnitsContext } from "../layout";
 import styles from "../savedUnits.module.css";
+import { useScrollLock } from "@/hooks/useScrollLock";
+import BookmarkToggle from "@/components/BookmarkToggle";
 
 export default function ChillersPage() {
+    const router = useRouter();
     const { selectedType } = useContext(SavedUnitsContext);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [airCooledList, setAirCooledList] = useState([1, 2, 3, 4, 5]);
     const [waterCooledList, setWaterCooledList] = useState([1, 2, 3]);
 
-    useEffect(() => {
-        if (isDetailsOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [isDetailsOpen]);
+    useScrollLock(isDetailsOpen);
 
     const handleRemoveAir = (id: number) => {
         setAirCooledList(prev => prev.filter(item => item !== id));
@@ -265,7 +260,13 @@ export default function ChillersPage() {
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                 </div>
-                                <button className={styles.calcBtn}>Calculate</button>
+                                <div className={styles.modalActions}>
+
+                                    <button className={styles.calcBtn} onClick={() => router.push(isAirCooled ? '/calculation/air-cooled-chiller' : '/calculation/water-cooled-chiller')}>Calculate</button>
+
+                                    <BookmarkToggle />
+
+                                </div>
                             </div>
                             <div className={styles.unitSpecs}>
                                 <h3>Technical Specifications</h3>
@@ -357,7 +358,13 @@ export default function ChillersPage() {
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                 </div>
-                                <button className={styles.calcBtn}>Calculate</button>
+                                <div className={styles.modalActions}>
+
+                                    <button className={styles.calcBtn} onClick={() => router.push(isAirCooled ? '/calculation/air-cooled-chiller' : '/calculation/water-cooled-chiller')}>Calculate</button>
+
+                                    <BookmarkToggle />
+
+                                </div>
                             </div>
                             <div className={styles.unitSpecs}>
                                 <h3>Technical Specifications</h3>

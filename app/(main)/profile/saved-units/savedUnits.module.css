@@ -190,6 +190,17 @@ body {
     font-size: 0.85rem;
 }
 
+.modalActions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modalActions .calcBtn {
+    margin-top: 0;
+}
+
 .unitSpecs {
     margin-top: 30px;
 }
@@ -446,7 +457,7 @@ body {
     }
 
     .unitDetails {
-        width: 70%;
+        width: 60%;
         max-width: 1000px;
         height: 60vh;
         position: fixed;
@@ -464,18 +475,18 @@ body {
     }
 
     .unitDesc {
-        width: 50%;
+        width: 60%;
     }
 
     .unitImage {
-        width: 50%;
+        width: 40%;
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
     }
 
     .unitImage img {
-        width: 60%;
+        width: 80%;
     }
 
     .bottomLogo {

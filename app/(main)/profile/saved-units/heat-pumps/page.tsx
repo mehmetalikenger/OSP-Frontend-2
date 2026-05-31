@@ -1,25 +1,20 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
 import { SavedUnitsContext } from "../layout";
 import styles from "../savedUnits.module.css";
+import { useScrollLock } from "@/hooks/useScrollLock";
+import BookmarkToggle from "@/components/BookmarkToggle";
 
 export default function HeatPumpsPage() {
+    const router = useRouter();
     const { selectedType } = useContext(SavedUnitsContext);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [airToWaterList, setairToWaterList] = useState([1, 2, 3]);
     const [waterToWaterList, setwaterToWaterList] = useState([1, 2, 3]);
 
-    useEffect(() => {
-        if (isDetailsOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [isDetailsOpen]);
+    useScrollLock(isDetailsOpen);
 
     const handleRemoveAir = (id: number) => {
         setairToWaterList(prev => prev.filter(item => item !== id));
@@ -265,7 +260,13 @@ export default function HeatPumpsPage() {
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                 </div>
-                                <button className={styles.calcBtn}>Calculate</button>
+                                <div className={styles.modalActions}>
+
+                                    <button className={styles.calcBtn} onClick={() => router.push(isAirToWater ? '/calculation/air-to-water-heat-pump' : '/calculation/water-to-water-heat-pump')}>Calculate</button>
+
+                                    <BookmarkToggle />
+
+                                </div>
                             </div>
                             <div className={styles.unitSpecs}>
                                 <h3>Technical Specifications</h3>
@@ -357,7 +358,13 @@ export default function HeatPumpsPage() {
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                     <img src="/icons/tune.png" alt="Unit icon" />
                                 </div>
-                                <button className={styles.calcBtn}>Calculate</button>
+                                <div className={styles.modalActions}>
+
+                                    <button className={styles.calcBtn} onClick={() => router.push(isAirToWater ? '/calculation/air-to-water-heat-pump' : '/calculation/water-to-water-heat-pump')}>Calculate</button>
+
+                                    <BookmarkToggle />
+
+                                </div>
                             </div>
                             <div className={styles.unitSpecs}>
                                 <h3>Technical Specifications</h3>

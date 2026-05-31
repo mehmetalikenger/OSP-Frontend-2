@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../calculation.module.css";
 
 interface ProductAccordionProps {
@@ -22,9 +23,30 @@ export default function ProductAccordion({
     drawingsContent,
     techSpecsContent
 }: ProductAccordionProps) {
-    const [activeSection, setActiveSection] = useState<string | null>("calculation");
+    const router = useRouter();
+    const [activeSection, setActiveSection] = useState<string | null>(null);
     const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
     const [fullscreenArray, setFullscreenArray] = useState<string[] | null>(null);
+
+    useEffect(() => {
+        let isDesktop = window.innerWidth >= 1200;
+
+        const handleResize = () => {
+            const currentlyDesktop = window.innerWidth >= 1200;
+            if (currentlyDesktop && !isDesktop) {
+                setActiveSection((prev) => prev ? prev : "calculation");
+            }
+            isDesktop = currentlyDesktop;
+        };
+
+        // Initial setup
+        if (isDesktop) {
+            setActiveSection("calculation");
+        }
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     const [zoomScale, setZoomScale] = useState<number>(1);
     const [zoomOrigin, setZoomOrigin] = useState<string>("center center");
 
@@ -69,18 +91,44 @@ export default function ProductAccordion({
 
     useEffect(() => {
         if (fullscreenArray !== null) {
-            document.body.style.overflow = 'hidden';
+            (window as any).__preventScroll = (e: any) => {
+                if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
+                    e.preventDefault();
+                }
+            };
+            (window as any).__preventKeyScroll = (e: any) => {
+                if (['Space', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.code)) {
+                    if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
+                        e.preventDefault();
+                    }
+                }
+            };
+            window.addEventListener("wheel", (window as any).__preventScroll, { passive: false });
+            window.addEventListener("touchmove", (window as any).__preventScroll, { passive: false });
+            window.addEventListener("keydown", (window as any).__preventKeyScroll, { passive: false });
         } else {
-            document.body.style.overflow = '';
+            if ((window as any).__preventScroll) {
+                window.removeEventListener("wheel", (window as any).__preventScroll);
+                window.removeEventListener("touchmove", (window as any).__preventScroll);
+                window.removeEventListener("keydown", (window as any).__preventKeyScroll);
+            }
         }
 
         return () => {
-            document.body.style.overflow = '';
+            if ((window as any).__preventScroll) {
+                window.removeEventListener("wheel", (window as any).__preventScroll);
+                window.removeEventListener("touchmove", (window as any).__preventScroll);
+                window.removeEventListener("keydown", (window as any).__preventKeyScroll);
+            }
         };
     }, [fullscreenArray]);
 
     return (
         <div className={styles.main}>
+            <div className={styles.backBtnContainer} onClick={() => router.back()}>
+                <img src="/icons/back-arrow-2.png" className={styles.lightIcon} alt="Back" />
+                <img src="/icons/back-arrow.png" className={styles.darkIcon} alt="Back" />
+            </div>
             <div className={styles.header}>
                 <div className={styles.headerBullet}></div>
                 <h1>{title}</h1>

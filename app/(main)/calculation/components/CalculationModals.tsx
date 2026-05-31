@@ -27,12 +27,34 @@ export default function CalculationModals({ isOpen, onClose }: CalculationModals
 
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
+            (window as any).__preventScroll = (e: any) => {
+                if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
+                    e.preventDefault();
+                }
+            };
+            (window as any).__preventKeyScroll = (e: any) => {
+                if (['Space', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.code)) {
+                    if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
+                        e.preventDefault();
+                    }
+                }
+            };
+            window.addEventListener("wheel", (window as any).__preventScroll, { passive: false });
+            window.addEventListener("touchmove", (window as any).__preventScroll, { passive: false });
+            window.addEventListener("keydown", (window as any).__preventKeyScroll, { passive: false });
         } else {
-            document.body.style.overflow = '';
+            if ((window as any).__preventScroll) {
+                window.removeEventListener("wheel", (window as any).__preventScroll);
+                window.removeEventListener("touchmove", (window as any).__preventScroll);
+                window.removeEventListener("keydown", (window as any).__preventKeyScroll);
+            }
         }
         return () => {
-            document.body.style.overflow = '';
+            if ((window as any).__preventScroll) {
+                window.removeEventListener("wheel", (window as any).__preventScroll);
+                window.removeEventListener("touchmove", (window as any).__preventScroll);
+                window.removeEventListener("keydown", (window as any).__preventKeyScroll);
+            }
         };
     }, [isOpen]);
 

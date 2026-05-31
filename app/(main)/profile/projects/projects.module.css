@@ -224,7 +224,7 @@
 }
 
 .unitName p {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: #2a2a2a;
 }
@@ -559,9 +559,17 @@
     width: 100%;
 }
 
-.modalCloseBtn .darkIcon { display: none; }
-:global(.dark-mode) .modalCloseBtn .lightIcon { display: none; }
-:global(.dark-mode) .modalCloseBtn .darkIcon { display: block; }
+.modalCloseBtn .darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .modalCloseBtn .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .modalCloseBtn .darkIcon {
+    display: block;
+}
 
 .createModalContent {
     width: 100%;
@@ -601,7 +609,8 @@
     color: #a0a0a0;
 }
 
-.formRow input, .formRow textarea {
+.formRow input,
+.formRow textarea {
     padding: 8px 12px;
     border: 1px solid #cecece;
     border-radius: 5px;
@@ -615,7 +624,8 @@
     min-height: 80px;
 }
 
-:global(.dark-mode) .formRow input, :global(.dark-mode) .formRow textarea {
+:global(.dark-mode) .formRow input,
+:global(.dark-mode) .formRow textarea {
     background: #1e1e1e;
     border: 1px solid #444;
     color: #dfdfdf;
@@ -631,7 +641,8 @@
     flex: 1;
 }
 
-.btnPrimary, .btnSecondary {
+.btnPrimary,
+.btnSecondary {
     padding: 8px 15px;
     border-radius: 5px;
     font-size: 0.85rem;
@@ -682,4 +693,4 @@
 
 .createProjectBtn:hover {
     background-color: rgba(215, 41, 46, 0.08);
-}
+}

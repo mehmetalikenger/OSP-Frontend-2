@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import sharedStyles from "../sharedProfile.module.css";
 import styles from "./projects.module.css";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 export default function ProjectsPage() {
     const [projectName, setProjectName] = useState("Test Project 1");
@@ -16,16 +17,8 @@ export default function ProjectsPage() {
     const [isOpen, setIsOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    useEffect(() => {
-        if (isCreateModalOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => {
-            document.body.style.overflow = '';
-        };
-    }, [isCreateModalOpen]);
+    useScrollLock(isCreateModalOpen);
+
 
     const formatMobileProjectName = (name: string) => {
         return name.split(" ").map(word => {

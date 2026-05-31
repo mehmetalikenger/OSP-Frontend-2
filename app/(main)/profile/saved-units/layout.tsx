@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useEffect } from "react";
+import { useState, createContext } from "react";
 import { usePathname } from "next/navigation";
 import sharedStyles from "../sharedProfile.module.css";
 import Combobox from "./Combobox";
@@ -27,14 +27,10 @@ export default function SavedUnitsLayout({ children }: { children: React.ReactNo
         comboboxOptions = ["Air to Water", "Water to Water"];
     }
 
-    useEffect(() => {
-        if (!comboboxOptions.includes(selectedType)) {
-            setSelectedType(comboboxOptions[0]);
-        }
-    }, [pathname, selectedType]);
+    const effectiveSelectedType = comboboxOptions.includes(selectedType) ? selectedType : comboboxOptions[0];
 
     return (
-        <SavedUnitsContext.Provider value={{ selectedType, setSelectedType }}>
+        <SavedUnitsContext.Provider value={{ selectedType: effectiveSelectedType, setSelectedType }}>
             <div className={sharedStyles.pageContentContainer}>
                 <div className={sharedStyles.header}>
                     <div className={sharedStyles.savedUnitsHeaderContent}>
@@ -43,7 +39,7 @@ export default function SavedUnitsLayout({ children }: { children: React.ReactNo
                             <h1>{title}</h1>
                         </div>
                         <Combobox
-                            value={selectedType || comboboxOptions[0]}
+                            value={effectiveSelectedType}
                             onChange={setSelectedType}
                             options={comboboxOptions}
                         />
