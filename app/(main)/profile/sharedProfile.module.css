@@ -1,8 +1,9 @@
 .pageContentContainer {
     padding: 30px 10px;
     width: 100%;
-    min-height: 100dvh;
+    min-height: 91dvh;
     background-color: #F2F2F2;
+    flex: 1;
 }
 
 .header {
@@ -35,7 +36,7 @@
 .headerBullet {
     width: 20px;
     height: 5px;
-    background-color: #777CA7;
+    background-color: rgb(119, 124, 167);
     border-radius: 10px;
 }
 

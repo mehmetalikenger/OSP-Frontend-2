@@ -53,7 +53,7 @@
 
 .logoDark {
     display: none;
-    height: 50px;
+    height: 55px;
     width: auto;
     object-fit: contain;
 }
@@ -199,6 +199,7 @@
 
     .loginContainer {
         width: 20%;
+        max-width: 500px;
     }
 
     .bottomLogo {
@@ -208,6 +209,18 @@
 
     .passwordEye img {
         width: 20px;
+    }
+}
+
+@media screen and (min-width: 3000px) {
+
+    .logoLight,
+    .logoDark {
+        height: 60px;
+    }
+
+    .passwordEye img {
+        width: 19px;
     }
 }
 

@@ -3,13 +3,14 @@
     display: flex;
     flex-direction: row;
     position: relative;
+    flex: 1;
 }
 
 .containerFirst {
     width: 60%;
     padding: 20px 20px 20px 10px;
     box-shadow: 1px 1px 3px #5a5a5a;
-    min-height: 100vh;
+    min-height: 91dvh;
     z-index: 100;
     transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
     overflow: hidden;
@@ -236,8 +237,10 @@
 
 .containerSecond {
     flex: 1;
-    min-height: 100vh;
+    min-height: 91dvh;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Dark Mode Styles */

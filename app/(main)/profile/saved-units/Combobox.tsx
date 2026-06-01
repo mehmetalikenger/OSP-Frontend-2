@@ -8,9 +8,10 @@ interface ComboboxProps {
     onChange: (value: string) => void;
     options: string[];
     className?: string;
+    containerClassName?: string;
 }
 
-export default function Combobox({ value, onChange, options, className }: ComboboxProps) {
+export default function Combobox({ value, onChange, options, className, containerClassName }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +34,7 @@ export default function Combobox({ value, onChange, options, className }: Combob
     };
 
     return (
-        <div className={styles.comboboxContainer} ref={containerRef}>
+        <div className={`${styles.comboboxContainer} ${containerClassName || ""}`} ref={containerRef}>
             <div className={styles.inputWrapper} onClick={() => setIsOpen(!isOpen)}>
                 <input
                     type="text"
