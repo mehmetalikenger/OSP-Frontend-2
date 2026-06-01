@@ -270,3 +270,9 @@
         width: 3.5%;
     }
 }
+
+@media screen and (min-width: 3000px) {
+    .containerIcon {
+        width: 2.5%;
+    }
+}

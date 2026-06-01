@@ -754,6 +754,10 @@
     border-color: #444;
 }
 
+.projectItem span {
+    font-size: 0.9rem
+}
+
 .checkbox {
     width: 20px;
     height: 20px;
@@ -1005,11 +1009,17 @@
 }
 
 @media screen and (min-width: 2000px) {
+    .main {
+        justify-content: center;
+        grid-template-columns: 350px 1000px;
+    }
+
     .sectionContent {
-        width: 60%;
+        width: 100%;
         padding-left: 50px;
         padding-right: 50px;
-        margin: 0 auto;
+        margin: 0;
+        max-width: 1000px;
     }
 
     .fullscreenControls {

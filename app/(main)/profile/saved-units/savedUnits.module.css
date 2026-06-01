@@ -589,3 +589,14 @@ body {
 .removeBtnContainer .closeBtn:hover {
     transform: scale(1.1);
 }
+
+@media screen and (min-width: 3000px) {
+    .container {
+        width: 100%;
+    }
+
+    .products {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 2500px;
+    }
+}

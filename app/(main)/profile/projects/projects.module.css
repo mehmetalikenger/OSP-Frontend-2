@@ -694,3 +694,14 @@
 .createProjectBtn:hover {
     background-color: rgba(215, 41, 46, 0.08);
 }
+
+@media screen and (min-width: 3000px) {
+
+    .unitName p {
+        font-size: 1.1rem;
+    }
+
+    .unitImage img {
+        width: 60%;
+    }
+}
