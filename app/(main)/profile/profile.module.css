@@ -391,3 +391,31 @@
         display: none !important;
     }
 }
+
+@media (max-width: 1023px) {
+    .sidebarPlaceholder {
+        display: none !important;
+    }
+
+    .containerFirst {
+        position: fixed !important;
+        top: 11vh !important;
+        height: 89dvh;
+        z-index: 990;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transform: translateX(0);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), width 0.6s cubic-bezier(0.16, 1, 0.3, 1), padding 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .containerFirstClosed {
+        transform: translateX(-150vw) !important;
+    }
+
+    .overlay {
+        position: fixed !important;
+        top: 11vh !important;
+        height: 89dvh;
+        z-index: 980;
+    }
+}

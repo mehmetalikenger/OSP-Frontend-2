@@ -149,8 +149,19 @@
     align-items: center;
 }
 
-.userIcon img {
+.desktopUserIcon {
     width: 37px;
+    display: block;
+}
+
+.mobileHamburgerIcon {
+    display: none;
+}
+
+.mobileHamburgerIcon svg {
+    width: 30px;
+    height: 30px;
+    stroke: currentColor;
 }
 
 .dropdownMenu {
@@ -191,6 +202,52 @@
     border-radius: 0 0 5px 5px;
 }
 
+.desktopOnlyLinks {
+    display: block;
+}
+
+.mobileOnlyLinks {
+    display: none;
+}
+
+.dropdownHeader {
+    padding: 10px 15px 5px 15px;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.dropdownDivider {
+    height: 1px;
+    background-color: #eee;
+    margin: 5px 0;
+}
+
+@media screen and (max-width: 1023px) {
+    .desktopUserIcon {
+        display: none;
+    }
+
+    .mobileHamburgerIcon {
+        display: block;
+        color: #333;
+    }
+
+    :global(.dark-mode) .mobileHamburgerIcon {
+        color: #e9e9e9;
+    }
+
+    .desktopOnlyLinks {
+        display: none;
+    }
+
+    .mobileOnlyLinks {
+        display: block;
+    }
+}
+
 @media screen and (min-width: 768px) {
     .nav {
         padding: 0 40px;
@@ -223,7 +280,7 @@
         width: 30px;
     }
 
-    .userIcon img {
+    .userIcon .desktopUserIcon {
         width: 40px;
     }
 

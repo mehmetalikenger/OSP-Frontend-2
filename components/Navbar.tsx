@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from './Navbar.module.css';
 
@@ -8,6 +9,10 @@ export default function Navbar() {
     const [language, setLanguage] = useState<'en' | 'de'>('en');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+
+    const pathname = usePathname();
+    const isAdmin = pathname.includes('/admin-panel');
+    const isProfile = pathname.includes('/profile');
 
     const userMenuRef = useRef<HTMLDivElement>(null);
     const lastScrollY = useRef(0);
@@ -93,8 +98,31 @@ export default function Navbar() {
                     >
                         <img src={language === 'en' ? "/icons/english-lan-icon.png" : "/icons/german-lan-icon.png"} alt={language.toUpperCase()} />
                     </div>
-                    <div className={styles.userIcon} onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} ref={userMenuRef}>
-                        <img src={isDarkMode ? "/icons/user-icon-second.png" : "/icons/user-icon.png"} alt="User" style={{ cursor: 'pointer' }} />
+                    <div className={styles.userIcon} ref={userMenuRef}>
+                        <img 
+                            src={isDarkMode ? "/icons/user-icon-second.png" : "/icons/user-icon.png"} 
+                            alt="User" 
+                            style={{ cursor: 'pointer' }} 
+                            className={styles.desktopUserIcon} 
+                            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                        />
+                        <div 
+                            className={styles.mobileHamburgerIcon} 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                if (isAdmin || isProfile) {
+                                    window.dispatchEvent(new CustomEvent('toggleMobileSidebar'));
+                                } else {
+                                    setIsUserMenuOpen(!isUserMenuOpen);
+                                }
+                            }}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </div>
                         {isUserMenuOpen && (
                             <div className={styles.dropdownMenu}>
                                 <Link href="/profile" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Profile</Link>

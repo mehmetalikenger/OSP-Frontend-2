@@ -24,11 +24,32 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+        const handleToggle = () => setIsSidebarOpen(prev => !prev);
+        window.addEventListener('toggleMobileSidebar', handleToggle as EventListener);
+        return () => window.removeEventListener('toggleMobileSidebar', handleToggle as EventListener);
+    }, []);
+
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.classList.add('mobile-sidebar-open');
+        } else {
+            document.body.classList.remove('mobile-sidebar-open');
+        }
+        return () => {
+            document.body.classList.remove('mobile-sidebar-open');
+        };
+    }, [isSidebarOpen]);
+
     const handleOptionClick = (path: string, keepOpen: boolean = false) => {
-        if (isSidebarOpen && !keepOpen) {
-            setIsSidebarOpen(false);
-        } else if (!isSidebarOpen && keepOpen) {
-            setIsSidebarOpen(true);
+        if (keepOpen) {
+            if (window.innerWidth >= 1024 && !isSidebarOpen) {
+                setIsSidebarOpen(true);
+            }
+        } else {
+            if (window.innerWidth < 1024 && isSidebarOpen) {
+                setIsSidebarOpen(false);
+            }
         }
         router.push(path);
     };
@@ -129,6 +150,19 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                             )}
                         </div>
                         <p>Account Settings</p>
+                    </div>
+                    
+                    <div className={styles.optionsLine} style={{ width: '100%', height: '1px', margin: '20px 0' }}></div>
+                    
+                    <div
+                        className={styles.option}
+                        onClick={() => {
+                            // Handle logout logic here
+                            console.log("Logout clicked");
+                        }}
+                        style={{ marginTop: 'auto' }}
+                    >
+                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>Log out</p>
                     </div>
                 </div>
             </div>

@@ -40,11 +40,32 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+        const handleToggle = () => setIsSidebarOpen(prev => !prev);
+        window.addEventListener('toggleMobileSidebar', handleToggle as EventListener);
+        return () => window.removeEventListener('toggleMobileSidebar', handleToggle as EventListener);
+    }, []);
+
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.classList.add('mobile-sidebar-open');
+        } else {
+            document.body.classList.remove('mobile-sidebar-open');
+        }
+        return () => {
+            document.body.classList.remove('mobile-sidebar-open');
+        };
+    }, [isSidebarOpen]);
+
     const handleOptionClick = (path: string, isParentWithChildren: boolean = false) => {
         if (isParentWithChildren) {
-            setIsSidebarOpen(!isSidebarOpen);
+            if (window.innerWidth >= 1024 && !isSidebarOpen) {
+                setIsSidebarOpen(true);
+            }
         } else {
-            setIsSidebarOpen(false);
+            if (window.innerWidth < 1024 && isSidebarOpen) {
+                setIsSidebarOpen(false);
+            }
         }
         router.push(path);
     };
@@ -267,6 +288,17 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                         )}
                     </div>
 
+                    <div className={styles.divider} style={{ margin: '20px 0' }}></div>
+                    
+                    <div
+                        className={styles.option}
+                        onClick={() => {
+                            // Handle logout logic here
+                            console.log("Logout clicked");
+                        }}
+                    >
+                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>Log out</p>
+                    </div>
                 </div>
             </div>
             

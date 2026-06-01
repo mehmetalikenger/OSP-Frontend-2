@@ -22,8 +22,14 @@ export default function AdminPanelPage() {
             {isAddingAdmin ? (
               <div className={styles.addInputContainer}>
                 <input type="email" placeholder="Enter admin email..." className={styles.addInput} />
-                <button className={styles.confirmBtn} onClick={() => setIsAddingAdmin(false)}>✓</button>
-                <button className={styles.cancelBtn} onClick={() => setIsAddingAdmin(false)}>✕</button>
+                <button className={styles.confirmBtn} onClick={() => setIsAddingAdmin(false)}>
+                  <img src="../../icons/tick-light.png" alt="confirm" className={styles.lightIcon} />
+                  <img src="../../icons/tick-dark.png" alt="confirm" className={styles.darkIcon} />
+                </button>
+                <button className={styles.cancelBtn} onClick={() => setIsAddingAdmin(false)}>
+                  <img src="../../icons/cancel-light.png" alt="cancel" className={styles.lightIcon} />
+                  <img src="../../icons/cancel-dark.png" alt="cancel" className={styles.darkIcon} />
+                </button>
               </div>
             ) : (
               <button className={styles.addBtn} onClick={() => setIsAddingAdmin(true)}>
@@ -91,8 +97,14 @@ export default function AdminPanelPage() {
             {isAddingUser ? (
               <div className={styles.addInputContainer}>
                 <input type="email" placeholder="Enter user email..." className={styles.addInput} />
-                <button className={styles.confirmBtn} onClick={() => setIsAddingUser(false)}>✓</button>
-                <button className={styles.cancelBtn} onClick={() => setIsAddingUser(false)}>✕</button>
+                <button className={styles.confirmBtn} onClick={() => setIsAddingUser(false)}>
+                  <img src="../../icons/tick-light.png" alt="confirm" className={styles.lightIcon} />
+                  <img src="../../icons/tick-dark.png" alt="confirm" className={styles.darkIcon} />
+                </button>
+                <button className={styles.cancelBtn} onClick={() => setIsAddingUser(false)}>
+                  <img src="../../icons/cancel-light.png" alt="cancel" className={styles.lightIcon} />
+                  <img src="../../icons/cancel-dark.png" alt="cancel" className={styles.darkIcon} />
+                </button>
               </div>
             ) : (
               <button className={styles.addBtn} onClick={() => setIsAddingUser(true)}>

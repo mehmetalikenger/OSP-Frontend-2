@@ -40,3 +40,9 @@ body.dark-mode select {
     font-size: 105%;
   }
 }
+
+@media (max-width: 1023px) {
+  body.mobile-sidebar-open {
+    overflow: hidden;
+  }
+}
