@@ -1,0 +1,143 @@
+.comboboxContainer {
+    position: relative;
+    width: 60px;
+    user-select: none;
+}
+
+.inputWrapper {
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+}
+
+.comboboxInput {
+    display: block;
+    width: 100%;
+    padding: 3px 22px 3px 8px;
+    font-size: 0.85rem;
+    font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+    background-color: white;
+    color: #323232;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.comboboxInput:focus {
+    border-color: #777CA7;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.arrowIcon {
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(270deg);
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arrowIconOpen {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.darkIcon {
+    display: none;
+}
+
+/* Dropdown styling */
+.dropdownList {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    padding: 4px 0;
+    list-style: none;
+    margin: 0;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdownItem {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+    color: #474747;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.dropdownItem:hover {
+    background-color: #F2F2F2;
+    color: #282F68;
+}
+
+.dropdownItemActive {
+    background-color: #C4D9FF;
+    color: #282F68;
+    font-weight: 500;
+}
+
+/* Dark Mode Support */
+:global(.dark-mode) .comboboxInput {
+    background-color: #383838;
+    border-color: #5C5C5C;
+    color: #d6d6d6;
+}
+
+:global(.dark-mode) .comboboxInput:focus {
+    border-color: #777CA7;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+:global(.dark-mode) .dropdownList {
+    background-color: #262626;
+    border-color: #5C5C5C;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark-mode) .dropdownItem {
+    color: #d9d7d7;
+}
+
+:global(.dark-mode) .dropdownItem:hover {
+    background-color: rgb(27 27 27);
+    color: #C4D9FF;
+}
+
+:global(.dark-mode) .dropdownItemActive {
+    background-color: #282F68;
+    color: #C4D9FF;
+}
+
+:global(.dark-mode) .darkIcon {
+    display: block;
+}
+
+:global(.dark-mode) .lightIcon {
+    display: none;
+}

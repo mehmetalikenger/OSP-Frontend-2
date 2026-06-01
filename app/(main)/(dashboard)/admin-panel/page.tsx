@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import styles from "./adminPanel.module.css"
+import AdminCombobox from "./AdminCombobox";
 
 export default function AdminPanelPage() {
   const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [isAddingUser, setIsAddingUser] = useState(false);
+  
+  const [userCategory1, setUserCategory1] = useState("A");
+  const [userCategory2, setUserCategory2] = useState("B");
+  const [userCategory3, setUserCategory3] = useState("A");
 
   return (
     <div className={styles.sectionsContainer}>
@@ -119,6 +124,7 @@ export default function AdminPanelPage() {
                   <th>No</th>
                   <th>Email</th>
                   <th>Create Date</th>
+                  <th>Category</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -127,6 +133,13 @@ export default function AdminPanelPage() {
                   <td>1</td>
                   <td>user1@mail.com</td>
                   <td>2024-05-12</td>
+                  <td>
+                    <AdminCombobox 
+                        value={userCategory1} 
+                        onChange={setUserCategory1} 
+                        options={["A", "B"]} 
+                    />
+                  </td>
                   <td>
                     <div className={styles.removeBtn}>
                       <img src="../../icons/remove.png" alt="remove img" />
@@ -138,6 +151,13 @@ export default function AdminPanelPage() {
                   <td>user2@mail.com</td>
                   <td>2024-05-14</td>
                   <td>
+                    <AdminCombobox 
+                        value={userCategory2} 
+                        onChange={setUserCategory2} 
+                        options={["A", "B"]} 
+                    />
+                  </td>
+                  <td>
                     <div className={styles.removeBtn}>
                       <img src="../../icons/remove.png" alt="remove img" />
                     </div>
@@ -147,6 +167,13 @@ export default function AdminPanelPage() {
                   <td>3</td>
                   <td>user3@mail.com</td>
                   <td>2024-05-20</td>
+                  <td>
+                    <AdminCombobox 
+                        value={userCategory3} 
+                        onChange={setUserCategory3} 
+                        options={["A", "B"]} 
+                    />
+                  </td>
                   <td>
                     <div className={styles.removeBtn}>
                       <img src="../../icons/remove.png" alt="remove img" />

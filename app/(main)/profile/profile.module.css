@@ -9,7 +9,7 @@
 .containerFirst {
     width: 60%;
     padding: 20px 20px 20px 10px;
-    box-shadow: 1px 1px 3px #5a5a5a;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
     min-height: 91dvh;
     z-index: 100;
     transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
