@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import styles from "../addUnit.module.css";
+import { useState } from "react";
+import styles from "../../add-unit/addUnit.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 
-export default function Page() {
+export default function EditHeatPumpModPage() {
     const [activeTab, setActiveTab] = useState("model");
+    const [selectedMod, setSelectedMod] = useState("Select Mod");
     const [unitType, setUnitType] = useState("air_to_water");
     const [unitMod, setUnitMod] = useState("cooling");
     const [compressor, setCompressor] = useState('Select Compressor');
@@ -15,16 +16,18 @@ export default function Page() {
     const [reversingValve, setReversingValve] = useState('Select Reversing Valve');
     const [chasis, setChasis] = useState('Select Chasis');
     const [refrigerant, setRefrigerant] = useState('Select Refrigerant');
+    const [heatPump, setHeatPump] = useState('Select Heat Pump');
 
     return (
         <div className={styles.sectionsContainer}>
-            <div className={styles.sectionContent}>
+            <div className={styles.sectionContent} style={{ maxWidth: "800px", flex: "none" }}>
+                
                 <div className={styles.breadcrumbContainer}>
                     <span 
                         className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`}
                         onClick={() => setActiveTab('model')}
                     >
-                        Model Information
+                        Model Details
                     </span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
                     <span 
@@ -44,22 +47,27 @@ export default function Page() {
 
                 <div className={styles.horizontalSeperator}></div>
 
-                <div className={styles.splitContent}>
-                    <div className={styles.leftContent}>
+                
                         <div className={styles.formSection}>
                             {activeTab === 'model' && (
                                 <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input type="text" className={styles.inputElement} placeholder="Enter model name" />
+                                        <label>Heat Pump</label>
+                                        <Combobox 
+                                            options={["Select Heat Pump", "Option 1"]}
+                                            value={heatPump}
+                                            onChange={setHeatPump}
+                                            className={`${styles.comboBox} ${heatPump.startsWith('Select') ? styles.placeholderText : ''}`}
+                                            containerClassName={styles.comboboxContainerOverride}
+                                        />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Type</label>
+                                        <label>Heat Pump Mod</label>
                                         <Combobox 
-                                            options={["Air to water", "Water to water"]}
-                                            value={unitType === "air_to_water" ? "Air to water" : "Water to water"}
-                                            onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")}
-                                            className={styles.comboBox}
+                                            options={["Select Mod", "Option 1"]}
+                                            value={selectedMod}
+                                            onChange={setSelectedMod}
+                                            className={`${styles.comboBox} ${selectedMod.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
@@ -252,74 +260,37 @@ export default function Page() {
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    <div className={styles.seperator}></div>
+                        <div className={styles.stepNavContainer} style={{ marginTop: "25px" }}>
+                            <div className={styles.stepNavLeft}>
+                                {activeTab !== 'model' && (
+                                    <button 
+                                        className={styles.stepBtn} 
+                                        onClick={() => setActiveTab(activeTab === 'tech' ? 'calc' : 'model')}
+                                    >
+                                        Previous
+                                    </button>
+                                )}
+                                {activeTab !== 'tech' && (
+                                    <button 
+                                        className={styles.stepBtn} 
+                                        onClick={() => setActiveTab(activeTab === 'model' ? 'calc' : 'tech')}
+                                    >
+                                        Next
+                                    </button>
+                                )}
+                            </div>
+                            {activeTab === 'tech' && (
+                                <div className={styles.stepNavRight}>
+                                    <button className={styles.cancelBtn}>Cancel</button>
+                                    <button className={styles.saveBtn}>Save Details</button>
+                                </div>
+                            )}
+                        </div>
+
                     
-                    <div className={styles.rightContent}>
-                        <div className={styles.uploadSection}>
-                    <div className={`${styles.uploadContainer} ${styles.imgContainer}`}>
-                        Upload Image
-                        <div className={styles.inputContainer}>
-                            <input type="file" accept="image/*" multiple className={styles.fileInput} id="image" />
-                            <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Images" />
-                            <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Images" />
-                        </div>
-                    </div>
-                    <div className={`${styles.drawingContainer} ${styles.uploadContainer}`}>
-                        Upload Drawing
-                        <div className={styles.inputContainer}>
-                            <input type="file" accept=".pdf,.dwg,.dxf" multiple className={styles.fileInput} id="drawing" />
-                            <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Drawings" />
-                            <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Drawings" />
-                        </div>
-                    </div>
-                    <div className={`${styles.docContainer} ${styles.uploadContainer}`}>
-                        Upload File
-                        <div className={styles.inputContainer}>
-                            <input type="file" accept=".pdf,.doc,.docx" multiple className={styles.fileInput} />
-                            <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Documents" id="doc" />
-                            <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Documents" />
-                        </div>
-                    </div>
-                    <div className={`${styles.iconContainer} ${styles.uploadContainer}`}>
-                        Upload Icon
-                        <div className={styles.inputContainer}>
-                            <input type="file" accept="image/png, image/svg+xml, .ico" multiple className={styles.fileInput} />
-                            <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Icons" id="icon" />
-                            <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Icons" />
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.stepNavContainer}>
-                    <div className={styles.stepNavLeft}>
-                        {activeTab !== 'model' && (
-                            <button 
-                                className={styles.stepBtn} 
-                                onClick={() => setActiveTab(activeTab === 'tech' ? 'calc' : 'model')}
-                            >
-                                Previous
-                            </button>
-                        )}
-                        {activeTab !== 'tech' && (
-                            <button 
-                                className={styles.stepBtn} 
-                                onClick={() => setActiveTab(activeTab === 'model' ? 'calc' : 'tech')}
-                            >
-                                Next
-                            </button>
-                        )}
-                    </div>
-                    {activeTab === 'tech' && (
-                        <div className={styles.stepNavRight}>
-                            <button className={styles.saveBtn}>Add Unit</button>
-                        </div>
-                    )}
-                </div>
-                </div>
-            </div>
 
-        </div>
+            </div>
         </div>
     );
 }

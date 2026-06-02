@@ -42,12 +42,8 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     }, [isSidebarOpen]);
 
     const handleOptionClick = (path: string, keepOpen: boolean = false) => {
-        if (keepOpen) {
-            if (window.innerWidth >= 1024 && !isSidebarOpen) {
-                setIsSidebarOpen(true);
-            }
-        } else {
-            if (window.innerWidth < 1024 && isSidebarOpen) {
+        if (!keepOpen) {
+            if (window.innerWidth < 1200 && isSidebarOpen) {
                 setIsSidebarOpen(false);
             }
         }

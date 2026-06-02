@@ -29,12 +29,6 @@
     }
 }
 
-@media (min-width: 1024px) {
-    .containerFirst {
-        width: 30%;
-    }
-}
-
 .containerFirstClosed {
     width: 80px;
     padding: 20px 10px;
@@ -367,7 +361,8 @@
 }
 
 .sidebarPlaceholder {
-    width: 80px;
+    display: none;
+    width: 0;
     flex-shrink: 0;
 }
 
@@ -383,33 +378,25 @@
 }
 
 @media (min-width: 1200px) {
-    .sidebarPlaceholder {
-        display: none !important;
-    }
-
     .overlay {
         display: none !important;
     }
 }
 
-@media (max-width: 1023px) {
-    .sidebarPlaceholder {
-        display: none !important;
-    }
-
+@media (max-width: 1199px) {
     .containerFirst {
         position: fixed !important;
         top: 11vh !important;
         height: 89dvh;
         z-index: 990;
         overflow-y: auto;
-        overflow-x: hidden;
         transform: translateX(0);
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), width 0.6s cubic-bezier(0.16, 1, 0.3, 1), padding 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .containerFirstClosed {
         transform: translateX(-150vw) !important;
+        width: 60% !important;
     }
 
     .overlay {
@@ -417,5 +404,29 @@
         top: 11vh !important;
         height: 89dvh;
         z-index: 980;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .containerFirst {
+        top: 9vh !important;
+        height: 91dvh;
+    }
+
+    .overlay {
+        top: 9vh !important;
+        height: 91dvh;
+    }
+}
+
+@media (max-width: 1199px) and (orientation: landscape) {
+    .containerFirst {
+        top: 12dvh !important;
+        height: 88dvh !important;
+    }
+
+    .overlay {
+        top: 12dvh !important;
+        height: 88dvh !important;
     }
 }

@@ -11,6 +11,7 @@
     align-items: center;
     padding: 0 10px;
     transition: transform 0.3s ease-in-out;
+
 }
 
 .navHidden {
@@ -225,7 +226,7 @@
     margin: 5px 0;
 }
 
-@media screen and (max-width: 1023px) {
+@media screen and (max-width: 1199px) {
     .desktopUserIcon {
         display: none;
     }
@@ -304,7 +305,7 @@
 
 @media screen and (orientation: landscape) {
     .nav {
-        height: 100px;
+        height: 12dvh;
     }
 }
 

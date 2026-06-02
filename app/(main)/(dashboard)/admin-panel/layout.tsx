@@ -58,12 +58,8 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
     }, [isSidebarOpen]);
 
     const handleOptionClick = (path: string, isParentWithChildren: boolean = false) => {
-        if (isParentWithChildren) {
-            if (window.innerWidth >= 1024 && !isSidebarOpen) {
-                setIsSidebarOpen(true);
-            }
-        } else {
-            if (window.innerWidth < 1024 && isSidebarOpen) {
+        if (!isParentWithChildren) {
+            if (window.innerWidth < 1200 && isSidebarOpen) {
                 setIsSidebarOpen(false);
             }
         }
@@ -154,9 +150,23 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname.includes('/add-unit/heat-pump') ? styles.subOptionActive : ''}`}
-                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump'); }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-model'); }}
                                     >
                                         <p>Heat Pump</p>
+                                    </div>
+                                    <div 
+                                        className={`${styles.subOption} ${pathname === '/admin-panel/add-unit/heat-pump-model' ? styles.subOptionActive : ''}`}
+                                        style={{ paddingLeft: '40px' }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-model'); }}
+                                    >
+                                        <p>Model</p>
+                                    </div>
+                                    <div 
+                                        className={`${styles.subOption} ${pathname === '/admin-panel/add-unit/heat-pump-mod' ? styles.subOptionActive : ''}`}
+                                        style={{ paddingLeft: '40px' }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-mod'); }}
+                                    >
+                                        <p>Mod</p>
                                     </div>
                                 </div>
                             </div>
@@ -197,9 +207,23 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname.includes('/edit-unit/heat-pump') ? styles.subOptionActive : ''}`}
-                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump'); }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-model'); }}
                                     >
                                         <p>Heat Pump</p>
+                                    </div>
+                                    <div 
+                                        className={`${styles.subOption} ${pathname === '/admin-panel/edit-unit/heat-pump-model' ? styles.subOptionActive : ''}`}
+                                        style={{ paddingLeft: '40px' }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-model'); }}
+                                    >
+                                        <p>Model</p>
+                                    </div>
+                                    <div 
+                                        className={`${styles.subOption} ${pathname === '/admin-panel/edit-unit/heat-pump-mod' ? styles.subOptionActive : ''}`}
+                                        style={{ paddingLeft: '40px' }}
+                                        onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-mod'); }}
+                                    >
+                                        <p>Mod</p>
                                     </div>
                                 </div>
                             </div>
@@ -288,10 +312,10 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                         )}
                     </div>
 
-                    <div className={styles.divider} style={{ margin: '20px 0' }}></div>
+                    <div className={`${styles.divider} ${styles.mobileLogout}`} style={{ margin: '20px 0' }}></div>
                     
                     <div
-                        className={styles.option}
+                        className={`${styles.option} ${styles.mobileLogout}`}
                         onClick={() => {
                             // Handle logout logic here
                             console.log("Logout clicked");
