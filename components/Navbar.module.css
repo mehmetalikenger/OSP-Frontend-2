@@ -263,7 +263,7 @@
 
 @media screen and (min-width: 1024px) {
     .nav {
-        height: 9vh;
+        height: 7vh;
     }
 
     .navContent {
@@ -293,6 +293,10 @@
 
 @media screen and (min-width: 1200px) {
 
+    .nav {
+        height: 8vh;
+    }
+
     .navButtons {
         gap: 40px;
     }
@@ -303,7 +307,7 @@
     }
 }
 
-@media screen and (orientation: landscape) {
+@media screen and (max-width: 1199px) and (orientation: landscape) {
     .nav {
         height: 12dvh;
     }

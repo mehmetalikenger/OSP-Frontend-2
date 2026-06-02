@@ -23,6 +23,10 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         activeOption = "Add Component";
     } else if (pathname.includes("/edit-component")) {
         activeOption = "Edit Component";
+    } else if (pathname.includes("/analysis")) {
+        activeOption = "Analytics";
+    } else if (pathname.includes("/projects")) {
+        activeOption = "Projects";
     }
 
     useEffect(() => {
@@ -310,6 +314,44 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    <div className={styles.divider}></div>
+
+                    {/* ANALYTICS */}
+                    <div
+                        className={`${styles.option} ${activeOption === "Analytics" ? styles.optionActive : ""}`}
+                        onClick={() => handleOptionClick("/admin-panel/analysis")}
+                    >
+                        <div className={styles.optionIcon}>
+                            {activeOption === "Analytics" ? (
+                                <img src="/icons/chart-filled.png" alt="Analytics" />
+                            ) : (
+                                <>
+                                    <img className={styles.lightIcon} src="/icons/chart-light.png" alt="Analytics" />
+                                    <img className={styles.darkIcon} src="/icons/chart-dark.png" alt="Analytics" />
+                                </>
+                            )}
+                        </div>
+                        <p>Analytics</p>
+                    </div>
+
+                    {/* PROJECTS */}
+                    <div
+                        className={`${styles.option} ${activeOption === "Projects" ? styles.optionActive : ""}`}
+                        onClick={() => handleOptionClick("/admin-panel/projects")}
+                    >
+                        <div className={styles.optionIcon}>
+                            {activeOption === "Projects" ? (
+                                <img src="/icons/project-filled.png" alt="Projects" />
+                            ) : (
+                                <>
+                                    <img className={styles.lightIcon} src="/icons/project-light.png" alt="Projects" />
+                                    <img className={styles.darkIcon} src="/icons/project-dark.png" alt="Projects" />
+                                </>
+                            )}
+                        </div>
+                        <p>Projects</p>
                     </div>
 
                     <div className={`${styles.divider} ${styles.mobileLogout}`} style={{ margin: '20px 0' }}></div>

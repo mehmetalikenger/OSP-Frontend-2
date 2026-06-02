@@ -1,0 +1,213 @@
+.container {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+.card {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+    overflow: hidden;
+}
+
+:global(.dark-mode) .card {
+    background-color: #272727;
+    border-color: #4f4f4f;
+}
+
+.pageHeader {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+:global(.dark-mode) .pageHeader {
+    border-bottom-color: #4f4f4f;
+}
+
+.pageTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #282f68;
+    margin: 0 0 5px 0;
+}
+
+:global(.dark-mode) .pageTitle {
+    color: #c0c0c0;
+}
+
+.totalCount {
+    font-size: 0.95rem;
+    color: #666;
+    margin: 0;
+}
+
+:global(.dark-mode) .totalCount {
+    color: #aeaeae;
+}
+
+/* Content Grid & Layout */
+.contentGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Filters Layout (Mobile slidable) */
+.filtersContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+:global(.dark-mode) .filtersContainer {
+    border-color: #4f4f4f;
+}
+
+/* Hide scrollbar for cleaner look, but keep it functional */
+.filtersContainer::-webkit-scrollbar {
+    height: 6px;
+}
+.filtersContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+.filtersContainer::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+    border-radius: 4px;
+}
+:global(.dark-mode) .filtersContainer::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+.filterItem {
+    flex: 0 0 auto;
+    width: 220px; /* Equal and wider size */
+}
+
+.filterCombobox {
+    width: 100% !important;
+}
+
+.textInput {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+    border: 1px solid #C2C2C2;
+    border-radius: 5px;
+    background-color: white;
+    color: #323232;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+:global(.dark-mode) .textInput {
+    background-color: #383838;
+    border-color: #5C5C5C;
+    color: #d6d6d6;
+}
+
+.filterLabel {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 5px;
+    padding-left: 2px;
+}
+
+:global(.dark-mode) .filterLabel {
+    color: #aeaeae;
+}
+
+/* Table Styles */
+.tableWrapper {
+    overflow-x: auto;
+    min-height: 500px;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 800px;
+}
+
+.dataTable th,
+.dataTable td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eeeeee;
+    font-size: 0.9rem;
+}
+
+.dataTable th {
+    font-weight: 600;
+    color: #444;
+    background-color: #f9f9f9;
+}
+
+.dataTable td {
+    color: #333;
+}
+
+.dataTable tbody tr:hover {
+    background-color: rgba(255, 0, 0, 0.08); /* Faint red for light mode */
+}
+
+:global(.dark-mode) .dataTable th,
+:global(.dark-mode) .dataTable td {
+    border-bottom-color: #444;
+}
+
+:global(.dark-mode) .dataTable th {
+    background-color: #333;
+    color: #c0c0c0;
+}
+
+:global(.dark-mode) .dataTable td {
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .dataTable tbody tr:hover {
+    background-color: rgba(255, 165, 0, 0.15); /* Faint orange for dark mode */
+}
+
+@media screen and (min-width: 768px) {
+    .container {
+        padding: 40px;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .contentGrid {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 40px;
+    }
+
+    .filtersContainer {
+        flex-direction: column;
+        overflow-x: visible;
+        padding-bottom: 0;
+        border-bottom: none;
+        border-right: 1px solid #e0e0e0;
+        padding-right: 30px;
+    }
+
+    :global(.dark-mode) .filtersContainer {
+        border-right-color: #4f4f4f;
+    }
+
+    .filterItem {
+        width: 100%;
+    }
+}

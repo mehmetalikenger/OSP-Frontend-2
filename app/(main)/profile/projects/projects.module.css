@@ -18,13 +18,13 @@
 
 .arrow img {
     width: 20px;
-    rotate: 90deg;
+    rotate: -90deg;
     cursor: pointer;
     transition: rotate 0.3s ease;
 }
 
 .arrowOpen img {
-    rotate: -90deg;
+    rotate: 90deg;
 }
 
 .projectHeader {

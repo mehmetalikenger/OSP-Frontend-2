@@ -407,7 +407,7 @@
     }
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 768px) and (max-width: 1023px) {
     .containerFirst {
         top: 9vh !important;
         height: 91dvh;
@@ -416,6 +416,18 @@
     .overlay {
         top: 9vh !important;
         height: 91dvh;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .containerFirst {
+        top: 7vh !important;
+        height: 93dvh;
+    }
+
+    .overlay {
+        top: 7vh !important;
+        height: 93dvh;
     }
 }
 
