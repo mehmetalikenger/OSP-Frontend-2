@@ -39,21 +39,29 @@
     color: #323232;
 }
 
-.field input {
+.field input,
+.field select {
     font-size: 0.9rem;
-    padding: 5px;
+    padding: 5px 10px;
     outline: none;
     border: 1px solid #C2C2C2;
     border-radius: 5px;
+    height: 40px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: white;
 }
 
 .adressInput {
     font-size: 0.9rem;
-    padding: 5px;
+    padding: 5px 10px;
     outline: none;
     border: 1px solid #C2C2C2;
     border-radius: 5px;
     height: 100px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: white;
 }
 
 .saveButton {
@@ -120,10 +128,78 @@
 }
 
 :global(.dark-mode) .field input,
+:global(.dark-mode) .field select,
 :global(.dark-mode) .adressInput {
     background-color: #5C5C5C;
     border: none;
     color: #d6d6d6;
+}
+
+:global(.dark-mode) .field select option {
+    background-color: #5C5C5C;
+    color: #d6d6d6;
+}
+
+:global(.dark-mode .react-tel-input .form-control) {
+    background-color: #5C5C5C !important;
+    border: none !important;
+    color: #d6d6d6 !important;
+    box-shadow: none !important;
+}
+
+:global(.dark-mode .react-tel-input .form-control:focus) {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+:global(.dark-mode .react-tel-input .flag-dropdown) {
+    background-color: #5C5C5C !important;
+    border: none !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+:global(.dark-mode .react-tel-input .selected-flag) {
+    background-color: #5C5C5C !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+:global(.dark-mode .react-tel-input .selected-flag .arrow) {
+    border-top-color: #dcdcdc !important;
+}
+
+:global(.dark-mode .react-tel-input .selected-flag .arrow.up) {
+    border-top-color: transparent !important;
+    border-bottom-color: #dcdcdc !important;
+}
+
+:global(.dark-mode .react-tel-input .selected-flag:hover),
+:global(.dark-mode .react-tel-input .selected-flag:focus),
+:global(.dark-mode .react-tel-input .flag-dropdown.open .selected-flag) {
+    background-color: #474747 !important;
+}
+
+:global(.dark-mode .react-tel-input) {
+    border: none !important;
+    outline: none !important;
+}
+
+:global(.dark-mode .react-tel-input .country-list) {
+    background-color: #383838 !important;
+    color: #d6d6d6 !important;
+    border: 1px solid #5C5C5C !important;
+}
+
+:global(.dark-mode .react-tel-input .country-list .country:hover),
+:global(.dark-mode .react-tel-input .country-list .country.highlight) {
+    background-color: #5C5C5C !important;
+}
+
+:global(.dark-mode .react-tel-input .country-list .country-name) {
+    color: #d6d6d6 !important;
+}
+
+:global(.dark-mode .react-tel-input .country-list .dial-code) {
+    color: #a0a0a0 !important;
 }
 
 :global(.dark-mode) .line {

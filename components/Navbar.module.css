@@ -194,9 +194,12 @@
     background-color: #f5f5f5;
 }
 
+.dropdownItem:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
 .dropdownItem:first-child {
     border-radius: 5px 5px 0 0;
-    border-bottom: 1px solid #eee;
 }
 
 .dropdownItem:last-child {
@@ -327,6 +330,6 @@
     background-color: #474747;
 }
 
-:global(.dark-mode) .dropdownItem:first-child {
+:global(.dark-mode) .dropdownItem:not(:last-child) {
     border-bottom: 1px solid #444;
 }

@@ -524,6 +524,7 @@
     width: 100%;
     overflow-x: auto;
     margin-top: 20px;
+    padding-bottom: 180px;
 }
 
 .table {

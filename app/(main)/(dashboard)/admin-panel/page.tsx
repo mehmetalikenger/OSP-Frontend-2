@@ -1,19 +1,153 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./adminPanel.module.css"
+import toastStyles from "./toast.module.css"
 import AdminCombobox from "./AdminCombobox";
+
+type UserProfile = {
+  id: number;
+  email: string;
+  category: string;
+  createdAt: string;
+};
 
 export default function AdminPanelPage() {
   const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [isAddingUser, setIsAddingUser] = useState(false);
   
-  const [userCategory1, setUserCategory1] = useState("A");
-  const [userCategory2, setUserCategory2] = useState("B");
-  const [userCategory3, setUserCategory3] = useState("A");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+
+  const [admins, setAdmins] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+
+  const [toastMessage, setToastMessage] = useState("");
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/admin/users", { credentials: 'include', cache: 'no-store' });
+      if (res.ok) {
+        setUsers(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/admin/admins", { credentials: 'include', cache: 'no-store' });
+      if (res.ok) {
+        setAdmins(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    fetchAdmins();
+  }, []);
+
+  const handleAddAdmin = async () => {
+    if (!adminEmail) return;
+    try {
+      const res = await fetch("http://localhost:8080/admin/admin-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({ email: adminEmail })
+      });
+      if (res.ok) {
+        showToast("Admin added successfully!");
+        setAdminEmail("");
+        setIsAddingAdmin(false);
+        fetchAdmins();
+      } else {
+        alert("Failed to add admin.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Network error.");
+    }
+  };
+
+  const handleAddUser = async () => {
+    if (!userEmail) return;
+    try {
+      const res = await fetch("http://localhost:8080/admin/user-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({ email: userEmail, category: "A" })
+      });
+      if (res.ok) {
+        showToast("User added successfully!");
+        setUserEmail("");
+        setIsAddingUser(false);
+        fetchUsers();
+      } else {
+        alert("Failed to add user.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Network error.");
+    }
+  };
+
+  const handleDeleteUser = async (id: number, type: 'admin' | 'user') => {
+    try {
+      const res = await fetch(`http://localhost:8080/admin/user/${id}`, {
+        method: "DELETE",
+        credentials: 'include'
+      });
+      if (res.ok) {
+        showToast(`${type === 'admin' ? 'Admin' : 'User'} removed.`);
+        if (type === 'admin') fetchAdmins();
+        else fetchUsers();
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
+  const handleCategoryChange = async (userId: number, newCategory: string) => {
+    try {
+      const res = await fetch(`http://localhost:8080/admin/update-category`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({ userId: userId.toString(), category: newCategory })
+      });
+      if (res.ok) {
+        showToast("Category updated.");
+        fetchUsers(); // Refresh to ensure state consistency
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? dateStr : d.toISOString().split('T')[0];
+  };
 
   return (
     <div className={styles.sectionsContainer}>
+      {toastMessage && (
+        <div className={toastStyles.toast}>
+            {toastMessage}
+        </div>
+      )}
       <div className={styles.section}>
         <div className={styles.sectionContent}>
           <div className={styles.sectionTop}>
@@ -26,8 +160,14 @@ export default function AdminPanelPage() {
             </div>
             {isAddingAdmin ? (
               <div className={styles.addInputContainer}>
-                <input type="email" placeholder="Enter admin email..." className={styles.addInput} />
-                <button className={styles.confirmBtn} onClick={() => setIsAddingAdmin(false)}>
+                <input 
+                  type="email" 
+                  placeholder="Enter admin email..." 
+                  className={styles.addInput}
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                />
+                <button className={styles.confirmBtn} onClick={handleAddAdmin}>
                   <img src="../../icons/tick-light.png" alt="confirm" className={styles.lightIcon} />
                   <img src="../../icons/tick-dark.png" alt="confirm" className={styles.darkIcon} />
                 </button>
@@ -53,36 +193,23 @@ export default function AdminPanelPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>admin1@offitec.com</td>
-                  <td>2024-05-12</td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>admin2@offitec.com</td>
-                  <td>2024-05-14</td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>admin3@offitec.com</td>
-                  <td>2024-05-20</td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
+                {admins.map((admin, index) => (
+                  <tr key={admin.id}>
+                    <td>{index + 1}</td>
+                    <td>{admin.email}</td>
+                    <td>{formatDate(admin.createdAt)}</td>
+                    <td>
+                      <div className={styles.removeBtn} onClick={() => handleDeleteUser(admin.id, 'admin')}>
+                        <img src="../../icons/remove.png" alt="remove img" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {admins.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: "center" }}>No admins found.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -101,8 +228,14 @@ export default function AdminPanelPage() {
             </div>
             {isAddingUser ? (
               <div className={styles.addInputContainer}>
-                <input type="email" placeholder="Enter user email..." className={styles.addInput} />
-                <button className={styles.confirmBtn} onClick={() => setIsAddingUser(false)}>
+                <input 
+                  type="email" 
+                  placeholder="Enter user email..." 
+                  className={styles.addInput}
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                />
+                <button className={styles.confirmBtn} onClick={handleAddUser}>
                   <img src="../../icons/tick-light.png" alt="confirm" className={styles.lightIcon} />
                   <img src="../../icons/tick-dark.png" alt="confirm" className={styles.darkIcon} />
                 </button>
@@ -129,57 +262,30 @@ export default function AdminPanelPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>user1@mail.com</td>
-                  <td>2024-05-12</td>
-                  <td>
-                    <AdminCombobox 
-                        value={userCategory1} 
-                        onChange={setUserCategory1} 
-                        options={["A", "B"]} 
-                    />
-                  </td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>user2@mail.com</td>
-                  <td>2024-05-14</td>
-                  <td>
-                    <AdminCombobox 
-                        value={userCategory2} 
-                        onChange={setUserCategory2} 
-                        options={["A", "B"]} 
-                    />
-                  </td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>user3@mail.com</td>
-                  <td>2024-05-20</td>
-                  <td>
-                    <AdminCombobox 
-                        value={userCategory3} 
-                        onChange={setUserCategory3} 
-                        options={["A", "B"]} 
-                    />
-                  </td>
-                  <td>
-                    <div className={styles.removeBtn}>
-                      <img src="../../icons/remove.png" alt="remove img" />
-                    </div>
-                  </td>
-                </tr>
+                {users.map((user, index) => (
+                  <tr key={user.id}>
+                    <td>{index + 1}</td>
+                    <td>{user.email}</td>
+                    <td>{formatDate(user.createdAt)}</td>
+                    <td>
+                      <AdminCombobox 
+                          value={user.category || "A"} 
+                          onChange={(val) => handleCategoryChange(user.id, val)} 
+                          options={["A", "B", "C"]} 
+                      />
+                    </td>
+                    <td>
+                      <div className={styles.removeBtn} onClick={() => handleDeleteUser(user.id, 'user')}>
+                        <img src="../../icons/remove.png" alt="remove img" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center" }}>No users found.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -9,9 +9,10 @@ interface ComboboxProps {
     options: string[];
     className?: string;
     containerClassName?: string;
+    disabled?: boolean;
 }
 
-export default function AdminCombobox({ value, onChange, options, className, containerClassName }: ComboboxProps) {
+export default function AdminCombobox({ value, onChange, options, className, containerClassName, disabled }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -34,12 +35,13 @@ export default function AdminCombobox({ value, onChange, options, className, con
     };
 
     return (
-        <div className={`${styles.comboboxContainer} ${containerClassName || ""}`} ref={containerRef}>
-            <div className={styles.inputWrapper} onClick={() => setIsOpen(!isOpen)}>
+        <div className={`${styles.comboboxContainer} ${containerClassName || ""} ${disabled ? styles.disabled : ""}`} ref={containerRef}>
+            <div className={styles.inputWrapper} onClick={() => !disabled && setIsOpen(!isOpen)}>
                 <input
                     type="text"
                     value={value}
                     readOnly
+                    disabled={disabled}
                     className={`${styles.comboboxInput} ${className || ""}`}
                 />
                 <img

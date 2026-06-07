@@ -13,6 +13,13 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         window.scrollTo(0, 0);
     }, [pathname]);
 
+    useEffect(() => {
+        const role = localStorage.getItem('userRole');
+        if (role !== 'ADMIN') {
+            router.push('/chiller');
+        }
+    }, [router]);
+
     // Determine the active top-level option based on pathname
     let activeOption = "Home";
     if (pathname.includes("/add-unit")) {
@@ -358,9 +365,13 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                     
                     <div
                         className={`${styles.option} ${styles.mobileLogout}`}
-                        onClick={() => {
-                            // Handle logout logic here
-                            console.log("Logout clicked");
+                        onClick={async () => {
+                            try {
+                                await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' });
+                            } catch (e) { console.error(e); }
+                            localStorage.removeItem('userId');
+                            localStorage.removeItem('userRole');
+                            window.location.href = '/login';
                         }}
                     >
                         <p style={{ color: '#d9534f', fontWeight: 'bold' }}>Log out</p>

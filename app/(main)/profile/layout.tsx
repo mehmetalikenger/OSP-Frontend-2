@@ -152,9 +152,13 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                     
                     <div
                         className={styles.option}
-                        onClick={() => {
-                            // Handle logout logic here
-                            console.log("Logout clicked");
+                        onClick={async () => {
+                            try {
+                                await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' });
+                            } catch (e) { console.error(e); }
+                            localStorage.removeItem('userId');
+                            localStorage.removeItem('userRole');
+                            window.location.href = '/login';
                         }}
                         style={{ marginTop: 'auto' }}
                     >

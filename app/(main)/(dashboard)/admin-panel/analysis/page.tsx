@@ -63,7 +63,7 @@ export default function AnalysisPage() {
                 <div className={styles.card}>
                     <h2 className={styles.cardTitle}>Unit Distribution Ratio (Views)</h2>
                     <div className={styles.chartContainer}>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                             <PieChart>
                                 <Pie
                                     data={pieData}
@@ -71,7 +71,7 @@ export default function AnalysisPage() {
                                     cy="50%"
                                     outerRadius={100}
                                     dataKey="value"
-                                    label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                                    label={({ percent = 0 }) => `${(percent * 100).toFixed(0)}%`}
                                     labelLine={false}
                                     stroke="var(--chart-border)"
                                 >

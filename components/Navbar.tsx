@@ -10,6 +10,26 @@ export default function Navbar() {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
 
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        setUserRole(localStorage.getItem('userRole'));
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await fetch('http://localhost:8080/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (e) {
+            console.error("Logout error", e);
+        }
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login';
+    };
+
     const pathname = usePathname();
     const isAdmin = pathname.includes('/admin-panel');
     const isProfile = pathname.includes('/profile');
@@ -126,7 +146,10 @@ export default function Navbar() {
                         {isUserMenuOpen && (
                             <div className={styles.dropdownMenu}>
                                 <Link href="/profile" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Profile</Link>
-                                <button className={styles.dropdownItem}>Log out</button>
+                                {userRole === 'ADMIN' && (
+                                    <Link href="/admin-panel" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Admin Panel</Link>
+                                )}
+                                <button className={styles.dropdownItem} onClick={handleLogout}>Log out</button>
                             </div>
                         )}
                     </div>
