@@ -29,6 +29,12 @@
     }
 }
 
+@media (min-width: 1024px) {
+    .mobileLogout {
+        display: none !important;
+    }
+}
+
 .containerFirstClosed {
     width: 80px;
     padding: 20px 10px;
@@ -356,7 +362,8 @@
 
     .containerFirst,
     .containerFirstClosed {
-        width: 12% !important;
+        width: 16% !important;
+        max-width: 350px;
     }
 }
 

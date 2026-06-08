@@ -6,6 +6,7 @@ import { Country, State } from "country-state-city";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
+import { fetchWithAuth } from "../../../../lib/api";
 
 export default function AccountSettingsPage() {
     const [userId, setUserId] = useState<string | null>(null);
@@ -21,6 +22,8 @@ export default function AccountSettingsPage() {
     const [cityName, setCityName] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [infoChanged, setInfoChanged] = useState(false);
     const [addressChanged, setAddressChanged] = useState(false);
@@ -43,7 +46,7 @@ export default function AccountSettingsPage() {
         const id = localStorage.getItem('userId');
         if (id) {
             setUserId(id);
-            fetch(`http://localhost:8080/user/${id}`, { credentials: 'include' })
+            fetchWithAuth(`http://localhost:8080/user/${id}`, { credentials: 'include' })
                 .then(res => res.json())
                 .then(data => {
                     setUsername(data.username || "");
@@ -53,9 +56,14 @@ export default function AccountSettingsPage() {
                     setAddress(data.address || "");
                     
                     if (data.country) {
-                        setCountryName(data.country);
-                        const c = countries.find(c => c.name === data.country);
-                        if (c) setCountryIsoCode(c.isoCode);
+                        const c = countries.find(c => c.isoCode === data.country);
+                        if (c) {
+                            setCountryName(c.name);
+                            setCountryIsoCode(c.isoCode);
+                        } else {
+                            setCountryName(data.country);
+                            setCountryIsoCode(data.country);
+                        }
                     }
                     setCityName(data.city || "");
                 })
@@ -81,7 +89,7 @@ export default function AccountSettingsPage() {
                 ? { id: userId, username, email, phone, surname } 
                 : { id: userId, username, email, phone };
                 
-            const res = await fetch(url, {
+            const res = await fetchWithAuth(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -100,7 +108,7 @@ export default function AccountSettingsPage() {
 
     const handleSaveAddress = async () => {
         try {
-            const res = await fetch(`http://localhost:8080/user/update-adress`, {
+            const res = await fetchWithAuth(`http://localhost:8080/user/update-adress`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -125,7 +133,7 @@ export default function AccountSettingsPage() {
         }
         setPasswordError(false);
         try {
-            const res = await fetch(`http://localhost:8080/user/update-password`, {
+            const res = await fetchWithAuth(`http://localhost:8080/user/update-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -236,23 +244,33 @@ export default function AccountSettingsPage() {
                 <div className={styles.containerFields}>
                     <div className={styles.field}>
                         <label htmlFor="password">Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            value={password} 
-                            style={passwordError ? { border: '1px solid red' } : {}}
-                            onChange={(e) => { setPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
-                        />
+                        <div className={styles.passwordArea}>
+                            <input 
+                                type={showPassword ? "text" : "password"} 
+                                id="password" 
+                                value={password} 
+                                style={passwordError ? { border: '1px solid red' } : {}}
+                                onChange={(e) => { setPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
+                            />
+                            <div className={styles.passwordEye} onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
+                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                            </div>
+                        </div>
                     </div>
                     <div className={styles.field}>
                         <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input 
-                            type="password" 
-                            id="confirmPassword" 
-                            value={confirmPassword} 
-                            style={passwordError ? { border: '1px solid red' } : {}}
-                            onChange={(e) => { setConfirmPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
-                        />
+                        <div className={styles.passwordArea}>
+                            <input 
+                                type={showConfirmPassword ? "text" : "password"} 
+                                id="confirmPassword" 
+                                value={confirmPassword} 
+                                style={passwordError ? { border: '1px solid red' } : {}}
+                                onChange={(e) => { setConfirmPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
+                            />
+                            <div className={styles.passwordEye} onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ cursor: 'pointer' }}>
+                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showConfirmPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                            </div>
+                        </div>
                         {passwordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Passwords do not match.</span>}
                     </div>
                 </div>

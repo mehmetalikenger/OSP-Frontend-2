@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "./adminPanel.module.css"
 import toastStyles from "./toast.module.css"
 import AdminCombobox from "./AdminCombobox";
+import { fetchWithAuth } from "../../../../lib/api";
 
 type UserProfile = {
   id: number;
@@ -22,16 +23,16 @@ export default function AdminPanelPage() {
   const [admins, setAdmins] = useState<UserProfile[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
 
-  const [toastMessage, setToastMessage] = useState("");
+  const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), 3000);
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToastInfo({ message: msg, type });
+    setTimeout(() => setToastInfo(null), 3000);
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:8080/admin/users", { credentials: 'include', cache: 'no-store' });
+      const res = await fetchWithAuth("http://localhost:8080/admin/users", { credentials: 'include', cache: 'no-store' });
       if (res.ok) {
         setUsers(await res.json());
       }
@@ -42,7 +43,7 @@ export default function AdminPanelPage() {
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetch("http://localhost:8080/admin/admins", { credentials: 'include', cache: 'no-store' });
+      const res = await fetchWithAuth("http://localhost:8080/admin/admins", { credentials: 'include', cache: 'no-store' });
       if (res.ok) {
         setAdmins(await res.json());
       }
@@ -59,52 +60,52 @@ export default function AdminPanelPage() {
   const handleAddAdmin = async () => {
     if (!adminEmail) return;
     try {
-      const res = await fetch("http://localhost:8080/admin/admin-register", {
+      const res = await fetchWithAuth("http://localhost:8080/admin/admin-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
         body: JSON.stringify({ email: adminEmail })
       });
       if (res.ok) {
-        showToast("Admin added successfully!");
+        showToast("Admin added successfully!", "success");
         setAdminEmail("");
         setIsAddingAdmin(false);
         fetchAdmins();
       } else {
-        alert("Failed to add admin.");
+        showToast("Failed to add admin.", "error");
       }
     } catch (error) {
       console.error(error);
-      alert("Network error.");
+      showToast("Network error.", "error");
     }
   };
 
   const handleAddUser = async () => {
     if (!userEmail) return;
     try {
-      const res = await fetch("http://localhost:8080/admin/user-register", {
+      const res = await fetchWithAuth("http://localhost:8080/admin/user-register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
         body: JSON.stringify({ email: userEmail, category: "A" })
       });
       if (res.ok) {
-        showToast("User added successfully!");
+        showToast("User added successfully!", "success");
         setUserEmail("");
         setIsAddingUser(false);
         fetchUsers();
       } else {
-        alert("Failed to add user.");
+        showToast("Failed to add user.", "error");
       }
     } catch (error) {
       console.error(error);
-      alert("Network error.");
+      showToast("Network error.", "error");
     }
   };
 
   const handleDeleteUser = async (id: number, type: 'admin' | 'user') => {
     try {
-      const res = await fetch(`http://localhost:8080/admin/user/${id}`, {
+      const res = await fetchWithAuth(`http://localhost:8080/admin/user/${id}`, {
         method: "DELETE",
         credentials: 'include'
       });
@@ -120,7 +121,7 @@ export default function AdminPanelPage() {
 
   const handleCategoryChange = async (userId: number, newCategory: string) => {
     try {
-      const res = await fetch(`http://localhost:8080/admin/update-category`, {
+      const res = await fetchWithAuth(`http://localhost:8080/admin/update-category`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
@@ -143,9 +144,9 @@ export default function AdminPanelPage() {
 
   return (
     <div className={styles.sectionsContainer}>
-      {toastMessage && (
-        <div className={toastStyles.toast}>
-            {toastMessage}
+      {toastInfo && (
+        <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
+            {toastInfo.message}
         </div>
       )}
       <div className={styles.section}>
@@ -271,7 +272,8 @@ export default function AdminPanelPage() {
                       <AdminCombobox 
                           value={user.category || "A"} 
                           onChange={(val) => handleCategoryChange(user.id, val)} 
-                          options={["A", "B", "C"]} 
+                          options={["A", "B"]} 
+                          containerClassName={styles.categoryCombobox}
                       />
                     </td>
                     <td>

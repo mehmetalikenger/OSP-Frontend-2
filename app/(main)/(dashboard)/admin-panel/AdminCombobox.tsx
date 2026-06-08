@@ -15,6 +15,7 @@ interface ComboboxProps {
 export default function AdminCombobox({ value, onChange, options, className, containerClassName, disabled }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLUListElement>(null);
 
     // Close dropdown on click outside
     useEffect(() => {
@@ -34,6 +35,30 @@ export default function AdminCombobox({ value, onChange, options, className, con
         setIsOpen(false);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (disabled) return;
+        if (e.key.length === 1) {
+            const letter = e.key.toLowerCase();
+            // Start searching from the next item after the current value, wrapping around
+            const currentIndex = options.indexOf(value);
+            let match = options.slice(currentIndex + 1).find(opt => opt.toLowerCase().startsWith(letter));
+            if (!match) {
+                match = options.find(opt => opt.toLowerCase().startsWith(letter));
+            }
+            
+            if (match) {
+                onChange(match);
+                if (isOpen && listRef.current) {
+                    const index = options.indexOf(match);
+                    const liElement = listRef.current.children[index] as HTMLElement;
+                    if (liElement) {
+                        liElement.scrollIntoView({ block: "nearest" });
+                    }
+                }
+            }
+        }
+    };
+
     return (
         <div className={`${styles.comboboxContainer} ${containerClassName || ""} ${disabled ? styles.disabled : ""}`} ref={containerRef}>
             <div className={styles.inputWrapper} onClick={() => !disabled && setIsOpen(!isOpen)}>
@@ -43,6 +68,7 @@ export default function AdminCombobox({ value, onChange, options, className, con
                     readOnly
                     disabled={disabled}
                     className={`${styles.comboboxInput} ${className || ""}`}
+                    onKeyDown={handleKeyDown}
                 />
                 <img
                     src="/icons/back.png"
@@ -56,7 +82,7 @@ export default function AdminCombobox({ value, onChange, options, className, con
                 />
             </div>
             {isOpen && (
-                <ul className={styles.dropdownList}>
+                <ul className={styles.dropdownList} ref={listRef}>
                     {options.map((option) => (
                         <li
                             key={option}

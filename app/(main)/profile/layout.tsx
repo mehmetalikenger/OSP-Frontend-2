@@ -148,10 +148,10 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                         <p>Account Settings</p>
                     </div>
                     
-                    <div className={styles.optionsLine} style={{ width: '100%', height: '1px', margin: '20px 0' }}></div>
+                    <div className={`${styles.optionsLine} ${styles.mobileLogout}`} style={{ width: '100%', height: '1px', margin: '20px 0' }}></div>
                     
                     <div
-                        className={styles.option}
+                        className={`${styles.option} ${styles.mobileLogout}`}
                         onClick={async () => {
                             try {
                                 await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' });
