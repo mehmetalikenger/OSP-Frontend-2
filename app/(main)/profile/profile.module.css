@@ -293,6 +293,7 @@
         position: static !important;
         width: 18% !important;
         padding: 20px 20px 20px 40px !important;
+        max-width: 300px;
     }
 
     .topIcon {
@@ -363,7 +364,6 @@
     .containerFirst,
     .containerFirstClosed {
         width: 16% !important;
-        max-width: 350px;
     }
 }
 

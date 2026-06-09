@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './login.module.css';
@@ -14,6 +14,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   
   const router = useRouter();
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  useEffect(() => {
+     const params = new URLSearchParams(window.location.search);
+     if (params.get('deleted') === 'true') {
+         setIsDeleted(true);
+     }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +40,24 @@ export default function LoginPage() {
         const data = await res.json();
         localStorage.setItem('userId', data.id);
         localStorage.setItem('userRole', data.role);
-        router.push('/chiller');
+        if (data.reactivated) {
+            router.push('/chiller?reactivated=true');
+        } else {
+            router.push('/chiller');
+        }
       } else {
-        setError('Login failed. Please check your credentials.');
+        try {
+            const errorData = await res.json();
+            if (errorData.message && errorData.message.includes("deleted")) {
+                setError("This account is deleted.");
+            } else if (errorData.error && errorData.error.includes("deleted")) {
+                setError("This account is deleted.");
+            } else {
+                setError('Login failed. Please check your credentials.');
+            }
+        } catch(e) {
+            setError('Login failed. Please check your credentials.');
+        }
       }
     } catch (err) {
       setError('Network error. Please try again later.');
@@ -42,6 +65,20 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  if (isDeleted) {
+    return (
+      <div className={`${styles.container} ${styles.deletedWrapper}`}>
+        <div className={styles.deletedBox}>
+          <h2>Deletion Process Started</h2>
+          <p>Your account deletion process has started. You can reactivate your account by logging in within 30 days.</p>
+          <button onClick={() => window.location.href = '/login'}>
+             Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

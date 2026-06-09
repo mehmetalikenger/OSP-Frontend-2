@@ -20,6 +20,10 @@ export default function AdminPanelPage() {
   const [adminEmail, setAdminEmail] = useState("");
   const [userEmail, setUserEmail] = useState("");
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{id: number, type: 'admin' | 'user', email: string} | null>(null);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+
   const [admins, setAdmins] = useState<UserProfile[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
 
@@ -72,7 +76,18 @@ export default function AdminPanelPage() {
         setIsAddingAdmin(false);
         fetchAdmins();
       } else {
-        showToast("Failed to add admin.", "error");
+        try {
+            const errorData = await res.json();
+            if (errorData.message) {
+                showToast(errorData.message, "error");
+            } else if (errorData.error) {
+                showToast(errorData.error, "error");
+            } else {
+                showToast("Failed to add admin.", "error");
+            }
+        } catch(e) {
+            showToast("Failed to add admin.", "error");
+        }
       }
     } catch (error) {
       console.error(error);
@@ -95,7 +110,18 @@ export default function AdminPanelPage() {
         setIsAddingUser(false);
         fetchUsers();
       } else {
-        showToast("Failed to add user.", "error");
+        try {
+            const errorData = await res.json();
+            if (errorData.message) {
+                showToast(errorData.message, "error");
+            } else if (errorData.error) {
+                showToast(errorData.error, "error");
+            } else {
+                showToast("Failed to add user.", "error");
+            }
+        } catch(e) {
+            showToast("Failed to add user.", "error");
+        }
       }
     } catch (error) {
       console.error(error);
@@ -103,19 +129,32 @@ export default function AdminPanelPage() {
     }
   };
 
-  const handleDeleteUser = async (id: number, type: 'admin' | 'user') => {
+  const openDeleteModal = (id: number, type: 'admin' | 'user', email: string) => {
+    setUserToDelete({ id, type, email });
+    setDeleteConfirmationText("");
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
     try {
-      const res = await fetchWithAuth(`http://localhost:8080/admin/user/${id}`, {
+      const res = await fetchWithAuth(`http://localhost:8080/admin/user/${userToDelete.id}`, {
         method: "DELETE",
         credentials: 'include'
       });
       if (res.ok) {
-        showToast(`${type === 'admin' ? 'Admin' : 'User'} removed.`);
-        if (type === 'admin') fetchAdmins();
+        showToast(`${userToDelete.type === 'admin' ? 'Admin' : 'User'} removed.`);
+        if (userToDelete.type === 'admin') fetchAdmins();
         else fetchUsers();
+      } else {
+        showToast("Failed to remove.", "error");
       }
     } catch(e) {
       console.error(e);
+      showToast("Network error.", "error");
+    } finally {
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -200,7 +239,7 @@ export default function AdminPanelPage() {
                     <td>{admin.email}</td>
                     <td>{formatDate(admin.createdAt)}</td>
                     <td>
-                      <div className={styles.removeBtn} onClick={() => handleDeleteUser(admin.id, 'admin')}>
+                      <div className={styles.removeBtn} onClick={() => openDeleteModal(admin.id, 'admin', admin.email)}>
                         <img src="../../icons/remove.png" alt="remove img" />
                       </div>
                     </td>
@@ -277,7 +316,7 @@ export default function AdminPanelPage() {
                       />
                     </td>
                     <td>
-                      <div className={styles.removeBtn} onClick={() => handleDeleteUser(user.id, 'user')}>
+                      <div className={styles.removeBtn} onClick={() => openDeleteModal(user.id, 'user', user.email)}>
                         <img src="../../icons/remove.png" alt="remove img" />
                       </div>
                     </td>
@@ -294,6 +333,36 @@ export default function AdminPanelPage() {
         </div>
 
       </div>
+      {deleteModalOpen && userToDelete && (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <h3>Confirm Deletion</h3>
+                <p>Are you sure you want to delete this {userToDelete.type}?</p>
+                <p>Please type <strong>{userToDelete.email}</strong> to confirm.</p>
+                <input 
+                    type="text" 
+                    value={deleteConfirmationText} 
+                    onChange={(e) => setDeleteConfirmationText(e.target.value)} 
+                    placeholder="Enter email to confirm..."
+                />
+                <div className={styles.modalButtons}>
+                    <button 
+                        className={styles.cancelModalBtn} 
+                        onClick={() => setDeleteModalOpen(false)}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        className={styles.confirmModalBtn} 
+                        disabled={deleteConfirmationText !== userToDelete.email} 
+                        onClick={confirmDeleteUser}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 }

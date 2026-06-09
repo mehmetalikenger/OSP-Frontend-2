@@ -357,6 +357,10 @@
     .containerIcon {
         width: 5%;
     }
+
+    .containerIcon img {
+        max-width: 25px;
+    }
 }
 
 @media screen and (min-width: 2000px) {

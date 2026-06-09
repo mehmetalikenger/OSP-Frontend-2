@@ -298,6 +298,7 @@
         position: static !important;
         width: 20% !important;
         padding: 20px 20px 60px 40px !important;
+        max-width: 300px;
     }
 
     .topIcon {
@@ -463,12 +464,12 @@
     .sectionTop {
         flex-wrap: wrap;
     }
-    
+
     .addInputContainer {
         width: 100%;
         margin-top: 5px;
     }
-    
+
     .addInput {
         flex: 1;
     }
@@ -591,7 +592,8 @@
 
 @media (min-width: 1200px) {
     .sectionsContainer {
-        margin-left: 50px;
+        padding-left: 50px;
+        padding-right: 50px;
         padding-top: 60px;
     }
 }
@@ -733,4 +735,123 @@
         top: 12dvh !important;
         height: 88dvh !important;
     }
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+:global(.dark-mode) .modalContent {
+    background-color: #262626;
+    color: white;
+}
+
+.modalContent h3 {
+    color: #282F68;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+:global(.dark-mode) .modalContent h3 {
+    color: #eeeeee;
+}
+
+.modalContent p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+:global(.dark-mode) .modalContent p {
+    color: #cccccc;
+}
+
+.modalContent input {
+    padding: 10px;
+    border: 1px solid #c2c2c2;
+    border-radius: 4px;
+}
+
+:global(.dark-mode) .modalContent input {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: white;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancelModalBtn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #484848;
+    background-color: transparent;
+    color: #484848;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cancelModalBtn:hover {
+    background-color: rgba(72, 72, 72, 0.1);
+}
+
+:global(.dark-mode) .cancelModalBtn {
+    border-color: #aeaeae;
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .cancelModalBtn:hover {
+    background-color: #333;
+}
+
+.confirmModalBtn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    background-color: #d7292e;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.confirmModalBtn:disabled {
+    background-color: #fca5a5;
+    cursor: not-allowed;
+}
+
+.confirmModalBtn:not(:disabled):hover {
+    background-color: #b91c1c;
+}
+
+:global(.dark-mode) .confirmModalBtn:disabled {
+    background-color: #7f1d1d;
+    color: #fca5a5;
 }

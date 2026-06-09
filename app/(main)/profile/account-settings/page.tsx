@@ -276,7 +276,8 @@ export default function AccountSettingsPage() {
                 </div>
                 {securityChanged && <button className={styles.saveButton} onClick={handleSaveSecurity}>Save</button>}
             </div>
-            <div className={`${styles.deleteAccountContainer} ${styles.container}`}>
+            {userRole !== 'ADMIN' && (
+                <div className={`${styles.deleteAccountContainer} ${styles.container}`}>
                 <div className={styles.containerFields}>
                     <span className={styles.deleteAccountTitle}>Delete Account</span>
                     <div className={styles.line}></div>
@@ -295,9 +296,25 @@ export default function AccountSettingsPage() {
                             <button
                                 className={styles.confirmDeleteButton}
                                 disabled={deleteConfirmationText !== 'delete'}
-                                onClick={() => {
-                                    setToastMessage("Account deleted");
-                                    setTimeout(() => setToastMessage(""), 3000);
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetchWithAuth(`http://localhost:8080/user/delete-account/${userId}`, {
+                                            method: "DELETE",
+                                            credentials: 'include'
+                                        });
+                                        if (res.ok) {
+                                            // Call logout to clear HttpOnly cookie
+                                            await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' }).catch(console.error);
+                                            localStorage.removeItem('userId');
+                                            localStorage.removeItem('userRole');
+                                            window.location.href = '/login?deleted=true';
+                                        } else {
+                                            setToastMessage("Failed to delete account");
+                                        }
+                                    } catch (e) {
+                                        console.error(e);
+                                        setToastMessage("Network error");
+                                    }
                                     setShowDeleteWarning(false);
                                     setDeleteConfirmationText("");
                                 }}
@@ -317,6 +334,7 @@ export default function AccountSettingsPage() {
                     )}
                 </div>
             </div>
+            )}
         </div>
     );
 }

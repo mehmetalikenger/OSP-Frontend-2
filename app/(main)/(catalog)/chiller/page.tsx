@@ -1,11 +1,24 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from "../catalog.module.css";
+import toastStyles from "../../(dashboard)/admin-panel/toast.module.css";
 
 export default function ChillerPage() {
     const [activeCategory, setActiveCategory] = useState<'chillers' | 'heatPumps'>('chillers');
+    const [showToast, setShowToast] = useState(false);
     const router = useRouter();
+    
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reactivated') === 'true') {
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+            
+            // Clean up the URL
+            router.replace('/chiller');
+        }
+    }, [router]);
 
     const handleCategoryClick = (category: 'chillers' | 'heatPumps') => {
         setActiveCategory(category);
@@ -17,6 +30,11 @@ export default function ChillerPage() {
     };
     return (
         <div className={styles.container}>
+            {showToast && (
+                <div className={toastStyles.toast}>
+                    Your account has been reactivated.
+                </div>
+            )}
             <h1 className={styles.header}>Products</h1>
             <div className={styles.categories}>
                 <div
