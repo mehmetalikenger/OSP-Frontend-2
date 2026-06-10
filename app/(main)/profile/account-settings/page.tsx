@@ -20,8 +20,10 @@ export default function AccountSettingsPage() {
     const [countryIsoCode, setCountryIsoCode] = useState("");
     const [countryName, setCountryName] = useState("");
     const [cityName, setCityName] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -29,6 +31,8 @@ export default function AccountSettingsPage() {
     const [addressChanged, setAddressChanged] = useState(false);
     const [securityChanged, setSecurityChanged] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+    const [currentPasswordError, setCurrentPasswordError] = useState(false);
+    const [newPasswordErrorMessage, setNewPasswordErrorMessage] = useState("");
 
     const [toastMessage, setToastMessage] = useState("");
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
@@ -132,20 +136,42 @@ export default function AccountSettingsPage() {
             return;
         }
         setPasswordError(false);
+        setCurrentPasswordError(false);
+        setNewPasswordErrorMessage("");
         try {
             const res = await fetchWithAuth(`http://localhost:8080/user/update-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ id: userId, password })
+                body: JSON.stringify({ id: userId, currentPassword, password })
             });
             if (res.ok) {
                 showToast("Password updated");
                 setSecurityChanged(false);
+                setCurrentPassword("");
                 setPassword("");
                 setConfirmPassword("");
             } else {
-                showToast("Failed to update password");
+                const errorText = await res.text();
+                let errorMessage = errorText;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    if (errorJson.errors && errorJson.errors.length > 0) {
+                        errorMessage = errorJson.errors[0].defaultMessage;
+                    } else {
+                        errorMessage = errorJson.message || errorJson.error || errorText;
+                    }
+                } catch (e) {
+                    // It's plain text
+                }
+                
+                if (errorMessage === "Current password is incorrect") {
+                    setCurrentPasswordError(true);
+                } else if (errorMessage === "New password cannot be the same as the current password" || errorMessage.includes("Password should be minimum")) {
+                    setNewPasswordErrorMessage(errorMessage);
+                } else {
+                    showToast(errorMessage || "Failed to update password");
+                }
             }
         } catch(err) {
             showToast("Network error");
@@ -243,19 +269,36 @@ export default function AccountSettingsPage() {
                 </div>
                 <div className={styles.containerFields}>
                     <div className={styles.field}>
-                        <label htmlFor="password">Password</label>
+                        <label htmlFor="currentPassword">Current Password</label>
+                        <div className={styles.passwordArea}>
+                            <input 
+                                type={showCurrentPassword ? "text" : "password"} 
+                                id="currentPassword" 
+                                value={currentPassword} 
+                                style={currentPasswordError ? { border: '1px solid red' } : {}}
+                                onChange={(e) => { setCurrentPassword(e.target.value); setSecurityChanged(true); setCurrentPasswordError(false); }} 
+                            />
+                            <div className={styles.passwordEye} onClick={() => setShowCurrentPassword(!showCurrentPassword)} style={{ cursor: 'pointer' }}>
+                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showCurrentPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                            </div>
+                        </div>
+                        {currentPasswordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Current password is incorrect.</span>}
+                    </div>
+                    <div className={styles.field}>
+                        <label htmlFor="password">New Password</label>
                         <div className={styles.passwordArea}>
                             <input 
                                 type={showPassword ? "text" : "password"} 
                                 id="password" 
                                 value={password} 
-                                style={passwordError ? { border: '1px solid red' } : {}}
-                                onChange={(e) => { setPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
+                                style={newPasswordErrorMessage ? { border: '1px solid red' } : {}}
+                                onChange={(e) => { setPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); setNewPasswordErrorMessage(""); }} 
                             />
                             <div className={styles.passwordEye} onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
                                 <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
+                        {newPasswordErrorMessage && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px', display: 'block' }}>{newPasswordErrorMessage}</span>}
                     </div>
                     <div className={styles.field}>
                         <label htmlFor="confirmPassword">Confirm Password</label>
@@ -298,18 +341,14 @@ export default function AccountSettingsPage() {
                                 disabled={deleteConfirmationText !== 'delete'}
                                 onClick={async () => {
                                     try {
-                                        const res = await fetchWithAuth(`http://localhost:8080/user/delete-account/${userId}`, {
-                                            method: "DELETE",
+                                        const res = await fetchWithAuth(`http://localhost:8080/account/delete-account-request`, {
+                                            method: "POST",
                                             credentials: 'include'
                                         });
                                         if (res.ok) {
-                                            // Call logout to clear HttpOnly cookie
-                                            await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' }).catch(console.error);
-                                            localStorage.removeItem('userId');
-                                            localStorage.removeItem('userRole');
-                                            window.location.href = '/login?deleted=true';
+                                            setToastMessage("A confirmation email has been sent. Please check your inbox to finalize account deletion.");
                                         } else {
-                                            setToastMessage("Failed to delete account");
+                                            setToastMessage("Failed to request account deletion");
                                         }
                                     } catch (e) {
                                         console.error(e);

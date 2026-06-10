@@ -11,6 +11,7 @@ type UserProfile = {
   email: string;
   category: string;
   createdAt: string;
+  status?: "ACTIVE" | "PENDING" | "DELETED";
 };
 
 export default function AdminPanelPage() {
@@ -75,6 +76,7 @@ export default function AdminPanelPage() {
         setAdminEmail("");
         setIsAddingAdmin(false);
         fetchAdmins();
+        fetchUsers();
       } else {
         try {
             const errorData = await res.json();
@@ -109,6 +111,7 @@ export default function AdminPanelPage() {
         setUserEmail("");
         setIsAddingUser(false);
         fetchUsers();
+        fetchAdmins();
       } else {
         try {
             const errorData = await res.json();
