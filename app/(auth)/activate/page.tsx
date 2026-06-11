@@ -37,7 +37,7 @@ function ActivateContent() {
     setMessage('Activating your account...');
 
     try {
-      const res = await fetch('http://localhost:8080/account/activate', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/account/activate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

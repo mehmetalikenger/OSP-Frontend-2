@@ -7,7 +7,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   // If unauthorized (401) or forbidden/missing token (403), try to refresh token
   if (res.status === 401 || res.status === 403) {
     try {
-      const refreshRes = await fetch('http://localhost:8080/newAccessToken', { 
+      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/newAccessToken`, { 
         method: 'GET',
         credentials: 'include' 
       });

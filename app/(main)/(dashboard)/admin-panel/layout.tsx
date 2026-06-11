@@ -367,7 +367,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                         className={`${styles.option} ${styles.mobileLogout}`}
                         onClick={async () => {
                             try {
-                                await fetch('http://localhost:8080/auth/logout', { method: 'POST', credentials: 'include' });
+                                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
                             } catch (e) { console.error(e); }
                             localStorage.removeItem('userId');
                             localStorage.removeItem('userRole');

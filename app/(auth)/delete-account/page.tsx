@@ -20,7 +20,7 @@ function DeleteAccountContent() {
     setStatus('loading');
     
     try {
-      const res = await fetch('http://localhost:8080/account/delete-account', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/account/delete-account`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -30,8 +30,6 @@ function DeleteAccountContent() {
       if (res.ok) {
         setStatus('success');
         setMessage('Your account has been successfully deleted. You can reactivate your account by logging in within 30 days.');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userRole');
       } else {
         const errorText = await res.text();
         let errorMessage = errorText;

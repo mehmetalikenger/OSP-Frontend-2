@@ -37,7 +37,7 @@ export default function AdminPanelPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetchWithAuth("http://localhost:8080/admin/users", { credentials: 'include', cache: 'no-store' });
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/users`, { credentials: 'include', cache: 'no-store' });
       if (res.ok) {
         setUsers(await res.json());
       }
@@ -48,7 +48,7 @@ export default function AdminPanelPage() {
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetchWithAuth("http://localhost:8080/admin/admins", { credentials: 'include', cache: 'no-store' });
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/admins`, { credentials: 'include', cache: 'no-store' });
       if (res.ok) {
         setAdmins(await res.json());
       }
@@ -65,7 +65,7 @@ export default function AdminPanelPage() {
   const handleAddAdmin = async () => {
     if (!adminEmail) return;
     try {
-      const res = await fetchWithAuth("http://localhost:8080/admin/admin-register", {
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/admin-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
@@ -100,7 +100,7 @@ export default function AdminPanelPage() {
   const handleAddUser = async () => {
     if (!userEmail) return;
     try {
-      const res = await fetchWithAuth("http://localhost:8080/admin/user-register", {
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/user-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
@@ -141,7 +141,7 @@ export default function AdminPanelPage() {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      const res = await fetchWithAuth(`http://localhost:8080/admin/user/${userToDelete.id}`, {
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/user/${userToDelete.id}`, {
         method: "DELETE",
         credentials: 'include'
       });
@@ -163,7 +163,7 @@ export default function AdminPanelPage() {
 
   const handleCategoryChange = async (userId: number, newCategory: string) => {
     try {
-      const res = await fetchWithAuth(`http://localhost:8080/admin/update-category`, {
+      const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/update-category`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',

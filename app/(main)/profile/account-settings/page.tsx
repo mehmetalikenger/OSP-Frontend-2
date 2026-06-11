@@ -50,7 +50,7 @@ export default function AccountSettingsPage() {
         const id = localStorage.getItem('userId');
         if (id) {
             setUserId(id);
-            fetchWithAuth(`http://localhost:8080/user/${id}`, { credentials: 'include' })
+            fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/user/${id}`, { credentials: 'include' })
                 .then(res => res.json())
                 .then(data => {
                     setUsername(data.username || "");
@@ -88,7 +88,7 @@ export default function AccountSettingsPage() {
 
     const handleSaveInfo = async () => {
         try {
-            const url = userRole === 'ADMIN' ? `http://localhost:8080/user/update-admin` : `http://localhost:8080/user/update-user`;
+            const url = userRole === 'ADMIN' ? `${process.env.NEXT_PUBLIC_API_URL}/user/update-admin` : `${process.env.NEXT_PUBLIC_API_URL}/user/update-user`;
             const payload = userRole === 'ADMIN' 
                 ? { id: userId, username, email, phone, surname } 
                 : { id: userId, username, email, phone };
@@ -112,7 +112,7 @@ export default function AccountSettingsPage() {
 
     const handleSaveAddress = async () => {
         try {
-            const res = await fetchWithAuth(`http://localhost:8080/user/update-adress`, {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/user/update-adress`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -132,14 +132,13 @@ export default function AccountSettingsPage() {
     const handleSaveSecurity = async () => {
         if (password !== confirmPassword) {
             setPasswordError(true);
-            showToast("Passwords don't match");
             return;
         }
         setPasswordError(false);
         setCurrentPasswordError(false);
         setNewPasswordErrorMessage("");
         try {
-            const res = await fetchWithAuth(`http://localhost:8080/user/update-password`, {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/user/update-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -341,7 +340,7 @@ export default function AccountSettingsPage() {
                                 disabled={deleteConfirmationText !== 'delete'}
                                 onClick={async () => {
                                     try {
-                                        const res = await fetchWithAuth(`http://localhost:8080/account/delete-account-request`, {
+                                        const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/account/delete-account-request`, {
                                             method: "POST",
                                             credentials: 'include'
                                         });
