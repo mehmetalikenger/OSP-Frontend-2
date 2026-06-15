@@ -1,20 +1,180 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../../add-unit/addUnit.module.css";
+import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
+import { fetchWithAuth } from "../../../../../../lib/api";
+
+type Condenser = {
+    id: number;
+    model: string;
+}
+
+type CondenserSpecs = {
+    id: number;
+    model: string;
+    capacity: number;
+}
 
 export default function EditCondenserPage() {
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Condenser");
-    const [brand, setBrand] = useState("Select Brand");
     const [model, setModel] = useState("");
 
     // Specs states
     const [condenser, setCondenser] = useState("Select Condenser");
     const [capacity, setCapacity] = useState("");
 
+    const [condensersList, setCondensersList] = useState<Condenser[]>([]);
+    const [condenserSpecsList, setCondenserSpecsList] = useState<CondenserSpecs[]>([]);
+    
+    const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+    const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+        setToastInfo({ message: msg, type });
+        setTimeout(() => setToastInfo(null), 3000);
+    };
+
+    const fetchCondensers = async () => {
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/condensers`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                setCondensersList(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch condensers", e);
+        }
+    };
+
+    const fetchCondenserSpecs = async () => {
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/allCondenserSpecs`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                setCondenserSpecsList(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch condenser specs", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchCondensers();
+        fetchCondenserSpecs();
+    }, []);
+
+    useEffect(() => {
+        if (selectedItemToEdit !== "Select Condenser") {
+            const cond = condensersList.find(c => c.model === selectedItemToEdit);
+            if (cond) {
+                setModel(cond.model);
+            }
+        } else {
+            setModel("");
+        }
+    }, [selectedItemToEdit, condensersList]);
+
+    useEffect(() => {
+        if (condenser !== "Select Condenser") {
+            const spec = condenserSpecsList.find(s => `${s.model} / C: ${s.capacity}` === condenser);
+            if (spec) {
+                setCapacity(spec.capacity.toString());
+            }
+        } else {
+            setCapacity("");
+        }
+    }, [condenser, condenserSpecsList]);
+
+    const handleEditCondenser = async () => {
+        if (selectedItemToEdit === "Select Condenser") {
+            showToast("Please select a condenser to edit.", "error");
+            return;
+        }
+        if (!model) {
+            showToast("Please enter a model.", "error");
+            return;
+        }
+
+        const cond = condensersList.find(c => c.model === selectedItemToEdit);
+        if (!cond) return;
+
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCondenser/${cond.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model }),
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                showToast("Condenser updated successfully!", "success");
+                setSelectedItemToEdit("Select Condenser");
+                fetchCondensers();
+                fetchCondenserSpecs();
+            } else {
+                try {
+                    const data = await res.json();
+                    showToast(data.message || "Failed to edit condenser.", "error");
+                } catch(e) {
+                    showToast("Failed to edit condenser.", "error");
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Network error.", "error");
+        }
+    };
+
+    const handleEditCondenserSpecs = async () => {
+        if (condenser === "Select Condenser") {
+            showToast("Please select condenser specs.", "error");
+            return;
+        }
+        if (!capacity) {
+            showToast("Please fill all fields.", "error");
+            return;
+        }
+
+        const selectedSpec = condenserSpecsList.find(s => `${s.model} / C: ${s.capacity}` === condenser);
+        if (!selectedSpec) return;
+
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCondenserSpecs/${selectedSpec.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ condenserId: 0, capacity: parseFloat(capacity) }),
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                showToast("Condenser Specs updated successfully!", "success");
+                setCondenser("Select Condenser");
+                fetchCondenserSpecs();
+            } else {
+                try {
+                    const data = await res.json();
+                    showToast(data.message || "Failed to edit condenser specs.", "error");
+                } catch(e) {
+                    showToast("Failed to edit condenser specs.", "error");
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Network error.", "error");
+        }
+    };
+
+    const condenserOptions = ["Select Condenser", ...condensersList.map(c => c.model)];
+    const specsOptions = ["Select Condenser", ...condenserSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {toastInfo && (
+                <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
+                    {toastInfo.message}
+                </div>
+            )}
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
@@ -28,24 +188,13 @@ export default function EditCondenserPage() {
                     <div className={styles.leftContent}>
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
-
                                     <div className={styles.formField}>
                                         <label>Condenser</label>
                                         <Combobox 
-                                            options={["Select Condenser", "Option 1", "Option 2"]}
+                                            options={condenserOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
-                                            containerClassName={styles.comboboxContainerOverride}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Brand</label>
-                                        <Combobox 
-                                            options={["Select Brand", "Frescold", "Copelant"]}
-                                            value={brand}
-                                            onChange={setBrand}
-                                            className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
@@ -61,15 +210,15 @@ export default function EditCondenserPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditCondenser}>Save</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Condenser</label>
+                                        <label>Condenser Specs</label>
                                         <Combobox 
-                                            options={["Select Condenser", "Option 1"]}
+                                            options={specsOptions}
                                             value={condenser}
                                             onChange={setCondenser}
                                             className={`${styles.comboBox} ${condenser.startsWith('Select') ? styles.placeholderText : ''}`}
@@ -79,7 +228,7 @@ export default function EditCondenserPage() {
                                     <div className={styles.formField}>
                                         <label>Capacity</label>
                                         <input 
-                                            type="text" 
+                                            type="number" 
                                             className={styles.inputElement} 
                                             placeholder="Enter capacity"
                                             value={capacity}
@@ -88,7 +237,7 @@ export default function EditCondenserPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditCondenserSpecs}>Save</button>
                             </div>
                         </div>
                     </div>

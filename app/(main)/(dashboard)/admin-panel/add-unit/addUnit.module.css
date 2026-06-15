@@ -418,11 +418,13 @@
 .inputElement:focus,
 .comboBox:focus {
     border-color: #282f68;
+    outline: none;
 }
 
 :global(.dark-mode) .inputElement:focus,
 :global(.dark-mode) .comboBox:focus {
     border-color: #c4d9ff;
+    outline: none;
 }
 
 .inputElement:disabled,
