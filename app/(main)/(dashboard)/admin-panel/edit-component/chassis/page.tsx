@@ -72,7 +72,7 @@ export default function EditChassisPage() {
             });
 
             if (res.ok) {
-                showToast("Chassis updated successfully!", "success");
+                showToast("Chassis updated successfully.", "success");
                 setSelectedItemToEdit("Select Chassis");
                 fetchChassis();
             } else {

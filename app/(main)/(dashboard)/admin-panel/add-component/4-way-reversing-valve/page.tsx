@@ -57,7 +57,7 @@ export default function AddFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve added successfully!", "success");
+                showToast("4-Way Reversing Valve added successfully.", "success");
                 setModel("");
                 fetchValves(); // Refresh the list
             } else {
@@ -99,7 +99,7 @@ export default function AddFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve Specs added successfully!", "success");
+                showToast("4-Way Reversing Valve Specs added successfully.", "success");
                 setFourWayReversingValve("Select 4-Way Reversing Valve");
                 setCapacity("");
             } else {

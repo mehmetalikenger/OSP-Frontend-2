@@ -108,7 +108,7 @@ export default function EditCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser updated successfully!", "success");
+                showToast("Condenser updated successfully.", "success");
                 setSelectedItemToEdit("Select Condenser");
                 fetchCondensers();
                 fetchCondenserSpecs();
@@ -148,7 +148,7 @@ export default function EditCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser Specs updated successfully!", "success");
+                showToast("Condenser Specs updated successfully.", "success");
                 setCondenser("Select Condenser");
                 fetchCondenserSpecs();
             } else {

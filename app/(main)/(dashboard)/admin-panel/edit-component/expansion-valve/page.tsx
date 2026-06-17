@@ -108,7 +108,7 @@ export default function EditExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve updated successfully!", "success");
+                showToast("Expansion Valve updated successfully.", "success");
                 setSelectedItemToEdit("Select Expansion Valve");
                 fetchExpansionValves();
                 fetchExpansionValveSpecs();
@@ -148,7 +148,7 @@ export default function EditExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve Specs updated successfully!", "success");
+                showToast("Expansion Valve Specs updated successfully.", "success");
                 setExpansionValve("Select Expansion Valve");
                 fetchExpansionValveSpecs();
             } else {

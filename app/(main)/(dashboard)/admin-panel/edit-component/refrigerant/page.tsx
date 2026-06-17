@@ -76,7 +76,7 @@ export default function EditRefrigerantPage() {
             });
 
             if (res.ok) {
-                showToast("Refrigerant updated successfully!", "success");
+                showToast("Refrigerant updated successfully.", "success");
                 setSelectedItemToEdit("Select Refrigerant");
                 fetchRefrigerants();
             } else {

@@ -30,7 +30,7 @@ export default function AddRefrigerantPage() {
             });
 
             if (res.ok) {
-                showToast("Refrigerant added successfully!", "success");
+                showToast("Refrigerant added successfully.", "success");
                 setName("");
                 setCode("");
             } else {

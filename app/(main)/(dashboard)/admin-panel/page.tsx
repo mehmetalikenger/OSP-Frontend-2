@@ -72,7 +72,7 @@ export default function AdminPanelPage() {
         body: JSON.stringify({ email: adminEmail })
       });
       if (res.ok) {
-        showToast("Admin added successfully!", "success");
+        showToast("Admin added successfully.", "success");
         setAdminEmail("");
         setIsAddingAdmin(false);
         fetchAdmins();
@@ -107,7 +107,7 @@ export default function AdminPanelPage() {
         body: JSON.stringify({ email: userEmail, category: "A" })
       });
       if (res.ok) {
-        showToast("User added successfully!", "success");
+        showToast("User added successfully.", "success");
         setUserEmail("");
         setIsAddingUser(false);
         fetchUsers();

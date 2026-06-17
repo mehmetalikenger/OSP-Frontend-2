@@ -57,7 +57,7 @@ export default function AddEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator added successfully!", "success");
+                showToast("Evaporator added successfully.", "success");
                 setModel("");
                 fetchEvaporators(); // Refresh the list
             } else {
@@ -99,7 +99,7 @@ export default function AddEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator Specs added successfully!", "success");
+                showToast("Evaporator Specs added successfully.", "success");
                 setEvaporator("Select Evaporator");
                 setCapacity("");
             } else {

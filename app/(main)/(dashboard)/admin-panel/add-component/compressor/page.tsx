@@ -62,7 +62,7 @@ export default function AddCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor added successfully!", "success");
+                showToast("Compressor added successfully.", "success");
                 setBrand("Select Brand");
                 setType("Select Type");
                 setModel("");
@@ -97,7 +97,7 @@ export default function AddCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor Specs added successfully!", "success");
+                showToast("Compressor Specs added successfully.", "success");
                 setCompressor("Select Compressor");
                 setCapacity("");
                 setPowerInput("");

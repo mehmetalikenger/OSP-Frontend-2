@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from './Navbar.module.css';
 
-export default function Navbar() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+export default function Navbar({ initialDark = false }: { initialDark?: boolean }) {
+    const [isDarkMode, setIsDarkMode] = useState(initialDark);
     const [language, setLanguage] = useState<'en' | 'de'>('en');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
@@ -66,6 +66,7 @@ export default function Navbar() {
         } else {
             document.body.classList.remove('dark-mode');
         }
+        document.cookie = `theme=${isDarkMode ? 'dark' : 'light'}; path=/; max-age=31536000; SameSite=Lax`;
     }, [isDarkMode]);
 
     useEffect(() => {

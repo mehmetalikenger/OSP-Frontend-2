@@ -183,79 +183,79 @@ export default function EditHeatPumpModPage() {
                                 <div className={styles.formGrid}>
                                     <div className={styles.formField}>
                                         <label>Capacity (Kw)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Compressor Qty</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Condenser Required Duty (kW)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Quiet Condenser Required Duty (kW)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Fan Power Input (kW)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>EER</label>
-                                        <input type="text" className={styles.inputElement} disabled={unitMod === 'heating'} />
+                                        <input type="number" className={styles.inputElement} disabled={unitMod === 'heating'} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>COP</label>
-                                        <input type="text" className={styles.inputElement} disabled={unitMod === 'cooling'} />
+                                        <input type="number" className={styles.inputElement} disabled={unitMod === 'cooling'} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Condenser Qty</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Number of Fans</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Fan Diameter</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Expansion Valve Qty</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Airflow Rate (m3/h)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Discharge Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Liquid Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Suction Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Liquid Receiver (L)</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Width</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Height</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Length</label>
-                                        <input type="text" className={styles.inputElement} />
+                                        <input type="number" className={styles.inputElement} />
                                     </div>
                                 </div>
                             )}

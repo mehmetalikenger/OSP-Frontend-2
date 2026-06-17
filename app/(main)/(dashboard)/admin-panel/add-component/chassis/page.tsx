@@ -29,7 +29,7 @@ export default function AddChassisPage() {
             });
 
             if (res.ok) {
-                showToast("Chassis added successfully!", "success");
+                showToast("Chassis added successfully.", "success");
                 setModel("");
             } else {
                 try {

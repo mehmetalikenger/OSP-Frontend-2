@@ -108,7 +108,7 @@ export default function EditFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve updated successfully!", "success");
+                showToast("4-Way Reversing Valve updated successfully.", "success");
                 setSelectedItemToEdit("Select 4-Way Reversing Valve");
                 fetchValves();
                 fetchValveSpecs();
@@ -148,7 +148,7 @@ export default function EditFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve Specs updated successfully!", "success");
+                showToast("4-Way Reversing Valve Specs updated successfully.", "success");
                 setFourWayReversingValve("Select 4-Way Reversing Valve");
                 fetchValveSpecs();
             } else {

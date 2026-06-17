@@ -108,7 +108,7 @@ export default function EditEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator updated successfully!", "success");
+                showToast("Evaporator updated successfully.", "success");
                 setSelectedItemToEdit("Select Evaporator");
                 fetchEvaporators();
                 fetchEvaporatorSpecs();
@@ -148,7 +148,7 @@ export default function EditEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator Specs updated successfully!", "success");
+                showToast("Evaporator Specs updated successfully.", "success");
                 setEvaporator("Select Evaporator");
                 fetchEvaporatorSpecs();
             } else {

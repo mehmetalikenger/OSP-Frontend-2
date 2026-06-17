@@ -122,7 +122,7 @@ export default function EditCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor updated successfully!", "success");
+                showToast("Compressor updated successfully.", "success");
                 setSelectedItemToEdit("Select Compressor");
                 fetchCompressors();
                 fetchCompressorSpecs(); // In case brand/model/type changed, refresh specs text
@@ -162,7 +162,7 @@ export default function EditCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor Specs updated successfully!", "success");
+                showToast("Compressor Specs updated successfully.", "success");
                 setCompressor("Select Compressor");
                 fetchCompressorSpecs();
             } else {

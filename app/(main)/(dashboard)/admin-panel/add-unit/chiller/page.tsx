@@ -195,7 +195,7 @@ export default function Page() {
             });
 
             if (res.ok) {
-                showToast("Chiller added successfully!", "success");
+                showToast("Chiller added successfully.", "success");
                 resetForm();
                 setActiveTab("model");
             } else {
@@ -404,79 +404,79 @@ export default function Page() {
                                 <div className={styles.formGrid}>
                                     <div className={styles.formField}>
                                         <label>Capacity (Kw)</label>
-                                        <input type="text" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Compressor Qty</label>
-                                        <input type="text" className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Condenser Required Duty (kW)</label>
-                                        <input type="text" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Quiet Condenser Required Duty (kW)</label>
-                                        <input type="text" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Fan Power Input (kW)</label>
-                                        <input type="text" className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>EER</label>
-                                        <input type="text" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
+                                        <input type="number" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>COP</label>
-                                        <input type="text" className={styles.inputElement} disabled={unitMod === 'cooling'} />
+                                        <input type="number" className={styles.inputElement} disabled={unitMod === 'cooling'} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Condenser Qty</label>
-                                        <input type="text" className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Number of Fans</label>
-                                        <input type="text" className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Fan Diameter</label>
-                                        <input type="text" className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Expansion Valve Qty</label>
-                                        <input type="text" className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Airflow Rate (m3/h)</label>
-                                        <input type="text" className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Discharge Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Liquid Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Suction Line Diameter</label>
-                                        <input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Gas Tank (L)</label>
-                                        <input type="text" className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Width</label>
-                                        <input type="text" className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Height</label>
-                                        <input type="text" className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Length</label>
-                                        <input type="text" className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} />
+                                        <input type="number" className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} />
                                     </div>
                                 </div>
                             )}

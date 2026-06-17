@@ -108,7 +108,7 @@ export default function AddHeatPumpModelPage() {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                showToast("Heat pump model created! Add its modes from the Mod page.", "success");
+                showToast("Heat pump model created. Add its modes from the Mod page.", "success");
                 resetForm();
             } else {
                 let msg = "Failed to create heat pump model.";
@@ -133,7 +133,7 @@ export default function AddHeatPumpModelPage() {
                     {toastInfo.message}
                 </div>
             )}
-            <div className={styles.sectionContent} style={{ maxWidth: "1000px", flex: "none" }}>
+            <div className={styles.sectionContent}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
                         Model Information
@@ -141,94 +141,136 @@ export default function AddHeatPumpModelPage() {
                 </div>
                 <div className={styles.horizontalSeperator}></div>
 
-                <div className={styles.formSection}>
-                    <div className={styles.formGrid}>
-                        <div className={styles.formField}>
-                            <label>Model</label>
-                            <input type="text" className={styles.inputElement} placeholder="Enter model name" value={model} onChange={(e) => setModel(e.target.value)} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Type</label>
-                            <Combobox
-                                options={["Air to water", "Water to water"]}
-                                value={unitType === "air_to_water" ? "Air to water" : "Water to water"}
-                                onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")}
-                                className={styles.comboBox}
-                                containerClassName={styles.comboboxContainerOverride}
-                            />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Refrigerant</label>
-                            <Combobox
-                                options={refrigerantOptions}
-                                value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT}
-                                onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)}
-                                className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`}
-                                containerClassName={styles.comboboxContainerOverride}
-                            />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Compressor Qty</label>
-                            <input type="text" className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Condenser Qty</label>
-                            <input type="text" className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Expansion Valve Qty</label>
-                            <input type="text" className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Fan Power Input (kW)</label>
-                            <input type="text" className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Number of Fans</label>
-                            <input type="text" className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Fan Diameter</label>
-                            <input type="text" className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Airflow Rate (m3/h)</label>
-                            <input type="text" className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Discharge Line Diameter</label>
-                            <input type="text" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Liquid Line Diameter</label>
-                            <input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Suction Line Diameter</label>
-                            <input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Gas Tank (L)</label>
-                            <input type="text" className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Width</label>
-                            <input type="text" className={styles.inputElement} value={f.width} onChange={upd("width")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Height</label>
-                            <input type="text" className={styles.inputElement} value={f.height} onChange={upd("height")} />
-                        </div>
-                        <div className={styles.formField}>
-                            <label>Length</label>
-                            <input type="text" className={styles.inputElement} value={f.length} onChange={upd("length")} />
+                <div className={styles.splitContent}>
+                    <div className={styles.leftContent}>
+                        <div className={styles.formSection}>
+                            <div className={styles.formGrid}>
+                                <div className={styles.formField}>
+                                    <label>Model</label>
+                                    <input type="text" className={styles.inputElement} placeholder="Enter model name" value={model} onChange={(e) => setModel(e.target.value)} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Type</label>
+                                    <Combobox
+                                        options={["Air to water", "Water to water"]}
+                                        value={unitType === "air_to_water" ? "Air to water" : "Water to water"}
+                                        onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")}
+                                        className={styles.comboBox}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Refrigerant</label>
+                                    <Combobox
+                                        options={refrigerantOptions}
+                                        value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT}
+                                        onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)}
+                                        className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Compressor Qty</label>
+                                    <input type="number" className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Condenser Qty</label>
+                                    <input type="number" className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Expansion Valve Qty</label>
+                                    <input type="number" className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Fan Power Input (kW)</label>
+                                    <input type="number" className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Number of Fans</label>
+                                    <input type="number" className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Fan Diameter</label>
+                                    <input type="number" className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Airflow Rate (m3/h)</label>
+                                    <input type="number" className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Discharge Line Diameter</label>
+                                    <input type="number" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Liquid Line Diameter</label>
+                                    <input type="number" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Suction Line Diameter</label>
+                                    <input type="number" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Gas Tank (L)</label>
+                                    <input type="number" className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Width</label>
+                                    <input type="number" className={styles.inputElement} value={f.width} onChange={upd("width")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Height</label>
+                                    <input type="number" className={styles.inputElement} value={f.height} onChange={upd("height")} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Length</label>
+                                    <input type="number" className={styles.inputElement} value={f.length} onChange={upd("length")} />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className={styles.stepNavContainer} style={{ marginTop: "25px", justifyContent: "flex-end" }}>
-                        <button className={styles.saveBtn} onClick={handleAdd} disabled={submitting}>
-                            {submitting ? "Adding..." : "Add"}
-                        </button>
+                    <div className={styles.seperator}></div>
+
+                    <div className={styles.rightContent}>
+                        <div className={styles.uploadSection}>
+                            <div className={`${styles.uploadContainer} ${styles.imgContainer}`}>
+                                Upload Image
+                                <div className={styles.inputContainer}>
+                                    <input type="file" accept="image/*" multiple className={styles.fileInput} id="image" />
+                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Images" />
+                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Images" />
+                                </div>
+                            </div>
+                            <div className={`${styles.drawingContainer} ${styles.uploadContainer}`}>
+                                Upload Drawing
+                                <div className={styles.inputContainer}>
+                                    <input type="file" accept=".pdf,.dwg,.dxf" multiple className={styles.fileInput} id="drawing" />
+                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Drawings" />
+                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Drawings" />
+                                </div>
+                            </div>
+                            <div className={`${styles.docContainer} ${styles.uploadContainer}`}>
+                                Upload File
+                                <div className={styles.inputContainer}>
+                                    <input type="file" accept=".pdf,.doc,.docx" multiple className={styles.fileInput} />
+                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Documents" id="doc" />
+                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Documents" />
+                                </div>
+                            </div>
+                            <div className={`${styles.iconContainer} ${styles.uploadContainer}`}>
+                                Upload Icon
+                                <div className={styles.inputContainer}>
+                                    <input type="file" accept="image/png, image/svg+xml, .ico" multiple className={styles.fileInput} />
+                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Icons" id="icon" />
+                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Icons" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.stepNavContainer} style={{ justifyContent: "flex-end" }}>
+                            <button className={styles.saveBtn} onClick={handleAdd} disabled={submitting}>
+                                {submitting ? "Adding..." : "Add"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

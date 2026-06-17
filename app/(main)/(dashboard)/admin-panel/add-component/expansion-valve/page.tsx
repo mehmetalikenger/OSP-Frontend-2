@@ -57,7 +57,7 @@ export default function AddExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve added successfully!", "success");
+                showToast("Expansion Valve added successfully.", "success");
                 setModel("");
                 fetchExpansionValves(); // Refresh the list
             } else {
@@ -99,7 +99,7 @@ export default function AddExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve Specs added successfully!", "success");
+                showToast("Expansion Valve Specs added successfully.", "success");
                 setExpansionValve("Select Expansion Valve");
                 setCapacity("");
             } else {

@@ -57,7 +57,7 @@ export default function AddCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser added successfully!", "success");
+                showToast("Condenser added successfully.", "success");
                 setModel("");
                 fetchCondensers(); // Refresh the list
             } else {
@@ -99,7 +99,7 @@ export default function AddCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser Specs added successfully!", "success");
+                showToast("Condenser Specs added successfully.", "success");
                 setCondenser("Select Condenser");
                 setCapacity("");
             } else {

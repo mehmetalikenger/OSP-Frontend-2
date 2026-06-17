@@ -176,7 +176,7 @@ export default function AddHeatPumpModPage() {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                showToast(`${unitMod === "cooling" ? "Cooling" : "Heating"} mode added!`, "success");
+                showToast(`${unitMod === "cooling" ? "Cooling" : "Heating"} mode added.`, "success");
                 resetModeFields();
                 setActiveTab("model");
                 await loadHeatPumps(); // refresh so the added mode is no longer offered
@@ -306,23 +306,23 @@ export default function AddHeatPumpModPage() {
                             </div>
                             <div className={styles.formField}>
                                 <label>Capacity (Kw)</label>
-                                <input type="text" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                                <input type="number" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>EER</label>
-                                <input type="text" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
+                                <input type="number" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>COP</label>
-                                <input type="text" className={styles.inputElement} value={cop} onChange={(e) => setCop(e.target.value)} disabled={unitMod === 'cooling'} />
+                                <input type="number" className={styles.inputElement} value={cop} onChange={(e) => setCop(e.target.value)} disabled={unitMod === 'cooling'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Condenser Required Duty (kW)</label>
-                                <input type="text" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
+                                <input type="number" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Quiet Condenser Required Duty (kW)</label>
-                                <input type="text" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
+                                <input type="number" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
                             </div>
                         </div>
                     )}
