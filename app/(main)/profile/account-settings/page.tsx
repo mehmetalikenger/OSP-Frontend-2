@@ -34,7 +34,7 @@ export default function AccountSettingsPage() {
     const [currentPasswordError, setCurrentPasswordError] = useState(false);
     const [newPasswordErrorMessage, setNewPasswordErrorMessage] = useState("");
 
-    const [toastMessage, setToastMessage] = useState("");
+    const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
     const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
     const deleteWarningRef = useRef<HTMLDivElement>(null);
@@ -81,9 +81,9 @@ export default function AccountSettingsPage() {
         }
     }, [showDeleteWarning]);
 
-    const showToast = (message: string) => {
-        setToastMessage(message);
-        setTimeout(() => setToastMessage(""), 3000);
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+        setToastInfo({ message, type });
+        setTimeout(() => setToastInfo(null), 3000);
     }
 
     const handleSaveInfo = async () => {
@@ -100,13 +100,23 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                showToast("User info saved");
+                showToast("User info saved", "success");
                 setInfoChanged(false);
             } else {
-                showToast("Failed to save info");
+                try {
+                    const errorText = await res.text();
+                    const errorJson = JSON.parse(errorText);
+                    if (errorJson.errors && errorJson.errors.length > 0) {
+                        showToast(errorJson.errors[0].defaultMessage || "Failed to save info", "error");
+                    } else {
+                        showToast(errorJson.message || errorJson.error || "Failed to save info", "error");
+                    }
+                } catch (e) {
+                    showToast("Failed to save info", "error");
+                }
             }
         } catch(err) {
-            showToast("Network error");
+            showToast("Network error", "error");
         }
     };
 
@@ -119,13 +129,23 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify({ id: userId, address, country: countryIsoCode, city: cityName })
             });
             if (res.ok) {
-                showToast("Address saved");
+                showToast("Address saved", "success");
                 setAddressChanged(false);
             } else {
-                showToast("Failed to save address");
+                try {
+                    const errorText = await res.text();
+                    const errorJson = JSON.parse(errorText);
+                    if (errorJson.errors && errorJson.errors.length > 0) {
+                        showToast(errorJson.errors[0].defaultMessage || "Failed to save address", "error");
+                    } else {
+                        showToast(errorJson.message || errorJson.error || "Failed to save address", "error");
+                    }
+                } catch (e) {
+                    showToast("Failed to save address", "error");
+                }
             }
         } catch(err) {
-            showToast("Network error");
+            showToast("Network error", "error");
         }
     };
 
@@ -145,7 +165,7 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify({ id: userId, currentPassword, password })
             });
             if (res.ok) {
-                showToast("Password updated");
+                showToast("Password updated", "success");
                 setSecurityChanged(false);
                 setCurrentPassword("");
                 setPassword("");
@@ -169,19 +189,19 @@ export default function AccountSettingsPage() {
                 } else if (errorMessage === "New password cannot be the same as the current password" || errorMessage.includes("Password should be minimum")) {
                     setNewPasswordErrorMessage(errorMessage);
                 } else {
-                    showToast(errorMessage || "Failed to update password");
+                    showToast(errorMessage || "Failed to update password", "error");
                 }
             }
         } catch(err) {
-            showToast("Network error");
+            showToast("Network error", "error");
         }
     };
 
     return (
         <div className={sharedStyles.pageContentContainer}>
-            {toastMessage && (
-                <div className={styles.toast}>
-                    {toastMessage}
+            {toastInfo && (
+                <div className={toastInfo.type === 'error' ? styles.errorToast : styles.toast}>
+                    {toastInfo.message}
                 </div>
             )}
             <div className={sharedStyles.header}>
@@ -345,13 +365,13 @@ export default function AccountSettingsPage() {
                                             credentials: 'include'
                                         });
                                         if (res.ok) {
-                                            setToastMessage("A confirmation email has been sent. Please check your inbox to finalize account deletion.");
+                                            showToast("A confirmation email has been sent. Please check your inbox to finalize account deletion.", "success");
                                         } else {
-                                            setToastMessage("Failed to request account deletion");
+                                            showToast("Failed to request account deletion", "error");
                                         }
                                     } catch (e) {
                                         console.error(e);
-                                        setToastMessage("Network error");
+                                        showToast("Network error", "error");
                                     }
                                     setShowDeleteWarning(false);
                                     setDeleteConfirmationText("");

@@ -236,6 +236,18 @@
     z-index: 1000;
 }
 
+.errorToast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f44336;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
 .deleteWarning {
     margin-top: 15px;
     padding: 15px;
@@ -346,7 +358,7 @@
         width: 7%;
     }
 
-    .toast {
+    .toast, .errorToast {
         right: 40px;
         padding: 20px 20px;
         font-size: 1rem;

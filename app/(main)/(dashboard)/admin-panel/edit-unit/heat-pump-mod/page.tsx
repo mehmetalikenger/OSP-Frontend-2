@@ -31,17 +31,17 @@ export default function EditHeatPumpModPage() {
                     </span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
                     <span 
-                        className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`}
-                        onClick={() => setActiveTab('calc')}
-                    >
-                        Calculation Values
-                    </span>
-                    <span className={styles.breadcrumbSeparator}>&gt;</span>
-                    <span 
                         className={`${styles.breadcrumbItem} ${activeTab === 'tech' ? styles.breadcrumbActive : ''}`}
                         onClick={() => setActiveTab('tech')}
                     >
                         Tech Details
+                    </span>
+                    <span className={styles.breadcrumbSeparator}>&gt;</span>
+                    <span
+                        className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`}
+                        onClick={() => setActiveTab('calc')}
+                    >
+                        Calculation Values
                     </span>
                 </div>
 
@@ -266,21 +266,21 @@ export default function EditHeatPumpModPage() {
                                 {activeTab !== 'model' && (
                                     <button 
                                         className={styles.stepBtn} 
-                                        onClick={() => setActiveTab(activeTab === 'tech' ? 'calc' : 'model')}
+                                        onClick={() => setActiveTab(activeTab === 'calc' ? 'tech' : 'model')}
                                     >
                                         Previous
                                     </button>
                                 )}
-                                {activeTab !== 'tech' && (
-                                    <button 
-                                        className={styles.stepBtn} 
-                                        onClick={() => setActiveTab(activeTab === 'model' ? 'calc' : 'tech')}
+                                {activeTab !== 'calc' && (
+                                    <button
+                                        className={styles.stepBtn}
+                                        onClick={() => setActiveTab(activeTab === 'model' ? 'tech' : 'calc')}
                                     >
                                         Next
                                     </button>
                                 )}
                             </div>
-                            {activeTab === 'tech' && (
+                            {activeTab === 'calc' && (
                                 <div className={styles.stepNavRight}>
                                     <button className={styles.cancelBtn}>Cancel</button>
                                     <button className={styles.saveBtn}>Save Details</button>
