@@ -297,7 +297,8 @@
 @media screen and (min-width: 1200px) {
 
     .nav {
-        height: 8vh;
+        height: 10vh;
+        max-height: 100px;
     }
 
     .navButtons {

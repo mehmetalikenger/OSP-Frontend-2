@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./adminPanel.module.css";
+import { fetchWithAuth } from "../../../../lib/api";
+
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [adminName, setAdminName] = useState("Admin");
+    const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
+    const picInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -17,8 +23,44 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         const role = localStorage.getItem('userRole');
         if (role !== 'ADMIN') {
             router.push('/chiller');
+            return;
         }
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+        fetchWithAuth(`${API}/user/${userId}`, { credentials: 'include', cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data) return;
+                const name = [data.username, data.surname].filter(Boolean).join(' ');
+                setAdminName(name || 'Admin');
+                if (data.imageUrl) setProfilePicUrl(data.imageUrl);
+            })
+            .catch(() => {});
     }, [router]);
+
+    const handleProfilePicChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+            const res = await fetchWithAuth(`${API}/user/${userId}/upload-profile-picture`, {
+                method: 'POST',
+                credentials: 'include',
+                body: fd,
+            });
+            if (res.ok) {
+                const profileRes = await fetchWithAuth(`${API}/user/${userId}`, { credentials: 'include', cache: 'no-store' });
+                if (profileRes.ok) {
+                    const data = await profileRes.json();
+                    if (data.imageUrl) setProfilePicUrl(data.imageUrl);
+                }
+            }
+        } catch (e) { console.error('Profile picture upload failed', e); }
+        e.target.value = '';
+    };
 
     // Determine the active top-level option based on pathname
     let activeOption = "Home";
@@ -98,10 +140,29 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
 
                 <div className={styles.userInfo}>
                     <div className={styles.profilePic}>
-                        <img src="/icons/profilePic.png" alt="Profile Picture" />
+                        <div
+                            className={styles.profilePicWrapper}
+                            onClick={() => picInputRef.current?.click()}
+                        >
+                            <img
+                                className={styles.profilePicAvatar}
+                                src={profilePicUrl || "/icons/profilePic.png"}
+                                alt="Profile Picture"
+                            />
+                            <div className={styles.profilePicOverlay}>
+                                <img src="/icons/photo.png" alt="Change photo" />
+                            </div>
+                        </div>
+                        <input
+                            ref={picInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleProfilePicChange}
+                        />
                     </div>
                     <div className={styles.userName}>
-                        <h2>Admin User</h2>
+                        <h2>{adminName}</h2>
                     </div>
                     <div className={styles.infoLine}></div>
                 </div>

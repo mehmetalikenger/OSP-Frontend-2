@@ -4,24 +4,34 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../calculation.module.css";
 
+interface CalcAsset {
+    url: string;
+    fileName: string | null;
+}
+
+interface TechSpec {
+    label: string;
+    value: string;
+}
+
 interface ProductAccordionProps {
     title: string;
     modelName?: string;
     calculationForm?: React.ReactNode;
-    documentsContent?: React.ReactNode;
-    imagesContent?: React.ReactNode;
-    drawingsContent?: React.ReactNode;
-    techSpecsContent?: React.ReactNode;
+    images?: CalcAsset[];
+    drawings?: CalcAsset[];
+    documents?: CalcAsset[];
+    specs?: TechSpec[];
 }
 
 export default function ProductAccordion({
     title,
     modelName,
     calculationForm,
-    documentsContent,
-    imagesContent,
-    drawingsContent,
-    techSpecsContent
+    images = [],
+    drawings = [],
+    documents = [],
+    specs = [],
 }: ProductAccordionProps) {
     const router = useRouter();
     const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -39,7 +49,6 @@ export default function ProductAccordion({
             isDesktop = currentlyDesktop;
         };
 
-        // Initial setup
         if (isDesktop) {
             setActiveSection("calculation");
         }
@@ -47,6 +56,7 @@ export default function ProductAccordion({
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
     const [zoomScale, setZoomScale] = useState<number>(1);
     const [zoomOrigin, setZoomOrigin] = useState<string>("center center");
 
@@ -63,25 +73,11 @@ export default function ProductAccordion({
         setTimeout(() => setZoomOrigin("center center"), 200);
     };
 
-    const productImages = [
-        "../../images/Products/310171.png",
-        "../../images/Products/569547.png",
-        "../../images/Products/745729.png"
-    ];
-
-    const productDrawings = [
-        "../../images/Products/824186.png",
-        "../../images/Products/569547.png",
-        "../../images/Products/745729.png"
-    ];
-
     const toggleSection = (section: string) => {
         const isDesktop = window.innerWidth >= 1200;
         const isOpening = activeSection !== section;
 
-        if (isDesktop && !isOpening) {
-            return;
-        }
+        if (isDesktop && !isOpening) return;
 
         setActiveSection(isOpening ? section : null);
 
@@ -129,6 +125,9 @@ export default function ProductAccordion({
         };
     }, [fullscreenArray]);
 
+    const imageUrls = images.map(i => i.url);
+    const drawingUrls = drawings.map(d => d.url);
+
     return (
         <div className={styles.main}>
             <div className={styles.backBtnContainer} onClick={() => router.back()}>
@@ -153,7 +152,7 @@ export default function ProductAccordion({
                         onClick={() => toggleSection('calculation')}
                     >
                         <div className={styles.buttonContent}>
-                            <div className={`${styles.sectionIcon}`}>
+                            <div className={styles.sectionIcon}>
                                 <img className={styles.lightIcon} src="../../icons/calculation.png" alt="Calculation" />
                                 <img className={styles.darkIcon} src="../../icons/calculation-darkMode.png" alt="Calculation" />
                             </div>
@@ -170,7 +169,7 @@ export default function ProductAccordion({
                         onClick={() => toggleSection('documents')}
                     >
                         <div className={styles.buttonContent}>
-                            <div className={`${styles.sectionIcon}`}>
+                            <div className={styles.sectionIcon}>
                                 <img className={styles.lightIcon} src="../../icons/document.png" alt="Documents" />
                                 <img className={styles.darkIcon} src="../../icons/document-darkMode.png" alt="Documents" />
                             </div>
@@ -181,12 +180,15 @@ export default function ProductAccordion({
                     {activeSection === 'documents' && (
                         <div className={styles.sectionContent}>
                             <div className={styles.documentsContainer}>
-                                <div className={styles.document}>
-                                    <a href="#">Product Catalog</a>
-                                </div>
-                                <div className={styles.document}>
-                                    <a href="#">Instruction Manual</a>
-                                </div>
+                                {documents.length > 0 ? documents.map((doc, i) => (
+                                    <div className={styles.document} key={i}>
+                                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                                            {doc.fileName || `Document ${i + 1}`}
+                                        </a>
+                                    </div>
+                                )) : (
+                                    <p style={{ padding: "12px", color: "#888" }}>No documents available.</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -198,7 +200,7 @@ export default function ProductAccordion({
                         onClick={() => toggleSection('images')}
                     >
                         <div className={styles.buttonContent}>
-                            <div className={`${styles.sectionIcon}`}>
+                            <div className={styles.sectionIcon}>
                                 <img className={styles.lightIcon} src="../../icons/image.png" alt="Images" />
                                 <img className={styles.darkIcon} src="../../icons/image-darkMode.png" alt="Images" />
                             </div>
@@ -209,15 +211,17 @@ export default function ProductAccordion({
                     {activeSection === 'images' && (
                         <div className={styles.sectionContent}>
                             <div className={styles.imagesContainer}>
-                                {productImages.map((src, index) => (
+                                {images.length > 0 ? imageUrls.map((src, index) => (
                                     <div className={styles.image} key={index} onClick={() => {
-                                        setFullscreenArray(productImages);
+                                        setFullscreenArray(imageUrls);
                                         setFullscreenIndex(index);
                                         handleZoomReset();
                                     }}>
-                                        <img src={src} alt="air-cooled-chiller" style={{ cursor: 'pointer' }} />
+                                        <img src={src} alt="product image" style={{ cursor: 'pointer' }} />
                                     </div>
-                                ))}
+                                )) : (
+                                    <p style={{ padding: "12px", color: "#888" }}>No images available.</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -229,7 +233,7 @@ export default function ProductAccordion({
                         onClick={() => toggleSection('drawings')}
                     >
                         <div className={styles.buttonContent}>
-                            <div className={`${styles.sectionIcon}`}>
+                            <div className={styles.sectionIcon}>
                                 <img className={styles.lightIcon} src="../../icons/drawing.png" alt="Drawings" />
                                 <img className={styles.darkIcon} src="../../icons/drawing-darkMode.png" alt="Drawings" />
                             </div>
@@ -240,15 +244,17 @@ export default function ProductAccordion({
                     {activeSection === 'drawings' && (
                         <div className={styles.sectionContent}>
                             <div className={styles.imagesContainer}>
-                                {productDrawings.map((src, index) => (
+                                {drawings.length > 0 ? drawingUrls.map((src, index) => (
                                     <div className={styles.image} key={index} onClick={() => {
-                                        setFullscreenArray(productDrawings);
+                                        setFullscreenArray(drawingUrls);
                                         setFullscreenIndex(index);
                                         handleZoomReset();
                                     }}>
                                         <img src={src} alt="drawing" style={{ cursor: 'pointer' }} />
                                     </div>
-                                ))}
+                                )) : (
+                                    <p style={{ padding: "12px", color: "#888" }}>No drawings available.</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -260,7 +266,7 @@ export default function ProductAccordion({
                         onClick={() => toggleSection('techSpecs')}
                     >
                         <div className={styles.buttonContent}>
-                            <div className={`${styles.sectionIcon}`}>
+                            <div className={styles.sectionIcon}>
                                 <img className={styles.lightIcon} src="../../icons/techSpec.png" alt="Tech Specs" />
                                 <img className={styles.darkIcon} src="../../icons/techSpec-darkMode.png" alt="Tech Specs" />
                             </div>
@@ -271,42 +277,18 @@ export default function ProductAccordion({
                     {activeSection === 'techSpecs' && (
                         <div className={styles.sectionContent}>
                             <div className={styles.unitSpecs}>
-                                <ul>
-                                    <li>
-                                        <span className={styles.specTitle}>Capacity Range:</span>
-                                        <span className={styles.specValue}>80 to 1200 kW</span>
-                                    </li>
-                                    <li>
-                                        <span className={styles.specTitle}>Design:</span>
-                                        <span className={styles.specValue}>
-                                            Long modular frame with multi-fan top sections
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className={styles.specTitle}>Ambient Temperature Range:</span>
-                                        <span className={styles.specValue}>
-                                            -20°C to 43°C
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className={styles.specTitle}>Options:</span>
-                                        <span className={styles.specValue}>
-                                            Defrost optimization, integrated water pump, buffer tank, etc
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className={styles.specTitle}>Benefits:</span>
-                                        <span className={styles.specValue}>
-                                            High heating COP, dual mode (heating/cooling), flexible
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <span className={styles.specTitle}>Advantages:</span>
-                                        <span className={styles.specValue}>
-                                            Low noise, zero combustion emissions, extremely reliable
-                                        </span>
-                                    </li>
-                                </ul>
+                                {specs.length > 0 ? (
+                                    <ul>
+                                        {specs.map(s => (
+                                            <li key={s.label}>
+                                                <span className={styles.specTitle}>{s.label}:</span>
+                                                <span className={styles.specValue}>{s.value}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p style={{ padding: "12px", color: "#888" }}>No specifications available.</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -326,8 +308,8 @@ export default function ProductAccordion({
                         <img src="../../icons/closeBtn-second.png" className={styles.darkIcon} alt="Close Button" />
                     </div>
 
-                    <div 
-                        className={styles.imageWrapper} 
+                    <div
+                        className={styles.imageWrapper}
                         onClick={(e) => e.stopPropagation()}
                         onMouseMove={(e) => handleZoomInteraction(e.clientX, e.clientY, e.currentTarget)}
                         onTouchMove={(e) => handleZoomInteraction(e.touches[0].clientX, e.touches[0].clientY, e.currentTarget)}
@@ -338,7 +320,7 @@ export default function ProductAccordion({
                             src={fullscreenArray[fullscreenIndex]}
                             alt="Fullscreen"
                             className={`${styles.fullscreenImage} ${zoomScale > 1 ? styles.zoomed : ''}`}
-                            style={{ 
+                            style={{
                                 transform: `scale(${zoomScale})`,
                                 transformOrigin: zoomOrigin,
                                 cursor: zoomScale > 1 ? 'zoom-out' : 'zoom-in'

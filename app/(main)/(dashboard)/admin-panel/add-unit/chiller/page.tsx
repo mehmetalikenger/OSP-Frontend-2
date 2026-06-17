@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import styles from "../addUnit.module.css";
@@ -15,6 +15,7 @@ type Refrigerant = { id: number; name: string; code: string };
 type Upload = { file: File; url: string; id: string };
 let uidCounter = 0;
 const uid = () => `u${Date.now()}_${uidCounter++}`;
+const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 
 const MAX_TOTAL_BYTES = 25 * 1024 * 1024; // 25 MB for the whole upload
 
@@ -32,11 +33,6 @@ const specLabel = (s: ComponentSpecs) => `${[s.brand, s.model].filter(Boolean).j
 const chassisLabel = (c: Chassis) => [c.brand, c.model].filter(Boolean).join(" / ");
 const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
 
-const xBtnStyle: React.CSSProperties = {
-    position: "absolute", top: -8, right: -8, width: 20, height: 20, borderRadius: "50%",
-    border: "none", background: "#d9534f", color: "#fff", fontSize: 13, lineHeight: "1",
-    cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center",
-};
 
 export default function Page() {
     const [activeTab, setActiveTab] = useState("model");
@@ -44,6 +40,8 @@ export default function Page() {
     const [unitMod] = useState("cooling");
 
     const [model, setModel] = useState("");
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
     const [compressor, setCompressor] = useState(SELECT.compressor);
     const [evaporator, setEvaporator] = useState(SELECT.evaporator);
     const [condenser, setCondenser] = useState(SELECT.condenser);
@@ -126,6 +124,7 @@ export default function Page() {
 
     const num = (v: string) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
     const int = (v: string) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+    const blockNeg = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); };
 
     const totalBytes = (extra: File[] = []) =>
         [...images, ...drawings, ...icons, ...documents].reduce((sum, u) => sum + u.file.size, 0) +
@@ -205,54 +204,48 @@ export default function Page() {
             return;
         }
 
-        const fd = new FormData();
-        const append = (prefix: string, obj: Record<string, unknown>) => {
-            Object.entries(obj).forEach(([k, v]) => fd.append(`${prefix}.${k}`, v === null || v === undefined ? "" : String(v)));
+        const payload = {
+            chillerDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW", mod: "COOLING" },
+            unitTechSpecsDTO: {
+                capacity: num(capacity),
+                compressorSpecsId: compressorSpec.id,
+                compressorQty: int(compressorQty),
+                condenserSpecsId: condenserSpec.id,
+                condenserQty: int(condenserQty),
+                expansionValveSpecsId: expansionValveSpec.id,
+                expansionValveQty: int(expansionValveQty),
+                evaporatorSpecsId: evaporatorSpec.id,
+                chassisId: chassisItem.id,
+                fourWayReversingValveSpecsId: reversingValveSpec ? reversingValveSpec.id : null,
+                refrigerantId: refrigerantItem.id,
+                condenserRequiredDuty: num(condenserRequiredDuty),
+                quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
+                fanPI: num(fanPI),
+                copErr: num(eer),
+                width: num(width),
+                length: num(length),
+                height: num(height),
+                numberOfFans: int(numberOfFans),
+                fanDiameter: num(fanDiameter),
+                airflowRate: num(airflowRate),
+                dischargeLineDiameter,
+                liquidLineDiameter,
+                suctionLineDiameter,
+                gasTank: num(gasTank),
+            },
+            unitDefCalcValuesDTO: {
+                ambient: num(ambient), evapIn: num(evapIn), evapOut: num(evapOut), condIn: num(condIn), condOut: num(condOut),
+            },
         };
-
-        append("chillerDto", { model: model.trim(), type: unitType === "air_to_water" ? "AW" : "WW", mod: "COOLING" });
-        append("unitTechSpecsDTO", {
-            capacity: num(capacity),
-            compressorSpecsId: compressorSpec.id,
-            compressorQty: int(compressorQty),
-            condenserSpecsId: condenserSpec.id,
-            condenserQty: int(condenserQty),
-            expansionValveSpecsId: expansionValveSpec.id,
-            expansionValveQty: int(expansionValveQty),
-            evaporatorSpecsId: evaporatorSpec.id,
-            chassisId: chassisItem.id,
-            fourWayReversingValveSpecsId: reversingValveSpec ? reversingValveSpec.id : null,
-            refrigerantId: refrigerantItem.id,
-            condenserRequiredDuty: num(condenserRequiredDuty),
-            quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
-            fanPI: num(fanPI),
-            copErr: num(eer),
-            width: num(width),
-            length: num(length),
-            height: num(height),
-            numberOfFans: int(numberOfFans),
-            fanDiameter: num(fanDiameter),
-            airflowRate: num(airflowRate),
-            dischargeLineDiameter,
-            liquidLineDiameter,
-            suctionLineDiameter,
-            gasTank: num(gasTank),
-        });
-        append("unitDefCalcValuesDTO", {
-            ambient: num(ambient), evapIn: num(evapIn), evapOut: num(evapOut), condIn: num(condIn), condOut: num(condOut),
-        });
-
-        const primary = images.find((u) => u.id === primaryId);
-        if (primary) fd.append("chillerDto.primaryImage", primary.file);
-        images.forEach((u) => { if (u.id !== primaryId) fd.append("chillerDto.images", u.file); });
-        drawings.forEach((u) => fd.append("chillerDto.technicalImages", u.file));
-        icons.forEach((u) => fd.append("chillerDto.icons", u.file));
-        documents.forEach((u) => fd.append("chillerDto.documents", u.file));
 
         setSubmitting(true);
         try {
-            const res = await fetchWithAuth(`${API}/admin/unit/addChiller`, { method: "POST", credentials: "include", body: fd });
+            const res = await fetchWithAuth(`${API}/admin/unit/addChiller`, {
+                method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload),
+            });
             if (res.ok) {
+                const unitId: number = await res.json();
+                await uploadAssets(unitId);
                 showToast("Chiller added successfully.", "success");
                 resetForm();
                 setActiveTab("model");
@@ -269,6 +262,23 @@ export default function Page() {
         }
     };
 
+    const uploadAssets = async (unitId: number) => {
+        const hasFiles = images.length > 0 || drawings.length > 0 || icons.length > 0 || documents.length > 0;
+        if (!hasFiles) return;
+        const fd = new FormData();
+        const primary = images.find((u) => u.id === primaryId);
+        if (primary) fd.append("primaryImage", primary.file);
+        images.forEach((u) => { if (u.id !== primaryId) fd.append("images", u.file); });
+        drawings.forEach((u) => fd.append("technicalImages", u.file));
+        icons.forEach((u) => fd.append("icons", u.file));
+        documents.forEach((u) => fd.append("documents", u.file));
+        try {
+            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
+        } catch (e) {
+            console.error("Asset upload failed", e);
+        }
+    };
+
     const compressorOptions = [SELECT.compressor, ...compressorList.map(specLabel)];
     const evaporatorOptions = [SELECT.evaporator, ...evaporatorList.map(specLabel)];
     const condenserOptions = [SELECT.condenser, ...condenserList.map(specLabel)];
@@ -277,12 +287,6 @@ export default function Page() {
     const chassisOptions = [SELECT.chassis, ...chassisList.map(chassisLabel)];
     const refrigerantOptions = [SELECT.refrigerant, ...refrigerantList.map(refrigerantLabel)];
 
-    const dropZoneStyle = (key: string): React.CSSProperties => ({
-        cursor: "pointer",
-        minHeight: 110,
-        transition: "background 0.15s, outline 0.15s",
-        ...(dragOver === key ? { outline: "2px dashed #4caf50", outlineOffset: "-5px", background: "rgba(76,175,80,0.10)" } : {}),
-    });
     const dropHandlers = (key: string, onFiles: (f: FileList | null) => void) => ({
         onDragOver: (e: React.DragEvent) => { e.preventDefault(); if (dragOver !== key) setDragOver(key); },
         onDragLeave: (e: React.DragEvent) => { e.preventDefault(); setDragOver(null); },
@@ -320,6 +324,14 @@ export default function Page() {
                                     <div className={styles.formField}>
                                         <label>Model</label>
                                         <input type="text" className={styles.inputElement} placeholder="Enter model name" value={model} onChange={(e) => setModel(e.target.value)} />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>Name</label>
+                                        <input type="text" className={styles.inputElement} placeholder="Enter display name" value={name} onChange={(e) => setName(e.target.value)} />
+                                    </div>
+                                    <div className={`${styles.formField} ${styles.formFieldFullWidth}`}>
+                                        <label>Description</label>
+                                        <textarea className={styles.inputElement} placeholder="Enter unit description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Type</label>
@@ -362,25 +374,25 @@ export default function Page() {
 
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>EER</label><input type="number" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
-                                    <div className={styles.formField}><label>COP</label><input type="number" className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
-                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Number of Fans</label><input type="number" className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Discharge Line Diameter</label><input type="number" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Liquid Line Diameter</label><input type="number" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Suction Line Diameter</label><input type="number" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Width</label><input type="number" className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Height</label><input type="number" className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Length</label><input type="number" className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>EER</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
+                                    <div className={styles.formField}><label>COP</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
+                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Number of Fans</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Discharge Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Liquid Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Suction Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
                                 </div>
                             )}
 
@@ -400,91 +412,163 @@ export default function Page() {
 
                     <div className={styles.rightContent}>
                         <div className={styles.uploadSection}>
-                            <div className={`${styles.uploadContainer} ${styles.imgContainer}`} style={dropZoneStyle("image")} onClick={() => imageInputRef.current?.click()} {...dropHandlers("image", onImageFiles)}>
-                                Upload Image
-                                <div className={styles.inputContainer}>
-                                    <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onImageFiles(e.target.files); e.target.value = ""; }} />
-                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Images" />
-                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Images" />
+
+                            {/* Total size bar */}
+                            <div className={styles.sizeBar}>
+                                <span className={styles.sizeBarLabel}>Storage</span>
+                                <div className={styles.sizeBarTrack}>
+                                    <div
+                                        className={`${styles.sizeBarFill}${totalBytes() > MAX_TOTAL_BYTES * 0.9 ? ` ${styles.sizeBarFillDanger}` : totalBytes() > MAX_TOTAL_BYTES * 0.7 ? ` ${styles.sizeBarFillWarn}` : ""}`}
+                                        style={{ width: `${Math.min(100, (totalBytes() / MAX_TOTAL_BYTES) * 100)}%` }}
+                                    />
                                 </div>
+                                <span className={styles.sizeBarValue}>{formatBytes(totalBytes())} / 25 MB</span>
                             </div>
-                            {images.length > 0 && (
-                                <div style={{ margin: "6px 0 14px" }}>
-                                    <div style={{ fontSize: "0.9rem", opacity: 0.85, marginBottom: 8 }}>Select one image as primary</div>
-                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                                        {images.map((u) => (
-                                            <div key={u.id} style={{ position: "relative" }}>
-                                                <img src={u.url} alt="" onClick={() => setLightbox(u.url)} style={{ width: 110, height: 110, objectFit: "cover", borderRadius: 8, cursor: "zoom-in", border: primaryId === u.id ? "2px solid #4caf50" : "1px solid #ccc" }} />
-                                                <div
-                                                    onClick={(e) => { e.stopPropagation(); setPrimaryId(u.id); }}
-                                                    title="Set as primary"
-                                                    style={{ position: "absolute", top: 6, left: 6, width: 22, height: 22, borderRadius: "50%", border: "2px solid #fff", background: primaryId === u.id ? "#4caf50" : "rgba(0,0,0,0.4)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer", boxShadow: "0 0 3px rgba(0,0,0,0.5)" }}
-                                                >
-                                                    {primaryId === u.id ? "✓" : ""}
+
+                            {/* Images */}
+                            <div className={styles.uploadCard}>
+                                <div className={styles.uploadCardHeader}>
+                                    <div className={styles.uploadCardTitle}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                        Images
+                                    </div>
+                                    {images.length > 0 && <span className={styles.uploadBadge}>{images.length}</span>}
+                                </div>
+                                <div
+                                    className={`${styles.dropZone}${dragOver === "image" ? ` ${styles.dropZoneActive}` : ""}`}
+                                    onClick={() => imageInputRef.current?.click()}
+                                    {...dropHandlers("image", onImageFiles)}
+                                >
+                                    <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onImageFiles(e.target.files); e.target.value = ""; }} />
+                                    <div className={styles.dropZoneInner}>
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span className={styles.dropZoneText}>Drop images here or click to browse</span>
+                                        <span className={styles.dropZoneHint}>PNG · JPG · WEBP — multiple files supported</span>
+                                    </div>
+                                </div>
+                                {images.length > 0 && (
+                                    <>
+                                        <span className={styles.uploadGridHint}>Click ☆ to mark as primary · click thumbnail to preview</span>
+                                        <div className={styles.imageGrid}>
+                                            {images.map((u) => (
+                                                <div key={u.id} className={`${styles.imageTile}${primaryId === u.id ? ` ${styles.imageTilePrimary}` : ""}`}>
+                                                    <img src={u.url} alt="" className={styles.imageTileImg} onClick={() => setLightbox(u.url)} />
+                                                    {primaryId === u.id && <span className={styles.primaryRing}>Primary</span>}
+                                                    <button type="button" className={`${styles.starBtn}${primaryId === u.id ? ` ${styles.starBtnActive}` : ""}`} title="Set as primary" onClick={(e) => { e.stopPropagation(); setPrimaryId(u.id); }}>
+                                                        {primaryId === u.id ? "★" : "☆"}
+                                                    </button>
+                                                    <button type="button" className={styles.removeTileBtn} onClick={() => removeImage(u.id)}>×</button>
                                                 </div>
-                                                <button type="button" onClick={() => removeImage(u.id)} style={xBtnStyle}>×</button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Technical Drawings */}
+                            <div className={styles.uploadCard}>
+                                <div className={styles.uploadCardHeader}>
+                                    <div className={styles.uploadCardTitle}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                                        Technical Drawings
+                                    </div>
+                                    {drawings.length > 0 && <span className={styles.uploadBadge}>{drawings.length}</span>}
+                                </div>
+                                <div
+                                    className={`${styles.dropZone}${dragOver === "drawing" ? ` ${styles.dropZoneActive}` : ""}`}
+                                    onClick={() => drawingInputRef.current?.click()}
+                                    {...dropHandlers("drawing", onDrawingFiles)}
+                                >
+                                    <input ref={drawingInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onDrawingFiles(e.target.files); e.target.value = ""; }} />
+                                    <div className={styles.dropZoneInner}>
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span className={styles.dropZoneText}>Drop drawings here or click to browse</span>
+                                        <span className={styles.dropZoneHint}>PNG · JPG — technical diagrams &amp; schematics</span>
+                                    </div>
+                                </div>
+                                {drawings.length > 0 && (
+                                    <div className={styles.imageGrid}>
+                                        {drawings.map((u) => (
+                                            <div key={u.id} className={styles.imageTile}>
+                                                <img src={u.url} alt="" className={styles.imageTileImg} onClick={() => setLightbox(u.url)} />
+                                                <button type="button" className={styles.removeTileBtn} onClick={() => removeFrom(drawings, setDrawings)(u.id)}>×</button>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
-
-                            <div className={`${styles.drawingContainer} ${styles.uploadContainer}`} style={dropZoneStyle("drawing")} onClick={() => drawingInputRef.current?.click()} {...dropHandlers("drawing", onDrawingFiles)}>
-                                Upload Drawing
-                                <div className={styles.inputContainer}>
-                                    <input ref={drawingInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onDrawingFiles(e.target.files); e.target.value = ""; }} />
-                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Drawings" />
-                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Drawings" />
-                                </div>
+                                )}
                             </div>
-                            {drawings.length > 0 && (
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: 12, margin: "6px 0 14px" }}>
-                                    {drawings.map((u) => (
-                                        <div key={u.id} style={{ position: "relative" }}>
-                                            <img src={u.url} alt="" onClick={() => setLightbox(u.url)} style={{ width: 110, height: 110, objectFit: "cover", borderRadius: 8, cursor: "zoom-in", border: "1px solid #ccc" }} />
-                                            <button type="button" onClick={() => removeFrom(drawings, setDrawings)(u.id)} style={xBtnStyle}>×</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
 
-                            <div className={`${styles.docContainer} ${styles.uploadContainer}`} style={dropZoneStyle("document")} onClick={() => documentInputRef.current?.click()} {...dropHandlers("document", onDocumentFiles)}>
-                                Upload File
-                                <div className={styles.inputContainer}>
+                            {/* Documents */}
+                            <div className={styles.uploadCard}>
+                                <div className={styles.uploadCardHeader}>
+                                    <div className={styles.uploadCardTitle}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        Documents
+                                    </div>
+                                    {documents.length > 0 && <span className={styles.uploadBadge}>{documents.length}</span>}
+                                </div>
+                                <div
+                                    className={`${styles.dropZone}${dragOver === "document" ? ` ${styles.dropZoneActive}` : ""}`}
+                                    onClick={() => documentInputRef.current?.click()}
+                                    {...dropHandlers("document", onDocumentFiles)}
+                                >
                                     <input ref={documentInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style={{ display: "none" }} onChange={(e) => { onDocumentFiles(e.target.files); e.target.value = ""; }} />
-                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Documents" />
-                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Documents" />
+                                    <div className={styles.dropZoneInner}>
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span className={styles.dropZoneText}>Drop files here or click to browse</span>
+                                        <span className={styles.dropZoneHint}>PDF · DOC · DOCX · XLS · XLSX</span>
+                                    </div>
                                 </div>
+                                {documents.length > 0 && (
+                                    <div className={styles.docList}>
+                                        {documents.map((u) => {
+                                            const ext = u.file.name.split(".").pop() ?? "file";
+                                            return (
+                                                <div key={u.id} className={styles.docItem}>
+                                                    <div className={styles.docExt}>{ext.slice(0, 4)}</div>
+                                                    <a href={u.url} target="_blank" rel="noopener noreferrer" className={styles.docName} title={u.file.name}>{u.file.name}</a>
+                                                    <span className={styles.docSize}>{formatBytes(u.file.size)}</span>
+                                                    <button type="button" className={styles.docRemoveBtn} onClick={() => removeFrom(documents, setDocuments)(u.id)}>×</button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                            {documents.length > 0 && (
-                                <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "6px 0 14px" }}>
-                                    {documents.map((u) => (
-                                        <div key={u.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "6px 10px", border: "1px solid #ddd", borderRadius: 4, fontSize: 13 }}>
-                                            <a href={u.url} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={u.file.name}>📄 {u.file.name}</a>
-                                            <button type="button" onClick={() => removeFrom(documents, setDocuments)(u.id)} style={{ border: "none", background: "transparent", color: "#d9534f", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
 
-                            <div className={`${styles.iconContainer} ${styles.uploadContainer}`} style={dropZoneStyle("icon")} onClick={() => iconInputRef.current?.click()} {...dropHandlers("icon", onIconFiles)}>
-                                Upload Icon
-                                <div className={styles.inputContainer}>
+                            {/* Icons */}
+                            <div className={styles.uploadCard}>
+                                <div className={styles.uploadCardHeader}>
+                                    <div className={styles.uploadCardTitle}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Icons
+                                    </div>
+                                    {icons.length > 0 && <span className={styles.uploadBadge}>{icons.length}</span>}
+                                </div>
+                                <div
+                                    className={`${styles.dropZone}${dragOver === "icon" ? ` ${styles.dropZoneActive}` : ""}`}
+                                    onClick={() => iconInputRef.current?.click()}
+                                    {...dropHandlers("icon", onIconFiles)}
+                                >
                                     <input ref={iconInputRef} type="file" accept="image/png, image/svg+xml, .ico" multiple style={{ display: "none" }} onChange={(e) => { onIconFiles(e.target.files); e.target.value = ""; }} />
-                                    <img className={styles.lightIcon} src="../../../icons/upload-light.png" alt="Icons" />
-                                    <img className={styles.darkIcon} src="../../../icons/upload-dark.png" alt="Icons" />
+                                    <div className={styles.dropZoneInner}>
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span className={styles.dropZoneText}>Drop icons here or click to browse</span>
+                                        <span className={styles.dropZoneHint}>PNG · SVG · ICO</span>
+                                    </div>
                                 </div>
+                                {icons.length > 0 && (
+                                    <div className={styles.iconGrid}>
+                                        {icons.map((u) => (
+                                            <div key={u.id} className={styles.iconTile}>
+                                                <img src={u.url} alt="" className={styles.iconTileImg} onClick={() => setLightbox(u.url)} />
+                                                <button type="button" className={styles.removeTileBtn} onClick={() => removeFrom(icons, setIcons)(u.id)}>×</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            {icons.length > 0 && (
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, margin: "6px 0 14px" }}>
-                                    {icons.map((u) => (
-                                        <div key={u.id} style={{ position: "relative" }}>
-                                            <img src={u.url} alt="" onClick={() => setLightbox(u.url)} style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 4, cursor: "zoom-in", border: "1px solid #ddd", padding: 2, background: "#fff" }} />
-                                            <button type="button" onClick={() => removeFrom(icons, setIcons)(u.id)} style={{ ...xBtnStyle, width: 16, height: 16, top: -6, right: -6, fontSize: 11 }}>×</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+
                         </div>
                         <div className={styles.stepNavContainer}>
                             <div className={styles.stepNavLeft}>
