@@ -59,7 +59,7 @@ export default function ChillerPage() {
                             <h3>Air Cooled Chillers</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/745729.png" alt="Air Cooled Chiller" />
+                            <img src="/images/products/745729.png" alt="Air Cooled Chiller" />
                         </div>
                     </div>
                     <button className={styles.viewBtn} onClick={() => router.push('/chiller/air-cooled-chillers')}>
@@ -72,7 +72,7 @@ export default function ChillerPage() {
                             <h3>Water Cooled Chillers</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/569547.png" alt="Water Cooled Chiller" />
+                            <img src="/images/products/569547.png" alt="Water Cooled Chiller" />
                         </div>
                     </div>
                     <button className={styles.viewBtn} onClick={() => router.push('/chiller/water-cooled-chillers')}>

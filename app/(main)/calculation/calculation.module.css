@@ -212,10 +212,13 @@
 
 .image {
     height: 150px;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .image img {
     height: 100%;
+    max-width: 100%;
     object-fit: contain;
 }
 

@@ -174,7 +174,7 @@ export default function ProjectsPage() {
                                                 <p>OffiTec Modular High-Capacity Air-Cooled Industrial Chiller Unit</p>
                                             </div>
                                             <div className={styles.unitImage}>
-                                                <img src="../../images/products/824186.png" alt="Chiller image" />
+                                                <img src="/images/products/824186.png" alt="Chiller image" />
                                             </div>
                                             <div className={styles.unitDocument}>
                                                 <div className={styles.documentIcon}>
@@ -193,7 +193,7 @@ export default function ProjectsPage() {
                                                 <p>OffiTec Modular High-Capacity Air-Cooled Industrial Chiller Unit</p>
                                             </div>
                                             <div className={styles.unitImage}>
-                                                <img src="../../images/products/824186.png" alt="Chiller image" />
+                                                <img src="/images/products/824186.png" alt="Chiller image" />
                                             </div>
                                             <div className={styles.unitDocument}>
                                                 <div className={styles.documentIcon}>
@@ -224,7 +224,7 @@ export default function ProjectsPage() {
                                                     </div>
                                                 </div>
                                                 <div className={styles.unitImage}>
-                                                    <img src="../../images/products/824186.png" alt="Chiller image" />
+                                                    <img src="/images/products/824186.png" alt="Chiller image" />
                                                 </div>
                                             </div>
                                         </div>
@@ -247,7 +247,7 @@ export default function ProjectsPage() {
                                                     </div>
                                                 </div>
                                                 <div className={styles.unitImage}>
-                                                    <img src="../../images/products/824186.png" alt="Chiller image" />
+                                                    <img src="/images/products/824186.png" alt="Chiller image" />
                                                 </div>
                                             </div>
                                         </div>
@@ -270,7 +270,7 @@ export default function ProjectsPage() {
                                                     </div>
                                                 </div>
                                                 <div className={styles.unitImage}>
-                                                    <img src="../../images/products/824186.png" alt="Chiller image" />
+                                                    <img src="/images/products/824186.png" alt="Chiller image" />
                                                 </div>
                                             </div>
                                         </div>

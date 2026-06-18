@@ -41,7 +41,7 @@ export default function HeatPumpsPage() {
                             <h3>Air to Water Heat Pumps</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/745729.png" alt="Air to Water Heat Pump" />
+                            <img src="/images/products/745729.png" alt="Air to Water Heat Pump" />
                         </div>
                     </div>
                     <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/air-to-water-heat-pumps')}>
@@ -54,7 +54,7 @@ export default function HeatPumpsPage() {
                             <h3>Water to Water Heat Pumps</h3>
                         </div>
                         <div className={styles.productImage}>
-                            <img src="../images/products/569547.png" alt="Water to Water Heat Pump" />
+                            <img src="/images/products/569547.png" alt="Water to Water Heat Pump" />
                         </div>
                     </div>
                     <button className={styles.viewBtn} onClick={() => router.push('/heat-pumps/water-to-water-heat-pumps')}>
