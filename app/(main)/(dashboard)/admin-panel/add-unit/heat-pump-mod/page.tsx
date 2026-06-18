@@ -9,6 +9,7 @@ import { fetchWithAuth } from "../../../../../../lib/api";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type ComponentSpecs = { id: number; brand?: string | null; model: string; capacity: number };
+type CompressorSpecs = { id: number; brand?: string | null; model: string; type?: string | null; capacity: number; powerInput: number };
 type Chassis = { id: number; brand?: string | null; model: string };
 type HeatPump = { id: number; model: string; type: string; mods: string[] };
 
@@ -22,8 +23,9 @@ const SELECT = {
     chassis: "Select Chasis",
 };
 
-const specLabel = (s: ComponentSpecs) => `${[s.brand, s.model].filter(Boolean).join(" / ")} / ${s.capacity} kW`;
-const chassisLabel = (c: Chassis) => [c.brand, c.model].filter(Boolean).join(" / ");
+const specLabel = (s: ComponentSpecs) => `${s.model} / C: ${s.capacity}`;
+const compressorLabel = (s: CompressorSpecs) => `${[s.brand, s.model, s.type].filter(Boolean).join(" / ")} / C: ${s.capacity} / PI: ${s.powerInput}`;
+const chassisLabel = (c: Chassis) => c.model;
 const heatPumpLabel = (h: HeatPump) => `${h.model} (${h.type})`;
 
 export default function AddHeatPumpModPage() {
@@ -41,7 +43,7 @@ export default function AddHeatPumpModPage() {
     const [reversingValveSpecsId, setReversingValveSpecsId] = useState<number | null>(null);
     const [chassisId, setChassisId] = useState<number | null>(null);
 
-    const [compressorList, setCompressorList] = useState<ComponentSpecs[]>([]);
+    const [compressorList, setCompressorList] = useState<CompressorSpecs[]>([]);
     const [evaporatorList, setEvaporatorList] = useState<ComponentSpecs[]>([]);
     const [condenserList, setCondenserList] = useState<ComponentSpecs[]>([]);
     const [expansionValveList, setExpansionValveList] = useState<ComponentSpecs[]>([]);
@@ -246,9 +248,9 @@ export default function AddHeatPumpModPage() {
                             <div className={styles.formField}>
                                 <label>Compressor</label>
                                 <Combobox
-                                    options={[SELECT.compressor, ...compressorList.map(specLabel)]}
-                                    value={compressorValue ? specLabel(compressorValue) : SELECT.compressor}
-                                    onChange={(label) => setCompressorSpecsId(compressorList.find((s) => specLabel(s) === label)?.id ?? null)}
+                                    options={[SELECT.compressor, ...compressorList.map(compressorLabel)]}
+                                    value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor}
+                                    onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)}
                                     className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />

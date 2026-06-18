@@ -9,6 +9,7 @@ import { fetchWithAuth } from "../../../../../../lib/api";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type ComponentSpecs = { id: number; brand?: string | null; model: string; capacity: number };
+type CompressorSpecs = { id: number; brand?: string | null; model: string; type?: string | null; capacity: number; powerInput: number };
 type Chassis = { id: number; brand?: string | null; model: string };
 type Refrigerant = { id: number; name: string; code: string };
 type ChillerSummary = { id: number; model: string; type: string };
@@ -48,8 +49,9 @@ const SELECT = {
     refrigerant: "Select Refrigerant",
 };
 
-const specLabel = (s: ComponentSpecs) => `${[s.brand, s.model].filter(Boolean).join(" / ")} / ${s.capacity} kW`;
-const chassisLabel = (c: Chassis) => [c.brand, c.model].filter(Boolean).join(" / ");
+const specLabel = (s: ComponentSpecs) => `${s.model} / C: ${s.capacity}`;
+const compressorLabel = (s: CompressorSpecs) => `${[s.brand, s.model, s.type].filter(Boolean).join(" / ")} / C: ${s.capacity} / PI: ${s.powerInput}`;
+const chassisLabel = (c: Chassis) => c.model;
 const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
 const chillerLabel = (c: ChillerSummary) => `${c.model} (${c.type})`;
 const str = (n: number | null | undefined) => (n === null || n === undefined ? "" : String(n));
@@ -73,7 +75,7 @@ export default function Page() {
     const [chassisId, setChassisId] = useState<number | null>(null);
     const [refrigerantId, setRefrigerantId] = useState<number | null>(null);
 
-    const [compressorList, setCompressorList] = useState<ComponentSpecs[]>([]);
+    const [compressorList, setCompressorList] = useState<CompressorSpecs[]>([]);
     const [evaporatorList, setEvaporatorList] = useState<ComponentSpecs[]>([]);
     const [condenserList, setCondenserList] = useState<ComponentSpecs[]>([]);
     const [expansionValveList, setExpansionValveList] = useState<ComponentSpecs[]>([]);
@@ -346,7 +348,7 @@ export default function Page() {
     };
 
     const chillerOptions = [SELECT.chiller, ...chillers.map(chillerLabel)];
-    const compressorOptions = [SELECT.compressor, ...compressorList.map(specLabel)];
+    const compressorOptions = [SELECT.compressor, ...compressorList.map(compressorLabel)];
     const evaporatorOptions = [SELECT.evaporator, ...evaporatorList.map(specLabel)];
     const condenserOptions = [SELECT.condenser, ...condenserList.map(specLabel)];
     const expansionValveOptions = [SELECT.expansionValve, ...expansionValveList.map(specLabel)];
@@ -395,7 +397,7 @@ export default function Page() {
                                     <div className={`${styles.formField} ${styles.formFieldFullWidth}`}><label>Description</label><textarea className={styles.inputElement} placeholder="Enter unit description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
                                     <div className={styles.formField}><label>Type</label><Combobox options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
                                     <div className={styles.formField}><label>Mod</label><Combobox options={["Cooling"]} value="Cooling" onChange={() => {}} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Compressor</label><Combobox options={compressorOptions} value={compressorValue ? specLabel(compressorValue) : SELECT.compressor} onChange={(label) => setCompressorSpecsId(compressorList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>Compressor</label><Combobox options={compressorOptions} value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor} onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                     <div className={styles.formField}><label>Evaporator</label><Combobox options={evaporatorOptions} value={evaporatorValue ? specLabel(evaporatorValue) : SELECT.evaporator} onChange={(label) => setEvaporatorSpecsId(evaporatorList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${evaporatorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                     <div className={styles.formField}><label>Condenser</label><Combobox options={condenserOptions} value={condenserValue ? specLabel(condenserValue) : SELECT.condenser} onChange={(label) => setCondenserSpecsId(condenserList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${condenserSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                     <div className={styles.formField}><label>Expansion Valve</label><Combobox options={expansionValveOptions} value={expansionValveValue ? specLabel(expansionValveValue) : SELECT.expansionValve} onChange={(label) => setExpansionValveSpecsId(expansionValveList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${expansionValveSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
