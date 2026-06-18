@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import styles from "../../add-unit/addUnit.module.css";
@@ -20,6 +20,10 @@ type CompressorSpecs = {
     type: string;
     capacity: number;
     powerInput: number;
+    qC1: number; qC2: number; qC3: number; qC4: number; qC5: number;
+    qC6: number; qC7: number; qC8: number; qC9: number; qC10: number;
+    pC1: number; pC2: number; pC3: number; pC4: number; pC5: number;
+    pC6: number; pC7: number; pC8: number; pC9: number; pC10: number;
 }
 
 export default function EditCompressorPage() {
@@ -28,14 +32,15 @@ export default function EditCompressorPage() {
     const [type, setType] = useState("Select Type");
     const [model, setModel] = useState("");
 
-    // Specs states
     const [compressor, setCompressor] = useState("Select Compressor");
     const [capacity, setCapacity] = useState("");
     const [powerInput, setPowerInput] = useState("");
+    const [qCoeffs, setQCoeffs] = useState<string[]>(Array(10).fill(""));
+    const [pCoeffs, setPCoeffs] = useState<string[]>(Array(10).fill(""));
 
     const [compressorsList, setCompressorsList] = useState<Compressor[]>([]);
     const [compressorSpecsList, setCompressorSpecsList] = useState<CompressorSpecs[]>([]);
-    
+
     const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -93,10 +98,24 @@ export default function EditCompressorPage() {
             if (spec) {
                 setCapacity(spec.capacity.toString());
                 setPowerInput(spec.powerInput.toString());
+                setQCoeffs([
+                    spec.qC1.toString(), spec.qC2.toString(), spec.qC3.toString(),
+                    spec.qC4.toString(), spec.qC5.toString(), spec.qC6.toString(),
+                    spec.qC7.toString(), spec.qC8.toString(), spec.qC9.toString(),
+                    spec.qC10.toString()
+                ]);
+                setPCoeffs([
+                    spec.pC1.toString(), spec.pC2.toString(), spec.pC3.toString(),
+                    spec.pC4.toString(), spec.pC5.toString(), spec.pC6.toString(),
+                    spec.pC7.toString(), spec.pC8.toString(), spec.pC9.toString(),
+                    spec.pC10.toString()
+                ]);
             }
         } else {
             setCapacity("");
             setPowerInput("");
+            setQCoeffs(Array(10).fill(""));
+            setPCoeffs(Array(10).fill(""));
         }
     }, [compressor, compressorSpecsList]);
 
@@ -125,7 +144,7 @@ export default function EditCompressorPage() {
                 showToast("Compressor updated successfully.", "success");
                 setSelectedItemToEdit("Select Compressor");
                 fetchCompressors();
-                fetchCompressorSpecs(); // In case brand/model/type changed, refresh specs text
+                fetchCompressorSpecs();
             } else {
                 try {
                     const data = await res.json();
@@ -149,15 +168,28 @@ export default function EditCompressorPage() {
             showToast("Please fill all fields.", "error");
             return;
         }
+        if (qCoeffs.some(v => v === "") || pCoeffs.some(v => v === "")) {
+            showToast("Please fill all coefficient fields.", "error");
+            return;
+        }
 
         const selectedSpec = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
         if (!selectedSpec) return;
+
+        const qObj = Object.fromEntries(qCoeffs.map((v, i) => [`qC${i + 1}`, parseFloat(v)]));
+        const pObj = Object.fromEntries(pCoeffs.map((v, i) => [`pC${i + 1}`, parseFloat(v)]));
 
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressorSpecs/${selectedSpec.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ compressorId: 0, capacity: parseFloat(capacity), powerInput: parseFloat(powerInput) }),
+                body: JSON.stringify({
+                    compressorId: 0,
+                    capacity: parseFloat(capacity),
+                    powerInput: parseFloat(powerInput),
+                    ...qObj,
+                    ...pObj
+                }),
                 credentials: 'include'
             });
 
@@ -202,85 +234,132 @@ export default function EditCompressorPage() {
                     <div className={styles.leftContent}>
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
-
-                                    <div className={styles.formField}>
-                                        <label>Compressor</label>
-                                        <Combobox 
-                                            options={compressorOptions}
-                                            value={selectedItemToEdit}
-                                            onChange={setSelectedItemToEdit}
-                                            className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
-                                            containerClassName={styles.comboboxContainerOverride}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Brand</label>
-                                        <Combobox 
-                                            options={["Select Brand", "Frescold", "Copelant"]}
-                                            value={brand}
-                                            onChange={setBrand}
-                                            className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
-                                            containerClassName={styles.comboboxContainerOverride}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Type</label>
-                                        <Combobox 
-                                            options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
-                                            value={type}
-                                            onChange={setType}
-                                            className={`${styles.comboBox} ${type.startsWith('Select') ? styles.placeholderText : ''}`}
-                                            containerClassName={styles.comboboxContainerOverride}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
-                                            value={model}
-                                            onChange={(e) => setModel(e.target.value)}
-                                        />
-                                    </div>
+                                <div className={styles.formField}>
+                                    <label>Compressor</label>
+                                    <Combobox
+                                        options={compressorOptions}
+                                        value={selectedItemToEdit}
+                                        onChange={setSelectedItemToEdit}
+                                        className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Brand</label>
+                                    <Combobox
+                                        options={["Select Brand", "Frescold", "Copelant"]}
+                                        value={brand}
+                                        onChange={setBrand}
+                                        className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Type</label>
+                                    <Combobox
+                                        options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
+                                        value={type}
+                                        onChange={setType}
+                                        className={`${styles.comboBox} ${type.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Model</label>
+                                    <input
+                                        type="text"
+                                        className={styles.inputElement}
+                                        placeholder="Enter model"
+                                        value={model}
+                                        onChange={(e) => setModel(e.target.value)}
+                                    />
+                                </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
                                 <button className={styles.saveBtn} onClick={handleEditCompressor}>Save</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
+
                             <div className={styles.formGrid}>
-                                    <div className={styles.formField}>
-                                        <label>Compressor Specs</label>
-                                        <Combobox 
-                                            options={specsOptions}
-                                            value={compressor}
-                                            onChange={setCompressor}
-                                            className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
-                                            containerClassName={styles.comboboxContainerOverride}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
-                                            value={capacity}
-                                            onChange={(e) => setCapacity(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>Power Input</label>
-                                        <input 
-                                            type="number" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter power input"
-                                            value={powerInput}
-                                            onChange={(e) => setPowerInput(e.target.value)}
-                                        />
-                                    </div>
+                                <div className={styles.formField}>
+                                    <label>Compressor Specs</label>
+                                    <Combobox
+                                        options={specsOptions}
+                                        value={compressor}
+                                        onChange={setCompressor}
+                                        className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Capacity</label>
+                                    <input
+                                        type="number"
+                                        className={styles.inputElement}
+                                        placeholder="Enter capacity"
+                                        value={capacity}
+                                        onChange={(e) => setCapacity(e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>Power Input</label>
+                                    <input
+                                        type="number"
+                                        className={styles.inputElement}
+                                        placeholder="Enter power input"
+                                        value={powerInput}
+                                        onChange={(e) => setPowerInput(e.target.value)}
+                                    />
+                                </div>
                             </div>
+
+                            <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
+
+                            <fieldset className={styles.coeffGroup}>
+                                <legend>Capacity Coefficients (Q)</legend>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+                                    {qCoeffs.map((val, i) => (
+                                        <div className={styles.formField} key={`q${i}`}>
+                                            <label>Q-C{i + 1}</label>
+                                            <input
+                                                type="number"
+                                                className={styles.inputElement}
+                                                placeholder="0"
+                                                value={val}
+                                                onChange={(e) => {
+                                                    const next = [...qCoeffs];
+                                                    next[i] = e.target.value;
+                                                    setQCoeffs(next);
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </fieldset>
+
+                            <fieldset className={styles.coeffGroup}>
+                                <legend>Power Input Coefficients (P)</legend>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+                                    {pCoeffs.map((val, i) => (
+                                        <div className={styles.formField} key={`p${i}`}>
+                                            <label>P-C{i + 1}</label>
+                                            <input
+                                                type="number"
+                                                className={styles.inputElement}
+                                                placeholder="0"
+                                                value={val}
+                                                onChange={(e) => {
+                                                    const next = [...pCoeffs];
+                                                    next[i] = e.target.value;
+                                                    setPCoeffs(next);
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </fieldset>
+
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
                                 <button className={styles.saveBtn} onClick={handleEditCompressorSpecs}>Save</button>
                             </div>

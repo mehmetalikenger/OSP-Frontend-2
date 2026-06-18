@@ -894,3 +894,27 @@ textarea.inputElement {
     box-sizing: border-box;
     display: block;
 }
+
+.coeffGroup {
+    border: 1.5px solid #282f68;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    min-width: 0;
+}
+
+.coeffGroup legend {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #282f68;
+    padding: 0 8px;
+    margin-left: 4px;
+}
+
+:global(.dark-mode) .coeffGroup {
+    border-color: #c4d9ff;
+}
+
+:global(.dark-mode) .coeffGroup legend {
+    color: #c4d9ff;
+}
