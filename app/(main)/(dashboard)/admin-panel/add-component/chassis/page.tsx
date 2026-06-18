@@ -35,7 +35,7 @@ export default function AddChassisPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add chassis.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add chassis.", "error");
                 }
             }

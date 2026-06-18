@@ -343,12 +343,13 @@ export default function AddHeatPumpModelPage() {
                                 {documents.length > 0 && (
                                     <div className={styles.docList}>
                                         {documents.map((u) => {
-                                            const ext = u.file.name.split(".").pop() ?? "file";
+                                            const fileName = u.file?.name ?? decodeURIComponent(u.url.split("/").pop() ?? "document");
+                                            const ext = fileName.split(".").pop() ?? "file";
                                             return (
                                                 <div key={u.id} className={styles.docItem}>
                                                     <div className={styles.docExt}>{ext.slice(0, 4)}</div>
-                                                    <a href={u.url} target="_blank" rel="noopener noreferrer" className={styles.docName} title={u.file.name}>{u.file.name}</a>
-                                                    <span className={styles.docSize}>{formatBytes(u.file.size)}</span>
+                                                    <a href={u.url} target="_blank" rel="noopener noreferrer" className={styles.docName} title={fileName}>{fileName}</a>
+                                                    {u.file && <span className={styles.docSize}>{formatBytes(u.file.size)}</span>}
                                                     <button type="button" className={styles.docRemoveBtn} onClick={() => removeFrom(documents, setDocuments)(u.id)}>×</button>
                                                 </div>
                                             );

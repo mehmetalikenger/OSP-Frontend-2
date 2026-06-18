@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from '../login/login.module.css';
 
@@ -59,13 +59,13 @@ function ActivateContent() {
           } else {
             errorMessage = errorJson.message || errorJson.error || errorText;
           }
-        } catch (e) {
+        } catch {
           // It's plain text
         }
         setStatus('error');
         setMessage(errorMessage || 'Failed to activate account. The link may have expired or is invalid.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Network error. Please try again later.');
     }

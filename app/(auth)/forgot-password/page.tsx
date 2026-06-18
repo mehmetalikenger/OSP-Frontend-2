@@ -28,13 +28,13 @@ export default function ForgotPasswordPage() {
         try {
           const errorJson = JSON.parse(errorText);
           errorMessage = errorJson.message || errorJson.error || errorText;
-        } catch (e) {
+        } catch {
           // It's plain text
         }
         setStatus('error');
         setMessage(errorMessage || 'Failed to send reset link. Please check the email and try again.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Network error. Please try again later.');
     }

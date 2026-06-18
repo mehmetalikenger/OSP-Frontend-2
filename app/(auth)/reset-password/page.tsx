@@ -56,13 +56,13 @@ function ResetPasswordContent() {
           } else {
             errorMessage = errorJson.message || errorJson.error || errorText;
           }
-        } catch (e) {
+        } catch {
           // It's plain text
         }
         setStatus('error');
         setMessage(errorMessage || 'Failed to reset password. The link may be invalid or expired.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Network error. Please try again later.');
     }

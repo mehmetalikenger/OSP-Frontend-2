@@ -87,7 +87,7 @@ export default function AdminPanelPage() {
             } else {
                 showToast("Failed to add admin.", "error");
             }
-        } catch(e) {
+        } catch {
             showToast("Failed to add admin.", "error");
         }
       }
@@ -122,7 +122,7 @@ export default function AdminPanelPage() {
             } else {
                 showToast("Failed to add user.", "error");
             }
-        } catch(e) {
+        } catch {
             showToast("Failed to add user.", "error");
         }
       }

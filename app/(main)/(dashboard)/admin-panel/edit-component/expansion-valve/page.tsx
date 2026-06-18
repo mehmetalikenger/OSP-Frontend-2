@@ -116,7 +116,7 @@ export default function EditExpansionValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit expansion valve.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit expansion valve.", "error");
                 }
             }
@@ -155,7 +155,7 @@ export default function EditExpansionValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit expansion valve specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit expansion valve specs.", "error");
                 }
             }

@@ -130,7 +130,7 @@ export default function EditCompressorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit compressor.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit compressor.", "error");
                 }
             }
@@ -169,7 +169,7 @@ export default function EditCompressorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit compressor specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit compressor specs.", "error");
                 }
             }

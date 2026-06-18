@@ -64,7 +64,7 @@ export default function AddExpansionValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add expansion valve.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add expansion valve.", "error");
                 }
             }
@@ -106,7 +106,7 @@ export default function AddExpansionValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add expansion valve specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add expansion valve specs.", "error");
                 }
             }

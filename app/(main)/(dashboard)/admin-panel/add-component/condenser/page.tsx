@@ -64,7 +64,7 @@ export default function AddCondenserPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add condenser.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add condenser.", "error");
                 }
             }
@@ -106,7 +106,7 @@ export default function AddCondenserPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add condenser specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add condenser specs.", "error");
                 }
             }

@@ -37,7 +37,7 @@ export default function AddRefrigerantPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add refrigerant.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add refrigerant.", "error");
                 }
             }

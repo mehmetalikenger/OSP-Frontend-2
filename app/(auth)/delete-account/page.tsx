@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from '../login/login.module.css';
 
@@ -36,13 +36,13 @@ function DeleteAccountContent() {
         try {
           const errorJson = JSON.parse(errorText);
           errorMessage = errorJson.message || errorJson.error || errorText;
-        } catch (e) {
+        } catch {
           // It's plain text
         }
         setStatus('error');
         setMessage(errorMessage || 'Failed to delete account. The link may have expired.');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
       setMessage('Network error. Please try again later.');
     }

@@ -79,7 +79,7 @@ export default function EditChassisPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit chassis.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit chassis.", "error");
                 }
             }

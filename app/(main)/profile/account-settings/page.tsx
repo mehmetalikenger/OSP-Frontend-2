@@ -111,11 +111,11 @@ export default function AccountSettingsPage() {
                     } else {
                         showToast(errorJson.message || errorJson.error || "Failed to save info", "error");
                     }
-                } catch (e) {
+                } catch {
                     showToast("Failed to save info", "error");
                 }
             }
-        } catch(err) {
+        } catch {
             showToast("Network error", "error");
         }
     };
@@ -140,11 +140,11 @@ export default function AccountSettingsPage() {
                     } else {
                         showToast(errorJson.message || errorJson.error || "Failed to save address", "error");
                     }
-                } catch (e) {
+                } catch {
                     showToast("Failed to save address", "error");
                 }
             }
-        } catch(err) {
+        } catch {
             showToast("Network error", "error");
         }
     };
@@ -180,7 +180,7 @@ export default function AccountSettingsPage() {
                     } else {
                         errorMessage = errorJson.message || errorJson.error || errorText;
                     }
-                } catch (e) {
+                } catch {
                     // It's plain text
                 }
                 
@@ -192,7 +192,7 @@ export default function AccountSettingsPage() {
                     showToast(errorMessage || "Failed to update password", "error");
                 }
             }
-        } catch(err) {
+        } catch {
             showToast("Network error", "error");
         }
     };

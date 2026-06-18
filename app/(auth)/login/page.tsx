@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -54,11 +53,11 @@ export default function LoginPage() {
             } else {
                 setError('Login failed. Please check your credentials.');
             }
-        } catch(e) {
+        } catch {
             setError('Login failed. Please check your credentials.');
         }
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again later.');
     } finally {
       setLoading(false);

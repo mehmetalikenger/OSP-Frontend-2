@@ -83,7 +83,7 @@ export default function EditRefrigerantPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit refrigerant.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit refrigerant.", "error");
                 }
             }

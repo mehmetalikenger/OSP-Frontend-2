@@ -8,10 +8,13 @@ const nextConfig: NextConfig = {
     proxyClientMaxBodySize: "25mb",
   },
   async rewrites() {
+    // Backend origin the /api proxy forwards to. Defaults to local dev;
+    // set BACKEND_URL in production (e.g. the Railway backend URL).
+    const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080'
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/:path*'
+        destination: `${backendUrl}/:path*`
       }
     ]
   }

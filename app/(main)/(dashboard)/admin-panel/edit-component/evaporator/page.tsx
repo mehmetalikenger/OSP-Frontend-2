@@ -116,7 +116,7 @@ export default function EditEvaporatorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit evaporator.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit evaporator.", "error");
                 }
             }
@@ -155,7 +155,7 @@ export default function EditEvaporatorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit evaporator specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit evaporator specs.", "error");
                 }
             }

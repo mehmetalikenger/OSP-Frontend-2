@@ -116,7 +116,7 @@ export default function EditFourWayReversingValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit valve.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit valve.", "error");
                 }
             }
@@ -155,7 +155,7 @@ export default function EditFourWayReversingValvePage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit valve specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit valve specs.", "error");
                 }
             }

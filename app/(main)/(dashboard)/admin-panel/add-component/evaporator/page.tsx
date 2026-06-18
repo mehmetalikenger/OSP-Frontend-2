@@ -64,7 +64,7 @@ export default function AddEvaporatorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add evaporator.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add evaporator.", "error");
                 }
             }
@@ -106,7 +106,7 @@ export default function AddEvaporatorPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to add evaporator specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to add evaporator specs.", "error");
                 }
             }

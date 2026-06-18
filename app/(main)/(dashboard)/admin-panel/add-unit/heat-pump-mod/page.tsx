@@ -97,7 +97,6 @@ export default function AddHeatPumpModPage() {
     }, []);
 
     const num = (v: string) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
-    const int = (v: string) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
 
     const selectedHeatPump = heatPumps.find((h) => h.id === selectedHeatPumpId);
     const unitType = selectedHeatPump?.type === "WW" ? "water_to_water" : "air_to_water";

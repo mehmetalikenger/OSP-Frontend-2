@@ -116,7 +116,7 @@ export default function EditCondenserPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit condenser.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit condenser.", "error");
                 }
             }
@@ -155,7 +155,7 @@ export default function EditCondenserPage() {
                 try {
                     const data = await res.json();
                     showToast(data.message || "Failed to edit condenser specs.", "error");
-                } catch(e) {
+                } catch {
                     showToast("Failed to edit condenser specs.", "error");
                 }
             }
