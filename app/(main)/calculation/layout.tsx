@@ -8,7 +8,7 @@ export default function CalculationLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className={`${styles.mobileContainer} ${styles.container}`}>
+        <div className={styles.container}>
             {children}
             <div className={styles.bottomLogo}>
                 <img src="../../logo/logo.png" alt="OffiTec Logo" />

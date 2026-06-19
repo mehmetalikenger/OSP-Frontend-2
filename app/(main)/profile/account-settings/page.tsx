@@ -298,7 +298,8 @@ export default function AccountSettingsPage() {
                                 onChange={(e) => { setCurrentPassword(e.target.value); setSecurityChanged(true); setCurrentPasswordError(false); }} 
                             />
                             <div className={styles.passwordEye} onClick={() => setShowCurrentPassword(!showCurrentPassword)} style={{ cursor: 'pointer' }}>
-                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showCurrentPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.lightIcon} src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showCurrentPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.darkIcon} src="/icons/pass-eye-darkMode.png" alt="Eye" style={{ opacity: showCurrentPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
                         {currentPasswordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Current password is incorrect.</span>}
@@ -314,7 +315,8 @@ export default function AccountSettingsPage() {
                                 onChange={(e) => { setPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); setNewPasswordErrorMessage(""); }} 
                             />
                             <div className={styles.passwordEye} onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
-                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.lightIcon} src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.darkIcon} src="/icons/pass-eye-darkMode.png" alt="Eye" style={{ opacity: showPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
                         {newPasswordErrorMessage && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px', display: 'block' }}>{newPasswordErrorMessage}</span>}
@@ -330,7 +332,8 @@ export default function AccountSettingsPage() {
                                 onChange={(e) => { setConfirmPassword(e.target.value); setSecurityChanged(true); setPasswordError(false); }} 
                             />
                             <div className={styles.passwordEye} onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ cursor: 'pointer' }}>
-                                <img src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showConfirmPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.lightIcon} src="/icons/pass-eye.png" alt="Eye" style={{ opacity: showConfirmPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
+                                <img className={styles.darkIcon} src="/icons/pass-eye-darkMode.png" alt="Eye" style={{ opacity: showConfirmPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
                         {passwordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Passwords do not match.</span>}

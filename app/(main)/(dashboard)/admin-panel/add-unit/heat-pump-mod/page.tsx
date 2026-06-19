@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -66,6 +66,8 @@ export default function AddHeatPumpModPage() {
 
     const [submitting, setSubmitting] = useState(false);
     const [toastInfo, setToastInfo] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const topRef = useRef<HTMLDivElement>(null);
+    const scrollToFormTop = () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     const showToast = (message: string, type: "success" | "error" = "success") => {
         setToastInfo({ message, type });
         setTimeout(() => setToastInfo(null), 3500);
@@ -206,6 +208,10 @@ export default function AddHeatPumpModPage() {
     const reversingValveValue = reversingValveList.find((s) => s.id === reversingValveSpecsId);
     const chassisValue = chassisList.find((c) => c.id === chassisId);
 
+    const modelComplete =
+        selectedHeatPumpId !== null && compressorSpecsId !== null && evaporatorSpecsId !== null &&
+        condenserSpecsId !== null && expansionValveSpecsId !== null && chassisId !== null;
+
     return (
         <div className={styles.sectionsContainer}>
             {toastInfo && (
@@ -213,7 +219,7 @@ export default function AddHeatPumpModPage() {
                     {toastInfo.message}
                 </div>
             )}
-            <div className={styles.sectionContent} style={{ maxWidth: "1000px", flex: "none" }}>
+            <div className={styles.sectionContent} ref={topRef} style={{ maxWidth: "1000px", flex: "none" }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>Mod Details</span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
@@ -359,7 +365,7 @@ export default function AddHeatPumpModPage() {
                                 <button className={styles.stepBtn} onClick={() => setActiveTab('model')}>Previous</button>
                             )}
                             {activeTab !== 'calc' && (
-                                <button className={styles.stepBtn} onClick={() => setActiveTab('calc')}>Next</button>
+                                <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab('calc'); scrollToFormTop(); }}>Next</button>
                             )}
                         </div>
                         {activeTab === 'calc' && (

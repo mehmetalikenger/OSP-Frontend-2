@@ -16,6 +16,7 @@ interface TechSpec {
 
 interface ProductAccordionProps {
     title: string;
+    unitName?: string;
     modelName?: string;
     calculationForm?: React.ReactNode;
     images?: CalcAsset[];
@@ -26,6 +27,7 @@ interface ProductAccordionProps {
 
 export default function ProductAccordion({
     title,
+    unitName,
     modelName,
     calculationForm,
     images = [],
@@ -139,10 +141,20 @@ export default function ProductAccordion({
                 <h1>{title}</h1>
             </div>
             <div className={styles.headerLine}></div>
-            {modelName && (
+            {(unitName || modelName) && (
                 <div className={styles.modelContainer}>
-                    <h2>Model</h2>
-                    <p className={styles.modelName}>{modelName}</p>
+                    {unitName && (
+                        <>
+                            <h2>Name</h2>
+                            <p className={styles.modelName}>{unitName}</p>
+                        </>
+                    )}
+                    {modelName && (
+                        <>
+                            <h2>Model</h2>
+                            <p className={styles.modelName}>{modelName}</p>
+                        </>
+                    )}
                 </div>
             )}
             <div className={styles.sectionContainer}>

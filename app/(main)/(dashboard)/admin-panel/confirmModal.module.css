@@ -1,0 +1,94 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+:global(.dark-mode) .content {
+    background-color: #262626;
+    color: #fff;
+}
+
+.title {
+    color: #282F68;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+:global(.dark-mode) .title {
+    color: #eeeeee;
+}
+
+.message {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+:global(.dark-mode) .message {
+    color: #cccccc;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancelBtn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #484848;
+    background-color: transparent;
+    color: #484848;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cancelBtn:hover {
+    background-color: rgba(72, 72, 72, 0.1);
+}
+
+:global(.dark-mode) .cancelBtn {
+    border-color: #aeaeae;
+    color: #aeaeae;
+}
+
+:global(.dark-mode) .cancelBtn:hover {
+    background-color: #333;
+}
+
+.confirmBtn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    background-color: #d7292e;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.confirmBtn:hover {
+    background-color: #b91c1c;
+}

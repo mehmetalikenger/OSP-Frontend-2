@@ -38,7 +38,8 @@ function AirToWaterHeatPumpContent() {
     return (
         <ProductAccordion
             title="Air to Water Heat Pump"
-            modelName={calcData ? (calcData.name || calcData.model) : undefined}
+            unitName={calcData?.name || undefined}
+            modelName={calcData?.model || undefined}
             images={calcData?.images}
             drawings={calcData?.drawings}
             documents={calcData?.documents}

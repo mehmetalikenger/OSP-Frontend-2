@@ -82,6 +82,18 @@
     width: 20px;
 }
 
+.passwordEye .darkIcon {
+    display: none;
+}
+
+:global(.dark-mode) .passwordEye .lightIcon {
+    display: none;
+}
+
+:global(.dark-mode) .passwordEye .darkIcon {
+    display: inline-block;
+}
+
 .saveButton {
     margin: 15px 0 5px 15px;
     padding: 5px 17px;

@@ -37,7 +37,8 @@ function WaterCooledChillerContent() {
     return (
         <ProductAccordion
             title="Water Cooled Chiller"
-            modelName={calcData ? (calcData.name || calcData.model) : undefined}
+            unitName={calcData?.name || undefined}
+            modelName={calcData?.model || undefined}
             images={calcData?.images}
             drawings={calcData?.drawings}
             documents={calcData?.documents}

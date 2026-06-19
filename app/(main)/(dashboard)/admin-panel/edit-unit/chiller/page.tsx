@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -120,6 +121,8 @@ export default function Page() {
     const drawingInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);
     const iconInputRef = useRef<HTMLInputElement>(null);
+    const topRef = useRef<HTMLDivElement>(null);
+    const scrollToFormTop = () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     const [submitting, setSubmitting] = useState(false);
     const [toastInfo, setToastInfo] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -128,6 +131,8 @@ export default function Page() {
         setToastInfo({ message, type });
         setTimeout(() => setToastInfo(null), 3500);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const totalBytes = (extra: File[] = []) =>
         [...images, ...drawings, ...icons, ...documents].reduce((sum, u) => sum + (u.file?.size ?? 0), 0) +
@@ -347,6 +352,29 @@ export default function Page() {
         setActiveTab("model");
     };
 
+    const handleDelete = async () => {
+        if (selectedChillerId === null) { showToast("Please select a chiller to delete.", "error"); return; }
+        const ok = await confirm({ title: "Delete chiller", message: "This will hide it from the catalog and admin lists. Users' saved copies are kept but hidden.", confirmText: "Delete" });
+        if (!ok) return;
+        setSubmitting(true);
+        try {
+            const res = await fetchWithAuth(`${API}/admin/unit/${selectedChillerId}`, { method: "DELETE", credentials: "include" });
+            if (res.ok) {
+                showToast("Chiller deleted.", "success");
+                handleCancel();
+                const listRes = await fetchWithAuth(`${API}/admin/unit/chillers`, { credentials: "include", cache: "no-store" });
+                if (listRes.ok) setChillers(await listRes.json());
+            } else {
+                showToast("Failed to delete chiller.", "error");
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Network error.", "error");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const chillerOptions = [SELECT.chiller, ...chillers.map(chillerLabel)];
     const compressorOptions = [SELECT.compressor, ...compressorList.map(compressorLabel)];
     const evaporatorOptions = [SELECT.evaporator, ...evaporatorList.map(specLabel)];
@@ -365,8 +393,14 @@ export default function Page() {
     const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
     const selectedChiller = chillers.find((c) => c.id === selectedChillerId);
 
+    const modelComplete =
+        model.trim() !== "" &&
+        compressorSpecsId !== null && evaporatorSpecsId !== null && condenserSpecsId !== null &&
+        expansionValveSpecsId !== null && chassisId !== null && refrigerantId !== null;
+
     return (
         <div className={styles.sectionsContainer}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === "error" ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -377,7 +411,7 @@ export default function Page() {
                     <img src={lightbox} alt="preview" style={{ maxWidth: "90vw", maxHeight: "90vh", objectFit: "contain" }} />
                 </div>
             )}
-            <div className={styles.sectionContent}>
+            <div className={styles.sectionContent} ref={topRef}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>Model Information</span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
@@ -416,17 +450,17 @@ export default function Page() {
                                     <div className={styles.formField}><label>EER</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
                                     <div className={styles.formField}><label>COP</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
                                     <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Number of Fans</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Discharge Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Liquid Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Suction Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
                                 </div>
                             )}
                             {activeTab === 'calc' && (
@@ -569,10 +603,11 @@ export default function Page() {
                         <div className={styles.stepNavContainer}>
                             <div className={styles.stepNavLeft}>
                                 {activeTab !== 'model' && <button className={styles.stepBtn} onClick={() => setActiveTab(activeTab === 'calc' ? 'tech' : 'model')}>Previous</button>}
-                                {activeTab !== 'calc' && <button className={styles.stepBtn} onClick={() => setActiveTab(activeTab === 'model' ? 'tech' : 'calc')}>Next</button>}
+                                {activeTab !== 'calc' && <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab(activeTab === 'model' ? 'tech' : 'calc'); scrollToFormTop(); }}>Next</button>}
                             </div>
                             {activeTab === 'calc' && (
                                 <div className={styles.stepNavRight}>
+                                    {selectedChillerId !== null && <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e' }} onClick={handleDelete} disabled={submitting}>Delete</button>}
                                     <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                                     <button className={styles.saveBtn} onClick={handleSave} disabled={submitting}>{submitting ? 'Saving...' : 'Save'}</button>
                                 </div>

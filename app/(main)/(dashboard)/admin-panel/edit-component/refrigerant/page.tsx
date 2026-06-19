@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 type Refrigerant = {
     id: number;
@@ -24,6 +25,8 @@ export default function EditRefrigerantPage() {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const fetchRefrigerants = async () => {
         try {
@@ -95,8 +98,27 @@ export default function EditRefrigerantPage() {
 
     const refrigerantOptions = ["Select Refrigerant", ...refrigerantsList.map(r => r.code)];
 
+    const handleDelete = async () => {
+        if (selectedItemToEdit === "Select Refrigerant") { showToast("Please select a refrigerant to delete.", "error"); return; }
+        const item = refrigerantsList.find(r => r.code === selectedItemToEdit);
+        if (!item) return;
+        const ok = await confirm({ title: "Delete refrigerant", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        if (!ok) return;
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/refrigerant/${item.id}`, { method: "DELETE", credentials: 'include' });
+            if (res.ok) {
+                showToast("Refrigerant deleted.", "success");
+                setSelectedItemToEdit("Select Refrigerant");
+                fetchRefrigerants();
+            } else {
+                showToast("Failed to delete refrigerant.", "error");
+            }
+        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+    };
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -147,6 +169,7 @@ export default function EditRefrigerantPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
                                 <button className={styles.saveBtn} onClick={handleEditRefrigerant}>Save</button>
                             </div>
                         </div>

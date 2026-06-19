@@ -6,10 +6,11 @@ import styles from "../calculation.module.css";
 interface CalculationModalsProps {
     isOpen: boolean;
     onClose: () => void;
+    initialStep?: 'result' | 'projects' | 'create';
 }
 
-export default function CalculationModals({ isOpen, onClose }: CalculationModalsProps) {
-    const [step, setStep] = useState<'result' | 'projects' | 'create'>('result');
+export default function CalculationModals({ isOpen, onClose, initialStep = 'result' }: CalculationModalsProps) {
+    const [step, setStep] = useState<'result' | 'projects' | 'create'>(initialStep);
     const [selectedProjects, setSelectedProjects] = useState<number[]>([]);
 
     // Form states
@@ -27,6 +28,7 @@ export default function CalculationModals({ isOpen, onClose }: CalculationModals
 
     useEffect(() => {
         if (isOpen) {
+            setStep(initialStep);
             (window as any).__preventScroll = (e: any) => {
                 if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
                     e.preventDefault();
@@ -56,12 +58,12 @@ export default function CalculationModals({ isOpen, onClose }: CalculationModals
                 window.removeEventListener("keydown", (window as any).__preventKeyScroll);
             }
         };
-    }, [isOpen]);
+    }, [isOpen, initialStep]);
 
     if (!isOpen) return null;
 
     const handleClose = () => {
-        setStep('result');
+        setStep(initialStep);
         onClose();
     };
 

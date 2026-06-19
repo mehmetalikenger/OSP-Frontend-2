@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 type Compressor = {
     id: number;
@@ -47,6 +48,8 @@ export default function EditCompressorPage() {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const fetchCompressors = async () => {
         try {
@@ -214,8 +217,28 @@ export default function EditCompressorPage() {
     const compressorOptions = ["Select Compressor", ...compressorsList.map(c => `${c.brand} / ${c.model} / ${c.type}`)];
     const specsOptions = ["Select Compressor", ...compressorSpecsList.map(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}`)];
 
+    const handleDelete = async () => {
+        if (selectedItemToEdit === "Select Compressor") { showToast("Please select a compressor to delete.", "error"); return; }
+        const item = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
+        if (!item) return;
+        const ok = await confirm({ title: "Delete compressor", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        if (!ok) return;
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/compressor/${item.id}`, { method: "DELETE", credentials: 'include' });
+            if (res.ok) {
+                showToast("Compressor deleted.", "success");
+                setSelectedItemToEdit("Select Compressor");
+                fetchCompressors();
+                fetchCompressorSpecs();
+            } else {
+                showToast("Failed to delete compressor.", "error");
+            }
+        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+    };
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -276,6 +299,7 @@ export default function EditCompressorPage() {
                                 </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
                                 <button className={styles.saveBtn} onClick={handleEditCompressor}>Save</button>
                             </div>
 

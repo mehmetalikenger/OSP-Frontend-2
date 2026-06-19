@@ -101,8 +101,16 @@
     text-align: center;
 }
 
-.stepBtn:hover {
+.stepBtn:hover:not(:disabled) {
     background-color: #c4d9ff;
+}
+
+.stepBtn:disabled {
+    background-color: #e9e9e9;
+    color: #a0a0a0;
+    border-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 :global(.dark-mode) .stepBtn {
@@ -111,8 +119,16 @@
     color: #ffffff;
 }
 
-:global(.dark-mode) .stepBtn:hover {
+:global(.dark-mode) .stepBtn:hover:not(:disabled) {
     background-color: #5a5a5a;
+}
+
+:global(.dark-mode) .stepBtn:disabled {
+    background-color: #3a3a3a;
+    color: #777777;
+    border-color: #555555;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .saveBtnContainer {
@@ -401,8 +417,19 @@
 }
 
 textarea.inputElement {
-    resize: vertical;
+    resize: none;
     min-height: 80px;
+}
+
+.inputElement[type="number"]::-webkit-outer-spin-button,
+.inputElement[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.inputElement[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .comboboxContainerOverride {

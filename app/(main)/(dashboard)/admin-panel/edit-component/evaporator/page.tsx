@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 type Evaporator = {
     id: number;
@@ -34,6 +35,8 @@ export default function EditEvaporatorPage() {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const fetchEvaporators = async () => {
         try {
@@ -168,8 +171,28 @@ export default function EditEvaporatorPage() {
     const evaporatorOptions = ["Select Evaporator", ...evaporatorsList.map(e => e.model)];
     const specsOptions = ["Select Evaporator", ...evaporatorSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
 
+    const handleDelete = async () => {
+        if (selectedItemToEdit === "Select Evaporator") { showToast("Please select an evaporator to delete.", "error"); return; }
+        const item = evaporatorsList.find(e => e.model === selectedItemToEdit);
+        if (!item) return;
+        const ok = await confirm({ title: "Delete evaporator", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        if (!ok) return;
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/evaporator/${item.id}`, { method: "DELETE", credentials: 'include' });
+            if (res.ok) {
+                showToast("Evaporator deleted.", "success");
+                setSelectedItemToEdit("Select Evaporator");
+                fetchEvaporators();
+                fetchEvaporatorSpecs();
+            } else {
+                showToast("Failed to delete evaporator.", "error");
+            }
+        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+    };
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -210,6 +233,7 @@ export default function EditEvaporatorPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
                                 <button className={styles.saveBtn} onClick={handleEditEvaporator}>Save</button>
                             </div>
 

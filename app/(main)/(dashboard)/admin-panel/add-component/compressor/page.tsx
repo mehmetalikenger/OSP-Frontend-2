@@ -68,8 +68,11 @@ export default function AddCompressorPage() {
                 setType("Select Type");
                 setModel("");
                 fetchCompressors();
+            } else if (res.status === 409) {
+                showToast("This compressor already exists.", "error");
             } else {
-                showToast("Failed to add compressor.", "error");
+                const data = await res.json().catch(() => null);
+                showToast(data?.message || "Failed to add compressor.", "error");
             }
         } catch (error) {
             console.error(error);

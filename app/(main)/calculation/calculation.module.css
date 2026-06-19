@@ -54,6 +54,10 @@
     font-weight: 550;
 }
 
+.modelContainer h2:not(:first-child) {
+    margin-top: 14px;
+}
+
 .modelContainer p {
     font-size: 0.9rem;
     margin-top: 5px;
@@ -333,6 +337,17 @@
     outline: none;
     border: 1px solid #C2C2C2;
     border-radius: 5px;
+}
+
+.input input[type="number"]::-webkit-outer-spin-button,
+.input input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .calcBtn {
@@ -718,6 +733,14 @@
     flex: 1;
 }
 
+/* Action row under the calculation results card — buttons keep their natural width. */
+.resultsCardActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
 /* Projects Modal */
 .projectsModalContent {
     width: 100%;
@@ -1039,5 +1062,157 @@
         right: 40px;
         width: 10%;
         max-width: 150px;
+    }
+}
+
+/* ===== Calculation results (Air Cooled Chiller) ===== */
+
+/* Form + results live in one card. Stacked by default (results under the form),
+   side by side from 1200px and up. */
+.calcLayout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+/* The form card and results card stack inside calcLayout, each full width. */
+.calcLayout > .sectionContent {
+    margin: 0;
+}
+
+.calcFormColumn {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.calcBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.calcError {
+    margin-top: 20px;
+    font-size: 0.82rem;
+    color: #d7292e;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.resultsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px 15px;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+:global(.dark-mode) .resultsPanel {
+    background-color: #262626;
+}
+
+.resultsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.resultsHeaderTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.resultsHeaderTitle h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #282f68;
+}
+
+:global(.dark-mode) .resultsHeaderTitle h3 {
+    color: #c0c0c0;
+}
+
+.resultsCloseBtn {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.resultsCloseBtn img {
+    width: 100%;
+}
+
+.resultsGrid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.resultMetric {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 160px;
+    min-width: 0;
+    padding: 14px 16px;
+    background-color: #f6f8ff;
+    border-radius: 6px;
+}
+
+:global(.dark-mode) .resultMetric {
+    background-color: #1e1e1e;
+}
+
+.resultMetricLabel {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+:global(.dark-mode) .resultMetricLabel {
+    color: #a0a0a0;
+}
+
+.resultMetricValue {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #282f68;
+    line-height: 1.1;
+}
+
+:global(.dark-mode) .resultMetricValue {
+    color: #c4d9ff;
+}
+
+.resultMetricUnit {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #888;
+    margin-left: 5px;
+}
+
+:global(.dark-mode) .resultMetricUnit {
+    color: #9a9a9a;
+}
+
+@media screen and (min-width: 1200px) {
+    /* calcLayout takes the right-hand grid column; form card and results card stack within it. */
+    .calcLayout {
+        grid-column: 2;
+        grid-row: 4 / span 10;
+        margin-top: 20px;
     }
 }

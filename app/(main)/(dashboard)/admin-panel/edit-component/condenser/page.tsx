@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 type Condenser = {
     id: number;
@@ -34,6 +35,8 @@ export default function EditCondenserPage() {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const fetchCondensers = async () => {
         try {
@@ -168,8 +171,28 @@ export default function EditCondenserPage() {
     const condenserOptions = ["Select Condenser", ...condensersList.map(c => c.model)];
     const specsOptions = ["Select Condenser", ...condenserSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
 
+    const handleDelete = async () => {
+        if (selectedItemToEdit === "Select Condenser") { showToast("Please select a condenser to delete.", "error"); return; }
+        const item = condensersList.find(c => c.model === selectedItemToEdit);
+        if (!item) return;
+        const ok = await confirm({ title: "Delete condenser", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        if (!ok) return;
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/condenser/${item.id}`, { method: "DELETE", credentials: 'include' });
+            if (res.ok) {
+                showToast("Condenser deleted.", "success");
+                setSelectedItemToEdit("Select Condenser");
+                fetchCondensers();
+                fetchCondenserSpecs();
+            } else {
+                showToast("Failed to delete condenser.", "error");
+            }
+        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+    };
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -210,6 +233,7 @@ export default function EditCondenserPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
                                 <button className={styles.saveBtn} onClick={handleEditCondenser}>Save</button>
                             </div>
 

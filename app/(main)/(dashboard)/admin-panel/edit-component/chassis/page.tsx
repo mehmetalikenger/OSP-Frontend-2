@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 type Chassis = {
     id: number;
@@ -22,6 +23,8 @@ export default function EditChassisPage() {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const fetchChassis = async () => {
         try {
@@ -91,8 +94,27 @@ export default function EditChassisPage() {
 
     const chassisOptions = ["Select Chassis", ...chassisList.map(c => c.model)];
 
+    const handleDelete = async () => {
+        if (selectedItemToEdit === "Select Chassis") { showToast("Please select a chassis to delete.", "error"); return; }
+        const item = chassisList.find(c => c.model === selectedItemToEdit);
+        if (!item) return;
+        const ok = await confirm({ title: "Delete chassis", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        if (!ok) return;
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/chassis/${item.id}`, { method: "DELETE", credentials: 'include' });
+            if (res.ok) {
+                showToast("Chassis deleted.", "success");
+                setSelectedItemToEdit("Select Chassis");
+                fetchChassis();
+            } else {
+                showToast("Failed to delete chassis.", "error");
+            }
+        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+    };
+
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === 'error' ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -133,6 +155,7 @@ export default function EditChassisPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
                                 <button className={styles.saveBtn} onClick={handleEditChassis}>Save</button>
                             </div>
                         </div>

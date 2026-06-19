@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useConfirm } from "../../useConfirm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -81,6 +82,8 @@ export default function EditHeatPumpModelPage() {
         setToastInfo({ message, type });
         setTimeout(() => setToastInfo(null), 3500);
     };
+
+    const { confirm, confirmElement } = useConfirm();
 
     const totalBytes = (extra: File[] = []) =>
         [...images, ...drawings, ...icons, ...documents].reduce((sum, u) => sum + (u.file?.size ?? 0), 0) +
@@ -284,11 +287,34 @@ export default function EditHeatPumpModelPage() {
         clearUploads();
     };
 
+    const handleDelete = async () => {
+        if (selectedHeatPumpId === null) { showToast("Please select a heat pump to delete.", "error"); return; }
+        const ok = await confirm({ title: "Delete heat pump", message: "This will hide it from the catalog and admin lists. Users' saved copies are kept but hidden.", confirmText: "Delete" });
+        if (!ok) return;
+        setSubmitting(true);
+        try {
+            const res = await fetchWithAuth(`${API}/admin/unit/${selectedHeatPumpId}`, { method: "DELETE", credentials: "include" });
+            if (res.ok) {
+                showToast("Heat pump deleted.", "success");
+                handleCancel();
+                await loadHeatPumps();
+            } else {
+                showToast("Failed to delete heat pump.", "error");
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Network error.", "error");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
     const selectedHeatPump = heatPumps.find((h) => h.id === selectedHeatPumpId);
 
     return (
         <div className={styles.sectionsContainer}>
+            {confirmElement}
             {toastInfo && (
                 <div className={toastInfo.type === "error" ? toastStyles.errorToast : toastStyles.toast}>
                     {toastInfo.message}
@@ -316,18 +342,18 @@ export default function EditHeatPumpModelPage() {
                                 <div className={styles.formField}><label>Refrigerant</label><Combobox options={[REFRIG_SELECT, ...refrigerantList.map(refrigerantLabel)]} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                 <div className={styles.formField}><label>Compressor Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
                                 <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
-                                <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
                                 <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
-                                <div className={styles.formField}><label>Number of Fans</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
+                                <div className={styles.formField}><label>Fan Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
                                 <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
                                 <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
-                                <div className={styles.formField}><label>Discharge Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Liquid Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Suction Line Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
+                                <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
+                                <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} /></div>
+                                <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
+                                <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
                                 <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
-                                <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
                                 <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
+                                <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
                             </div>
                         </div>
                     </div>
@@ -458,6 +484,7 @@ export default function EditHeatPumpModelPage() {
                             </div>
                         </div>
                         <div className={styles.stepNavContainer} style={{ justifyContent: "flex-end", gap: "10px" }}>
+                            {selectedHeatPumpId !== null && <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e' }} onClick={handleDelete} disabled={submitting}>Delete</button>}
                             <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
                             <button className={styles.saveBtn} onClick={handleSave} disabled={submitting}>{submitting ? "Saving..." : "Save"}</button>
                         </div>

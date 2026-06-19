@@ -37,15 +37,16 @@ function AirCooledChillerContent() {
     return (
         <ProductAccordion
             title="Air Cooled Chiller"
-            modelName={calcData ? (calcData.name || calcData.model) : undefined}
+            unitName={calcData?.name || undefined}
+            modelName={calcData?.model || undefined}
             images={calcData?.images}
             drawings={calcData?.drawings}
             documents={calcData?.documents}
             specs={calcData?.specs}
             calculationForm={calcData ? (
-                <AirCooledChillerForm defaults={calcData.coolingDefaults} />
+                <AirCooledChillerForm unitId={id} defaults={calcData.coolingDefaults} />
             ) : (
-                <AirCooledChillerForm />
+                <AirCooledChillerForm unitId={id} />
             )}
         />
     );
