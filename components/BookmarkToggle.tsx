@@ -53,7 +53,6 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
         <div
             className={`${styles.bookmarkBtn} ${className || ""}`}
             onClick={handleClick}
-            style={{ opacity: loading ? 0.6 : 1 }}
         >
             <img src="/icons/bookmark.png" className={`${styles.lightIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />
             <img src="/icons/bookmark-darkMode.png" className={`${styles.darkIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />

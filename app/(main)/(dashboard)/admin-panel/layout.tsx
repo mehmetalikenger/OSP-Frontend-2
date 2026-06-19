@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./adminPanel.module.css";
 import { fetchWithAuth } from "../../../../lib/api";
+import { resizeImageFile } from "@/lib/imageResize";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -44,7 +45,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
         const userId = localStorage.getItem('userId');
         if (!userId) return;
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', await resizeImageFile(file));
         try {
             const res = await fetchWithAuth(`${API}/user/${userId}/upload-profile-picture`, {
                 method: 'POST',

@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { resizeImageFile } from "@/lib/imageResize";
 import { useConfirm } from "../../useConfirm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -229,9 +230,9 @@ export default function EditHeatPumpModelPage() {
 
         const fd = new FormData();
         const primaryItem = newImages.find(u => u.id === primaryId);
-        if (primaryItem?.file) fd.append("primaryImage", primaryItem.file);
-        newImages.forEach(u => { if (u.id !== primaryId && u.file) fd.append("images", u.file); });
-        newDrawings.forEach(u => { if (u.file) fd.append("technicalImages", u.file); });
+        if (primaryItem?.file) fd.append("primaryImage", await resizeImageFile(primaryItem.file));
+        for (const u of newImages) { if (u.id !== primaryId && u.file) fd.append("images", await resizeImageFile(u.file)); }
+        for (const u of newDrawings) { if (u.file) fd.append("technicalImages", await resizeImageFile(u.file)); }
         newIcons.forEach(u => { if (u.file) fd.append("icons", u.file); });
         newDocs.forEach(u => { if (u.file) fd.append("documents", u.file); });
 
