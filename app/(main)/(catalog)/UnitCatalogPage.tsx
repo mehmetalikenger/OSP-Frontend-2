@@ -88,7 +88,7 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                     </div>
                     {isMobile && (
                         <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
+                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
                         </div>
                     )}
                     <div className={styles.productSpecs}>
@@ -102,7 +102,7 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                 </div>
                 {!isMobile && (
                     <div className={styles.productImage}>
-                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
+                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
                     </div>
                 )}
             </div>

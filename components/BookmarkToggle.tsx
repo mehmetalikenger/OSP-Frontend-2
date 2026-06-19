@@ -24,6 +24,9 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
     const handleClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (loading) return;
+        const optimisticSaved = !isSaved;
+        setIsSaved(optimisticSaved);
+        onSavedChange?.(optimisticSaved);
         setLoading(true);
         try {
             const res = await fetchWithAuth(`${API}/units/${unitId}/save`, {
@@ -34,9 +37,13 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
                 const data = await res.json();
                 setIsSaved(data.saved);
                 onSavedChange?.(data.saved);
+            } else {
+                setIsSaved(!optimisticSaved);
+                onSavedChange?.(!optimisticSaved);
             }
         } catch {
-            // no-op
+            setIsSaved(!optimisticSaved);
+            onSavedChange?.(!optimisticSaved);
         } finally {
             setLoading(false);
         }
