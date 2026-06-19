@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./profile.module.css";
 import { fetchWithAuth } from "../../../lib/api";
-import { resizeImageFile } from "@/lib/imageResize";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -40,7 +39,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         const userId = localStorage.getItem('userId');
         if (!userId) return;
         const fd = new FormData();
-        fd.append('file', await resizeImageFile(file));
+        fd.append('file', file);
         try {
             const res = await fetchWithAuth(`${API}/user/${userId}/upload-profile-picture`, {
                 method: 'POST',

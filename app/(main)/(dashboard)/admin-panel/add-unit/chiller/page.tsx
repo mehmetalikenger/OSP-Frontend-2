@@ -5,7 +5,6 @@ import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
-import { resizeImageFile } from "@/lib/imageResize";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -272,9 +271,9 @@ export default function Page() {
         if (!hasFiles) return;
         const fd = new FormData();
         const primary = images.find((u) => u.id === primaryId);
-        if (primary) fd.append("primaryImage", await resizeImageFile(primary.file));
-        for (const u of images) { if (u.id !== primaryId) fd.append("images", await resizeImageFile(u.file)); }
-        for (const u of drawings) fd.append("technicalImages", await resizeImageFile(u.file));
+        if (primary) fd.append("primaryImage", primary.file);
+        images.forEach((u) => { if (u.id !== primaryId) fd.append("images", u.file); });
+        drawings.forEach((u) => fd.append("technicalImages", u.file));
         icons.forEach((u) => fd.append("icons", u.file));
         documents.forEach((u) => fd.append("documents", u.file));
         try {
