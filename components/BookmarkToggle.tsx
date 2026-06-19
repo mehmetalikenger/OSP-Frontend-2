@@ -55,17 +55,10 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
             onClick={handleClick}
             style={{ opacity: loading ? 0.6 : 1 }}
         >
-            {!isSaved ? (
-                <>
-                    <img src="/icons/bookmark.png" className={styles.lightIcon} alt="Save" />
-                    <img src="/icons/bookmark-darkMode.png" className={styles.darkIcon} alt="Save" />
-                </>
-            ) : (
-                <>
-                    <img src="/icons/bookmark-selected.png" className={styles.lightIcon} alt="Saved" />
-                    <img src="/icons/bookmark-darkMode-selected.png" className={styles.darkIcon} alt="Saved" />
-                </>
-            )}
+            <img src="/icons/bookmark.png" className={`${styles.lightIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />
+            <img src="/icons/bookmark-darkMode.png" className={`${styles.darkIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />
+            <img src="/icons/bookmark-selected.png" className={`${styles.lightIcon} ${!isSaved ? styles.hide : ""}`} alt="Saved" />
+            <img src="/icons/bookmark-darkMode-selected.png" className={`${styles.darkIcon} ${!isSaved ? styles.hide : ""}`} alt="Saved" />
         </div>
     );
 }
