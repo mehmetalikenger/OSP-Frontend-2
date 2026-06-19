@@ -313,23 +313,23 @@ export default function AddHeatPumpModPage() {
                             </div>
                             <div className={styles.formField}>
                                 <label>Capacity (Kw)</label>
-                                <input type="number" className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>EER</label>
-                                <input type="number" className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>COP</label>
-                                <input type="number" className={styles.inputElement} value={cop} onChange={(e) => setCop(e.target.value)} disabled={unitMod === 'cooling'} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={cop} onChange={(e) => setCop(e.target.value)} disabled={unitMod === 'cooling'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Condenser Required Duty (kW)</label>
-                                <input type="number" className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Quiet Condenser Required Duty (kW)</label>
-                                <input type="number" className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
                             </div>
                         </div>
                     )}
@@ -338,23 +338,23 @@ export default function AddHeatPumpModPage() {
                         <div className={styles.formGrid}>
                             <div className={styles.formField}>
                                 <label>Ambient (°C)</label>
-                                <input type="number" className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Evaporator Inlet (°C)</label>
-                                <input type="number" className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Evaporator Outlet (°C)</label>
-                                <input type="number" className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Condenser Inlet (°C)</label>
-                                <input type="number" className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>Condenser Outlet (°C)</label>
-                                <input type="number" className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
                             </div>
                         </div>
                     )}

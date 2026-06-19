@@ -110,15 +110,15 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                 <div className={styles.calcFormColumn}>
                     <div className={styles.input}>
                         <label htmlFor="glycolMixture">Glycol Mixture</label>
-                        <input type="number" id="glycolMixture" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="glycolMixture" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                        <input type="number" id="mixtureRatio" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="mixtureRatio" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
-                        <input type="number" id="distanceForSound" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="distanceForSound" min="0" />
                     </div>
                     <div className={`${styles.sectionHeader} ${styles.coolingSectionHeader}`}>
                         <h3>Cooling</h3>
@@ -126,7 +126,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     <div className={styles.input}>
                         <label htmlFor="dryBulbAmbientTemperature">Dry Bulb Ambient Temperature (°C)</label>
                         <input
-                            type="number"
+                            type="number" onWheel={(e) => e.currentTarget.blur()}
                             id="dryBulbAmbientTemperature"
                             min="-5"
                             max="50"
@@ -137,7 +137,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     <div className={styles.input}>
                         <label htmlFor="waterInletTemperature">Water Inlet Temperature (°C)</label>
                         <input
-                            type="number"
+                            type="number" onWheel={(e) => e.currentTarget.blur()}
                             id="waterInletTemperature"
                             min="-30"
                             max="25"
@@ -148,7 +148,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     <div className={styles.input}>
                         <label htmlFor="waterOutletTemperature">Water Outlet Temperature (°C)</label>
                         <input
-                            type="number"
+                            type="number" onWheel={(e) => e.currentTarget.blur()}
                             id="waterOutletTemperature"
                             min="-35"
                             max="20"
@@ -159,23 +159,23 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     <div className={styles.divider}></div>
                     <div className={styles.input}>
                         <label htmlFor="calculationMethod">Calculation Method</label>
-                        <input type="number" id="calculationMethod" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="calculationMethod" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="deltaT">ΔT (°C)</label>
-                        <input type="number" id="deltaT" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="deltaT" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
-                        <input type="number" id="foulingFactor" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="foulingFactor" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
-                        <input type="number" id="heightAboveSeaLevel" min="0" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="heightAboveSeaLevel" min="0" />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="minAmbientTemperature">Min. Ambient Temperature (°C)</label>
-                        <input type="number" id="minAmbientTemperature" />
+                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="minAmbientTemperature" />
                     </div>
 
                     {error && <p className={styles.calcError}>{error}</p>}
