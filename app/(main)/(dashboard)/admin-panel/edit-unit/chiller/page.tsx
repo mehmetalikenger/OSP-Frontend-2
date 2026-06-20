@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 import { useConfirm } from "../../useConfirm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -269,26 +270,19 @@ export default function Page() {
         if (c) { setSelectedChillerId(c.id); loadChiller(c.id); }
     };
 
+    // Uploads only newly added files (existing server assets are untouched) directly
+    // to R2 via presigned URLs. The primary is only set here when it's a new image;
+    // re-primarying an existing image is handled by handleSetPrimary.
     const uploadNewAssets = async (unitId: number) => {
-        const newImages = images.filter(u => !u.serverId);
-        const newDrawings = drawings.filter(u => !u.serverId);
-        const newIcons = icons.filter(u => !u.serverId);
-        const newDocs = documents.filter(u => !u.serverId);
-        if (!newImages.length && !newDrawings.length && !newIcons.length && !newDocs.length) return;
-
-        const fd = new FormData();
-        const primaryItem = newImages.find(u => u.id === primaryId);
-        if (primaryItem?.file) fd.append("primaryImage", primaryItem.file);
-        newImages.forEach(u => { if (u.id !== primaryId && u.file) fd.append("images", u.file); });
-        newDrawings.forEach(u => { if (u.file) fd.append("technicalImages", u.file); });
-        newIcons.forEach(u => { if (u.file) fd.append("icons", u.file); });
-        newDocs.forEach(u => { if (u.file) fd.append("documents", u.file); });
-
-        try {
-            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
-        } catch (e) {
-            console.error("Asset upload failed", e);
-        }
+        const isNew = (u: Upload): u is Upload & { file: File } => !u.serverId && !!u.file;
+        const primaryItem = images.find((u) => u.id === primaryId && isNew(u));
+        await uploadUnitAssets(unitId, {
+            images: images.filter(isNew).map((u) => u.file),
+            primaryImage: primaryItem?.file ?? null,
+            drawings: drawings.filter(isNew).map((u) => u.file),
+            icons: icons.filter(isNew).map((u) => u.file),
+            documents: documents.filter(isNew).map((u) => u.file),
+        });
     };
 
     const handleSave = async () => {
@@ -321,8 +315,13 @@ export default function Page() {
                 method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload),
             });
             if (res.ok) {
-                await uploadNewAssets(selectedChillerId);
-                showToast("Chiller updated successfully.", "success");
+                try {
+                    await uploadNewAssets(selectedChillerId);
+                    showToast("Chiller updated successfully.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Chiller saved, but file upload failed.", "error");
+                }
                 const listRes = await fetchWithAuth(`${API}/admin/unit/chillers`, { credentials: "include", cache: "no-store" });
                 if (listRes.ok) setChillers(await listRes.json());
             } else {
@@ -442,34 +441,34 @@ export default function Page() {
                             )}
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>EER</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
-                                    <div className={styles.formField}><label>COP</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
-                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>EER</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
+                                    <div className={styles.formField}><label>COP</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
+                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
                                 </div>
                             )}
                             {activeTab === 'calc' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Ambient (°C)</label><input type="number" className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Inlet (°C)</label><input type="number" className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
-                                    <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Evaporator Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
                                 </div>
                             )}
                         </div>

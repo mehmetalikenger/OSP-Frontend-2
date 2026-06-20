@@ -319,7 +319,7 @@ export default function EditCompressorPage() {
                                 <div className={styles.formField}>
                                     <label>Capacity</label>
                                     <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
                                         placeholder="Enter capacity"
                                         value={capacity}
@@ -329,7 +329,7 @@ export default function EditCompressorPage() {
                                 <div className={styles.formField}>
                                     <label>Power Input</label>
                                     <input
-                                        type="number"
+                                        type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
                                         placeholder="Enter power input"
                                         value={powerInput}
@@ -347,7 +347,7 @@ export default function EditCompressorPage() {
                                         <div className={styles.formField} key={`q${i}`}>
                                             <label>Q-C{i + 1}</label>
                                             <input
-                                                type="number"
+                                                type="number" onWheel={(e) => e.currentTarget.blur()}
                                                 className={styles.inputElement}
                                                 placeholder="0"
                                                 value={val}
@@ -369,7 +369,7 @@ export default function EditCompressorPage() {
                                         <div className={styles.formField} key={`p${i}`}>
                                             <label>P-C{i + 1}</label>
                                             <input
-                                                type="number"
+                                                type="number" onWheel={(e) => e.currentTarget.blur()}
                                                 className={styles.inputElement}
                                                 placeholder="0"
                                                 value={val}

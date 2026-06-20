@@ -24,15 +24,15 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
         <div className={styles.sectionContent}>
             <div className={styles.input}>
                 <label htmlFor="glycolMixture">Glycol Mixture</label>
-                <input type="number" id="glycolMixture" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="glycolMixture" min="0" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                <input type="number" id="mixtureRatio" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="mixtureRatio" min="0" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
-                <input type="number" id="distanceForSound" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="distanceForSound" min="0" />
             </div>
             <div className={`${styles.sectionHeader} ${styles.coolingSectionHeader}`}>
                 <h3>Cooling</h3>
@@ -40,7 +40,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             <div className={styles.input}>
                 <label htmlFor="coolingDryBulbAmbient">Dry Bulb Ambient Temperature (°C)</label>
                 <input
-                    type="number"
+                    type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingDryBulbAmbient"
                     key={coolingDefaults ? `c-ambient-${coolingDefaults.ambient}` : "c-ambient-empty"}
                     defaultValue={coolingDefaults != null ? coolingDefaults.ambient : ""}
@@ -49,7 +49,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             <div className={styles.input}>
                 <label htmlFor="coolingWaterInlet">Water Inlet Temperature (°C)</label>
                 <input
-                    type="number"
+                    type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingWaterInlet"
                     key={coolingDefaults ? `c-evapIn-${coolingDefaults.evapIn}` : "c-evapIn-empty"}
                     defaultValue={coolingDefaults != null ? coolingDefaults.evapIn : ""}
@@ -61,7 +61,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             <div className={styles.input}>
                 <label htmlFor="heatingDryBulbAmbient">Dry Bulb Ambient Temperature (°C)</label>
                 <input
-                    type="number"
+                    type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingDryBulbAmbient"
                     key={heatingDefaults ? `h-ambient-${heatingDefaults.ambient}` : "h-ambient-empty"}
                     defaultValue={heatingDefaults != null ? heatingDefaults.ambient : ""}
@@ -69,12 +69,12 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             </div>
             <div className={styles.input}>
                 <label htmlFor="wetBulbAmbientTemperature">Wet Bulb Ambient Temperature (°C)</label>
-                <input type="number" id="wetBulbAmbientTemperature" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="wetBulbAmbientTemperature" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="heatingWaterInlet">Water Inlet Temperature (°C)</label>
                 <input
-                    type="number"
+                    type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingWaterInlet"
                     key={heatingDefaults ? `h-condIn-${heatingDefaults.condIn}` : "h-condIn-empty"}
                     defaultValue={heatingDefaults != null ? heatingDefaults.condIn : ""}
@@ -83,7 +83,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             <div className={styles.input}>
                 <label htmlFor="heatingWaterOutlet">Water Outlet Temperature (°C)</label>
                 <input
-                    type="number"
+                    type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingWaterOutlet"
                     key={heatingDefaults ? `h-condOut-${heatingDefaults.condOut}` : "h-condOut-empty"}
                     defaultValue={heatingDefaults != null ? heatingDefaults.condOut : ""}
@@ -92,19 +92,19 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             <div className={styles.divider}></div>
             <div className={styles.input}>
                 <label htmlFor="calculationMethod">Calculation Method</label>
-                <input type="number" id="calculationMethod" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="calculationMethod" min="0" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="deltaT">ΔT (°C)</label>
-                <input type="number" id="deltaT" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="deltaT" min="0" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
-                <input type="number" id="foulingFactor" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="foulingFactor" min="0" />
             </div>
             <div className={styles.input}>
                 <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
-                <input type="number" id="heightAboveSeaLevel" min="0" />
+                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="heightAboveSeaLevel" min="0" />
             </div>
             <button className={styles.calcBtn} onClick={() => setIsModalsOpen(true)}>
                 Calculate

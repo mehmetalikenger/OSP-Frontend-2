@@ -11,7 +11,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 interface TechSpecItem { label: string; value: string; }
 
-interface UnitCard {
+export interface UnitCard {
     id: number;
     name: string | null;
     model: string;
@@ -31,13 +31,15 @@ interface UnitDetail extends UnitCard {
 
 interface Props {
     title: string;
-    apiUrl: string;
+    apiPath: string;                 // backend path, e.g. "/units/chillers?type=AW"
     calcRoute: string;
     altText: string;
+    initialUnits?: UnitCard[] | null; // provided by the server render (SSR)
 }
 
-export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: Props) {
-    const [units, setUnits] = useState<UnitCard[]>([]);
+export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, initialUnits }: Props) {
+    // Seeded from the server render so the cards are in the initial HTML.
+    const [units, setUnits] = useState<UnitCard[]>(initialUnits ?? []);
     const [selectedUnit, setSelectedUnit] = useState<UnitDetail | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const router = useRouter();
@@ -45,11 +47,13 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
     useScrollLock(isDetailsOpen);
 
     useEffect(() => {
-        fetchWithAuth(apiUrl, { credentials: "include" })
+        // Fallback: only fetch on the client if the server didn't provide the list.
+        if (initialUnits) return;
+        fetchWithAuth(`${API}${apiPath}`, { credentials: "include" })
             .then(r => r.ok ? r.json() : [])
             .then((data: UnitCard[]) => setUnits(data))
             .catch(() => {});
-    }, [apiUrl]);
+    }, [apiPath, initialUnits]);
 
     const handleView = async (id: number) => {
         try {
@@ -85,10 +89,11 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                 <div className={styles.productInfo}>
                     <div className={styles.productTitle}>
                         <h2>{unit.name || unit.model}</h2>
+                        {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                     </div>
                     {isMobile && (
                         <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
+                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
                         </div>
                     )}
                     <div className={styles.productSpecs}>
@@ -102,7 +107,7 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                 </div>
                 {!isMobile && (
                     <div className={styles.productImage}>
-                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
+                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
                     </div>
                 )}
             </div>
@@ -122,7 +127,10 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                     <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                 </div>
                 <div className={styles.unitDetailContainer}>
-                    <div className={styles.unitName}><h2>{d.name || d.model}</h2></div>
+                    <div className={styles.unitName}>
+                        <h2>{d.name || d.model}</h2>
+                        {d.name && <p className={styles.modelName}>{d.model}</p>}
+                    </div>
                     <div className={styles.unitImage}>
                         <img src={d.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
                     </div>
@@ -162,7 +170,10 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
                     <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                 </div>
                 <div className={styles.unitDetailContainer}>
-                    <div className={styles.unitName}><h2>{d.name || d.model}</h2></div>
+                    <div className={styles.unitName}>
+                        <h2>{d.name || d.model}</h2>
+                        {d.name && <p className={styles.modelName}>{d.model}</p>}
+                    </div>
                     <div className={styles.unitInfo}>
                         {d.description && (
                             <div className={styles.unitDesc}><p>{d.description}</p></div>
@@ -203,6 +214,10 @@ export default function UnitCatalogPage({ title, apiUrl, calcRoute, altText }: P
     return (
         <>
             <div className={styles.container}>
+                <div className={styles.backBtnContainer} onClick={() => router.back()}>
+                    <img src="/icons/back-arrow-2.png" className={styles.lightIcon} alt="Back" />
+                    <img src="/icons/back-arrow.png" className={styles.darkIcon} alt="Back" />
+                </div>
                 <div className={styles.category}>
                     <h1>{title}</h1>
                 </div>

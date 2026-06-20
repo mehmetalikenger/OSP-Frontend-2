@@ -5,10 +5,12 @@ import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type Refrigerant = { id: number; name: string; code: string };
+type Chassis = { id: number; brand?: string | null; model: string };
 type Upload = { file?: File; url: string; id: string; serverId?: number };
 
 let uidCounter = 0;
@@ -17,7 +19,9 @@ const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1
 const MAX_TOTAL_BYTES = 25 * 1024 * 1024;
 
 const REFRIG_SELECT = "Select Refrigerant";
+const CHASSIS_SELECT = "Select Chasis";
 const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
+const chassisLabel = (c: Chassis) => c.model;
 
 export default function AddHeatPumpModelPage() {
     const [unitType, setUnitType] = useState("air_to_water");
@@ -27,6 +31,8 @@ export default function AddHeatPumpModelPage() {
 
     const [refrigerantList, setRefrigerantList] = useState<Refrigerant[]>([]);
     const [refrigerantId, setRefrigerantId] = useState<number | null>(null);
+    const [chassisList, setChassisList] = useState<Chassis[]>([]);
+    const [chassisId, setChassisId] = useState<number | null>(null);
 
     const [f, setF] = useState({
         compressorQty: "", condenserQty: "", expansionValveQty: "",
@@ -106,14 +112,16 @@ export default function AddHeatPumpModelPage() {
     };
 
     useEffect(() => {
-        (async () => {
+        const load = async (path: string, setter: (d: any) => void) => {
             try {
-                const res = await fetchWithAuth(`${API}/admin/component/refrigerants`, { credentials: "include", cache: "no-store" });
-                if (res.ok) setRefrigerantList(await res.json());
+                const res = await fetchWithAuth(`${API}${path}`, { credentials: "include", cache: "no-store" });
+                if (res.ok) setter(await res.json());
             } catch (e) {
-                console.error("Failed to load refrigerants", e);
+                console.error(`Failed to load ${path}`, e);
             }
-        })();
+        };
+        load("/admin/component/refrigerants", setRefrigerantList);
+        load("/admin/component/chassis", setChassisList);
     }, []);
 
     const num = (v: string) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
@@ -122,6 +130,8 @@ export default function AddHeatPumpModelPage() {
 
     const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
     const refrigerantOptions = [REFRIG_SELECT, ...refrigerantList.map(refrigerantLabel)];
+    const chassisValue = chassisList.find((c) => c.id === chassisId);
+    const chassisOptions = [CHASSIS_SELECT, ...chassisList.map(chassisLabel)];
 
     const resetForm = () => {
         setModel("");
@@ -129,6 +139,7 @@ export default function AddHeatPumpModelPage() {
         setDescription("");
         setUnitType("air_to_water");
         setRefrigerantId(null);
+        setChassisId(null);
         setF({
             compressorQty: "", condenserQty: "", expansionValveQty: "",
             fanPI: "", width: "", length: "", height: "",
@@ -138,37 +149,29 @@ export default function AddHeatPumpModelPage() {
         clearUploads();
     };
 
+    // Uploads only newly added files directly to R2 via presigned URLs (lib/assetUpload).
     const uploadNewAssets = async (unitId: number) => {
-        const newImages = images.filter(u => !u.serverId);
-        const newDrawings = drawings.filter(u => !u.serverId);
-        const newIcons = icons.filter(u => !u.serverId);
-        const newDocs = documents.filter(u => !u.serverId);
-        if (!newImages.length && !newDrawings.length && !newIcons.length && !newDocs.length) return;
-
-        const fd = new FormData();
-        const primaryItem = newImages.find(u => u.id === primaryId);
-        if (primaryItem?.file) fd.append("primaryImage", primaryItem.file);
-        newImages.forEach(u => { if (u.id !== primaryId && u.file) fd.append("images", u.file); });
-        newDrawings.forEach(u => { if (u.file) fd.append("technicalImages", u.file); });
-        newIcons.forEach(u => { if (u.file) fd.append("icons", u.file); });
-        newDocs.forEach(u => { if (u.file) fd.append("documents", u.file); });
-
-        try {
-            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
-        } catch (e) {
-            console.error("Asset upload failed", e);
-        }
+        const isNew = (u: Upload): u is Upload & { file: File } => !u.serverId && !!u.file;
+        const primaryItem = images.find((u) => u.id === primaryId && isNew(u));
+        await uploadUnitAssets(unitId, {
+            images: images.filter(isNew).map((u) => u.file),
+            primaryImage: primaryItem?.file ?? null,
+            drawings: drawings.filter(isNew).map((u) => u.file),
+            icons: icons.filter(isNew).map((u) => u.file),
+            documents: documents.filter(isNew).map((u) => u.file),
+        });
     };
 
     const handleAdd = async () => {
         if (!model.trim()) { showToast("Please enter a model name.", "error"); return; }
         if (refrigerantId === null) { showToast("Please select a refrigerant.", "error"); return; }
+        if (chassisId === null) { showToast("Please select a chassis.", "error"); return; }
 
         const payload = {
             heatPumpDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW" },
             commonSpecsDto: {
                 compressorQty: int(f.compressorQty), condenserQty: int(f.condenserQty),
-                expansionValveQty: int(f.expansionValveQty), refrigerantId,
+                expansionValveQty: int(f.expansionValveQty), refrigerantId, chassisId,
                 fanPI: num(f.fanPI), width: num(f.width), length: num(f.length), height: num(f.height),
                 numberOfFans: int(f.numberOfFans), fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
                 dischargeLineDiameter: f.dischargeLineDiameter, liquidLineDiameter: f.liquidLineDiameter,
@@ -183,8 +186,13 @@ export default function AddHeatPumpModelPage() {
             });
             if (res.ok) {
                 const newId: number = await res.json();
-                await uploadNewAssets(newId);
-                showToast("Heat pump model created. Add its modes from the Mod page.", "success");
+                try {
+                    await uploadNewAssets(newId);
+                    showToast("Heat pump model created. Add its modes from the Mod page.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Heat pump created, but file upload failed.", "error");
+                }
                 resetForm();
             } else {
                 let msg = "Failed to create heat pump model.";
@@ -241,20 +249,24 @@ export default function AddHeatPumpModelPage() {
                                     <label>Refrigerant</label>
                                     <Combobox options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
-                                <div className={styles.formField}><label>Compressor Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
-                                <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
-                                <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
-                                <div className={styles.formField}><label>Fan Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
-                                <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
-                                <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
-                                <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
+                                <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
+                                <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
+                                <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
+                                <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
+                                <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
+                                <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
+                                <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
                                 <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
-                                <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
-                                <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
-                                <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
+                                <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
+                                <div className={styles.formField}>
+                                    <label>Chasis</label>
+                                    <Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : CHASSIS_SELECT} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                </div>
+                                <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
+                                <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
+                                <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
                             </div>
                         </div>
                     </div>

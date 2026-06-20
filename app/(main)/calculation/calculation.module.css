@@ -1,5 +1,6 @@
 .container {
     background-color: #EDEDED;
+    flex: 1;
     min-height: 91dvh;
     position: relative;
     padding: 30px 10px 60px 10px;

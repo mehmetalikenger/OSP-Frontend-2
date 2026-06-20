@@ -24,6 +24,9 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
     const handleClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (loading) return;
+        const optimisticSaved = !isSaved;
+        setIsSaved(optimisticSaved);
+        onSavedChange?.(optimisticSaved);
         setLoading(true);
         try {
             const res = await fetchWithAuth(`${API}/units/${unitId}/save`, {
@@ -34,9 +37,13 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
                 const data = await res.json();
                 setIsSaved(data.saved);
                 onSavedChange?.(data.saved);
+            } else {
+                setIsSaved(!optimisticSaved);
+                onSavedChange?.(!optimisticSaved);
             }
         } catch {
-            // no-op
+            setIsSaved(!optimisticSaved);
+            onSavedChange?.(!optimisticSaved);
         } finally {
             setLoading(false);
         }
@@ -46,19 +53,11 @@ export default function BookmarkToggle({ className, unitId, initialSaved = false
         <div
             className={`${styles.bookmarkBtn} ${className || ""}`}
             onClick={handleClick}
-            style={{ opacity: loading ? 0.6 : 1 }}
         >
-            {!isSaved ? (
-                <>
-                    <img src="/icons/bookmark.png" className={styles.lightIcon} alt="Save" />
-                    <img src="/icons/bookmark-darkMode.png" className={styles.darkIcon} alt="Save" />
-                </>
-            ) : (
-                <>
-                    <img src="/icons/bookmark-selected.png" className={styles.lightIcon} alt="Saved" />
-                    <img src="/icons/bookmark-darkMode-selected.png" className={styles.darkIcon} alt="Saved" />
-                </>
-            )}
+            <img src="/icons/bookmark.png" className={`${styles.lightIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />
+            <img src="/icons/bookmark-darkMode.png" className={`${styles.darkIcon} ${isSaved ? styles.hide : ""}`} alt="Save" />
+            <img src="/icons/bookmark-selected.png" className={`${styles.lightIcon} ${!isSaved ? styles.hide : ""}`} alt="Saved" />
+            <img src="/icons/bookmark-darkMode-selected.png" className={`${styles.darkIcon} ${!isSaved ? styles.hide : ""}`} alt="Saved" />
         </div>
     );
 }

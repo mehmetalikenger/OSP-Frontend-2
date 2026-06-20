@@ -1,61 +1,26 @@
-"use client";
+import { serverFetch } from "@/lib/serverApi";
+import AirCooledChillerClient, { UnitCalcData } from "./AirCooledChillerClient";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { fetchWithAuth } from "@/lib/api";
-import ProductAccordion from "../components/ProductAccordion";
-import AirCooledChillerForm from "../components/AirCooledChillerForm";
+// Server component: fetch the unit's calc-data on the server (forwarding the user's
+// auth cookie) so the name/model/specs are already in the initial HTML — no blank
+// flash while the client fetches. If the call fails (e.g. the access token is expired
+// at render time), we pass null and the client falls back to its own fetch-with-refresh.
+export default async function AirCooledChillerPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ id?: string }>;
+}) {
+    const { id } = await searchParams;
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+    let initialData: UnitCalcData | null = null;
+    if (id) {
+        try {
+            const res = await serverFetch(`/units/${id}/calc-data`);
+            if (res.ok) initialData = await res.json();
+        } catch {
+            // leave initialData null -> client fetches as a fallback
+        }
+    }
 
-interface CalcAsset { url: string; fileName: string | null; }
-interface TechSpec { label: string; value: string; }
-interface Defaults { ambient: number; condensation: number; evaporation: number; subcooling: number; superheat: number; evapIn: number; evapOut: number; condIn: number; condOut: number; }
-interface UnitCalcData {
-    name: string | null;
-    model: string;
-    images: CalcAsset[];
-    drawings: CalcAsset[];
-    documents: CalcAsset[];
-    specs: TechSpec[];
-    coolingDefaults: Defaults | null;
-}
-
-function AirCooledChillerContent() {
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
-    const [calcData, setCalcData] = useState<UnitCalcData | null>(null);
-
-    useEffect(() => {
-        if (!id) return;
-        fetchWithAuth(`${API}/units/${id}/calc-data`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : null)
-            .then((data: UnitCalcData | null) => setCalcData(data))
-            .catch(() => {});
-    }, [id]);
-
-    return (
-        <ProductAccordion
-            title="Air Cooled Chiller"
-            unitName={calcData?.name || undefined}
-            modelName={calcData?.model || undefined}
-            images={calcData?.images}
-            drawings={calcData?.drawings}
-            documents={calcData?.documents}
-            specs={calcData?.specs}
-            calculationForm={calcData ? (
-                <AirCooledChillerForm unitId={id} defaults={calcData.coolingDefaults} />
-            ) : (
-                <AirCooledChillerForm unitId={id} />
-            )}
-        />
-    );
-}
-
-export default function AirCooledChillerPage() {
-    return (
-        <Suspense>
-            <AirCooledChillerContent />
-        </Suspense>
-    );
+    return <AirCooledChillerClient id={id ?? null} initialData={initialData} />;
 }

@@ -1,15 +1,26 @@
-"use client";
-import UnitCatalogPage from "../../UnitCatalogPage";
+import { serverFetch } from "@/lib/serverApi";
+import UnitCatalogPage, { UnitCard } from "../../UnitCatalogPage";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+// Server component: fetch the unit list up front (forwarding the auth cookie) so the
+// cards are in the initial HTML. Falls back to null -> client fetch on error.
+export default async function AirCooledChillersPage() {
+    const apiPath = "/units/chillers?type=AW";
 
-export default function AirCooledChillersPage() {
+    let initialUnits: UnitCard[] | null = null;
+    try {
+        const res = await serverFetch(apiPath);
+        if (res.ok) initialUnits = await res.json();
+    } catch {
+        // leave null -> client fetches as a fallback
+    }
+
     return (
         <UnitCatalogPage
             title="Air Cooled Chillers"
-            apiUrl={`${API}/units/chillers?type=AW`}
+            apiPath={apiPath}
             calcRoute="/calculation/air-cooled-chiller"
             altText="Air Cooled Chiller"
+            initialUnits={initialUnits}
         />
     );
 }

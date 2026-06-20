@@ -5,6 +5,7 @@ import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -249,8 +250,13 @@ export default function Page() {
             });
             if (res.ok) {
                 const unitId: number = await res.json();
-                await uploadAssets(unitId);
-                showToast("Chiller added successfully.", "success");
+                try {
+                    await uploadAssets(unitId);
+                    showToast("Chiller added successfully.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Chiller created, but file upload failed.", "error");
+                }
                 resetForm();
                 setActiveTab("model");
             } else {
@@ -266,21 +272,16 @@ export default function Page() {
         }
     };
 
+    // Uploads the selected files directly to R2 via presigned URLs (see lib/assetUpload).
     const uploadAssets = async (unitId: number) => {
-        const hasFiles = images.length > 0 || drawings.length > 0 || icons.length > 0 || documents.length > 0;
-        if (!hasFiles) return;
-        const fd = new FormData();
         const primary = images.find((u) => u.id === primaryId);
-        if (primary) fd.append("primaryImage", primary.file);
-        images.forEach((u) => { if (u.id !== primaryId) fd.append("images", u.file); });
-        drawings.forEach((u) => fd.append("technicalImages", u.file));
-        icons.forEach((u) => fd.append("icons", u.file));
-        documents.forEach((u) => fd.append("documents", u.file));
-        try {
-            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
-        } catch (e) {
-            console.error("Asset upload failed", e);
-        }
+        await uploadUnitAssets(unitId, {
+            images: images.map((u) => u.file),
+            primaryImage: primary?.file ?? null,
+            drawings: drawings.map((u) => u.file),
+            icons: icons.map((u) => u.file),
+            documents: documents.map((u) => u.file),
+        });
     };
 
     const compressorOptions = [SELECT.compressor, ...compressorList.map(compressorLabel)];
@@ -384,35 +385,35 @@ export default function Page() {
 
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>EER</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
-                                    <div className={styles.formField}><label>COP</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
-                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>EER</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
+                                    <div className={styles.formField}><label>COP</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
+                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Width</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Length</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Height</label><input type="number" min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
                                 </div>
                             )}
 
                             {activeTab === 'calc' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Ambient (°C)</label><input type="number" className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Inlet (°C)</label><input type="number" className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
-                                    <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Evaporator Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
                                 </div>
                             )}
                         </div>

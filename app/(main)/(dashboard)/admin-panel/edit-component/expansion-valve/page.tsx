@@ -252,7 +252,7 @@ export default function EditExpansionValvePage() {
                                     <div className={styles.formField}>
                                         <label>Capacity</label>
                                         <input 
-                                            type="number" 
+                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
                                             className={styles.inputElement} 
                                             placeholder="Enter capacity"
                                             value={capacity}

@@ -67,6 +67,16 @@ body {
     font-weight: 600;
 }
 
+.modelName {
+    font-size: 0.9rem;
+    color: #8a8a8a;
+    margin-top: 8px;
+}
+
+:global(.dark-mode) .modelName {
+    color: #9a9a9a;
+}
+
 .productImage {
     width: 100%;
     display: flex;
