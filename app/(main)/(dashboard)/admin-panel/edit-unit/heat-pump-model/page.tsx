@@ -11,6 +11,7 @@ import { useConfirm } from "../../useConfirm";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type Refrigerant = { id: number; name: string; code: string };
+type Chassis = { id: number; brand?: string | null; model: string };
 type HeatPumpSummary = { id: number; model: string; type: string; mods: string[] };
 
 type Upload = {
@@ -38,7 +39,9 @@ const fromServerAsset = (a: { id: number; url: string }) => ({
 
 const HP_SELECT = "Select Heat Pump";
 const REFRIG_SELECT = "Select Refrigerant";
+const CHASSIS_SELECT = "Select Chasis";
 const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
+const chassisLabel = (c: Chassis) => c.model;
 const heatPumpLabel = (h: HeatPumpSummary) => `${h.model} (${h.type})`;
 const str = (n: number | null | undefined) => (n === null || n === undefined ? "" : String(n));
 
@@ -53,6 +56,8 @@ export default function EditHeatPumpModelPage() {
 
     const [refrigerantList, setRefrigerantList] = useState<Refrigerant[]>([]);
     const [refrigerantId, setRefrigerantId] = useState<number | null>(null);
+    const [chassisList, setChassisList] = useState<Chassis[]>([]);
+    const [chassisId, setChassisId] = useState<number | null>(null);
 
     const [f, setF] = useState({
         compressorQty: "", condenserQty: "", expansionValveQty: "",
@@ -158,12 +163,14 @@ export default function EditHeatPumpModelPage() {
     };
 
     useEffect(() => {
-        (async () => {
+        const load = async (path: string, setter: (d: any) => void) => {
             try {
-                const res = await fetchWithAuth(`${API}/admin/component/refrigerants`, { credentials: "include", cache: "no-store" });
-                if (res.ok) setRefrigerantList(await res.json());
-            } catch (e) { console.error("Failed to load refrigerants", e); }
-        })();
+                const res = await fetchWithAuth(`${API}${path}`, { credentials: "include", cache: "no-store" });
+                if (res.ok) setter(await res.json());
+            } catch (e) { console.error(`Failed to load ${path}`, e); }
+        };
+        load("/admin/component/refrigerants", setRefrigerantList);
+        load("/admin/component/chassis", setChassisList);
         loadHeatPumps();
     }, []);
 
@@ -178,7 +185,7 @@ export default function EditHeatPumpModelPage() {
         dischargeLineDiameter: "", liquidLineDiameter: "", suctionLineDiameter: "", gasTank: "",
     };
 
-    const clearForm = () => { setModel(""); setName(""); setDescription(""); setUnitType("air_to_water"); setRefrigerantId(null); setF(emptyF); };
+    const clearForm = () => { setModel(""); setName(""); setDescription(""); setUnitType("air_to_water"); setRefrigerantId(null); setChassisId(null); setF(emptyF); };
 
     const loadHeatPump = async (id: number) => {
         try {
@@ -190,6 +197,7 @@ export default function EditHeatPumpModelPage() {
             setDescription(d.description ?? "");
             setUnitType(d.type === "WW" ? "water_to_water" : "air_to_water");
             setRefrigerantId(d.refrigerantId ?? null);
+            setChassisId(d.chassisId ?? null);
             setF({
                 compressorQty: str(d.compressorQty), condenserQty: str(d.condenserQty),
                 expansionValveQty: str(d.expansionValveQty), fanPI: str(d.fanPI),
@@ -239,12 +247,13 @@ export default function EditHeatPumpModelPage() {
         if (selectedHeatPumpId === null) { showToast("Please select a heat pump to edit.", "error"); return; }
         if (!model.trim()) { showToast("Please enter a model name.", "error"); return; }
         if (refrigerantId === null) { showToast("Please select a refrigerant.", "error"); return; }
+        if (chassisId === null) { showToast("Please select a chassis.", "error"); return; }
 
         const payload = {
             heatPumpDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW" },
             commonSpecsDto: {
                 compressorQty: int(f.compressorQty), condenserQty: int(f.condenserQty),
-                expansionValveQty: int(f.expansionValveQty), refrigerantId,
+                expansionValveQty: int(f.expansionValveQty), refrigerantId, chassisId,
                 fanPI: num(f.fanPI), width: num(f.width), length: num(f.length), height: num(f.height),
                 numberOfFans: int(f.numberOfFans), fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
                 dischargeLineDiameter: f.dischargeLineDiameter, liquidLineDiameter: f.liquidLineDiameter,
@@ -308,6 +317,8 @@ export default function EditHeatPumpModelPage() {
     };
 
     const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
+    const chassisValue = chassisList.find((c) => c.id === chassisId);
+    const chassisOptions = [CHASSIS_SELECT, ...chassisList.map(chassisLabel)];
     const selectedHeatPump = heatPumps.find((h) => h.id === selectedHeatPumpId);
 
     return (
@@ -349,6 +360,7 @@ export default function EditHeatPumpModelPage() {
                                 <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
+                                <div className={styles.formField}><label>Chasis</label><Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : CHASSIS_SELECT} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                 <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
                                 <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
                                 <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
