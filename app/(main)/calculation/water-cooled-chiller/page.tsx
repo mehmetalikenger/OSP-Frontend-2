@@ -1,61 +1,24 @@
-"use client";
+import { serverFetch } from "@/lib/serverApi";
+import WaterCooledChillerClient, { UnitCalcData } from "./WaterCooledChillerClient";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { fetchWithAuth } from "@/lib/api";
-import ProductAccordion from "../components/ProductAccordion";
-import WaterCooledChillerForm from "../components/WaterCooledChillerForm";
+// Server component: fetch calc-data up front (forwarding the auth cookie) so the
+// name/model/specs are in the initial HTML. Falls back to null -> client fetch on error.
+export default async function WaterCooledChillerPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ id?: string }>;
+}) {
+    const { id } = await searchParams;
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+    let initialData: UnitCalcData | null = null;
+    if (id) {
+        try {
+            const res = await serverFetch(`/units/${id}/calc-data`);
+            if (res.ok) initialData = await res.json();
+        } catch {
+            // leave null -> client fetches as a fallback
+        }
+    }
 
-interface CalcAsset { url: string; fileName: string | null; }
-interface TechSpec { label: string; value: string; }
-interface Defaults { ambient: number; condensation: number; evaporation: number; subcooling: number; superheat: number; evapIn: number; evapOut: number; condIn: number; condOut: number; }
-interface UnitCalcData {
-    name: string | null;
-    model: string;
-    images: CalcAsset[];
-    drawings: CalcAsset[];
-    documents: CalcAsset[];
-    specs: TechSpec[];
-    coolingDefaults: Defaults | null;
-}
-
-function WaterCooledChillerContent() {
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
-    const [calcData, setCalcData] = useState<UnitCalcData | null>(null);
-
-    useEffect(() => {
-        if (!id) return;
-        fetchWithAuth(`${API}/units/${id}/calc-data`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : null)
-            .then((data: UnitCalcData | null) => setCalcData(data))
-            .catch(() => {});
-    }, [id]);
-
-    return (
-        <ProductAccordion
-            title="Water Cooled Chiller"
-            unitName={calcData?.name || undefined}
-            modelName={calcData?.model || undefined}
-            images={calcData?.images}
-            drawings={calcData?.drawings}
-            documents={calcData?.documents}
-            specs={calcData?.specs}
-            calculationForm={calcData ? (
-                <WaterCooledChillerForm defaults={calcData.coolingDefaults} />
-            ) : (
-                <WaterCooledChillerForm />
-            )}
-        />
-    );
-}
-
-export default function WaterCooledChillerPage() {
-    return (
-        <Suspense>
-            <WaterCooledChillerContent />
-        </Suspense>
-    );
+    return <WaterCooledChillerClient id={id ?? null} initialData={initialData} />;
 }
