@@ -5,6 +5,7 @@ import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -249,8 +250,13 @@ export default function Page() {
             });
             if (res.ok) {
                 const unitId: number = await res.json();
-                await uploadAssets(unitId);
-                showToast("Chiller added successfully.", "success");
+                try {
+                    await uploadAssets(unitId);
+                    showToast("Chiller added successfully.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Chiller created, but file upload failed.", "error");
+                }
                 resetForm();
                 setActiveTab("model");
             } else {
@@ -266,21 +272,16 @@ export default function Page() {
         }
     };
 
+    // Uploads the selected files directly to R2 via presigned URLs (see lib/assetUpload).
     const uploadAssets = async (unitId: number) => {
-        const hasFiles = images.length > 0 || drawings.length > 0 || icons.length > 0 || documents.length > 0;
-        if (!hasFiles) return;
-        const fd = new FormData();
         const primary = images.find((u) => u.id === primaryId);
-        if (primary) fd.append("primaryImage", primary.file);
-        images.forEach((u) => { if (u.id !== primaryId) fd.append("images", u.file); });
-        drawings.forEach((u) => fd.append("technicalImages", u.file));
-        icons.forEach((u) => fd.append("icons", u.file));
-        documents.forEach((u) => fd.append("documents", u.file));
-        try {
-            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
-        } catch (e) {
-            console.error("Asset upload failed", e);
-        }
+        await uploadUnitAssets(unitId, {
+            images: images.map((u) => u.file),
+            primaryImage: primary?.file ?? null,
+            drawings: drawings.map((u) => u.file),
+            icons: icons.map((u) => u.file),
+            documents: documents.map((u) => u.file),
+        });
     };
 
     const compressorOptions = [SELECT.compressor, ...compressorList.map(compressorLabel)];

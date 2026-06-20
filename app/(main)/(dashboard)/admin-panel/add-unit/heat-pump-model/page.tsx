@@ -5,6 +5,7 @@ import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -138,26 +139,17 @@ export default function AddHeatPumpModelPage() {
         clearUploads();
     };
 
+    // Uploads only newly added files directly to R2 via presigned URLs (lib/assetUpload).
     const uploadNewAssets = async (unitId: number) => {
-        const newImages = images.filter(u => !u.serverId);
-        const newDrawings = drawings.filter(u => !u.serverId);
-        const newIcons = icons.filter(u => !u.serverId);
-        const newDocs = documents.filter(u => !u.serverId);
-        if (!newImages.length && !newDrawings.length && !newIcons.length && !newDocs.length) return;
-
-        const fd = new FormData();
-        const primaryItem = newImages.find(u => u.id === primaryId);
-        if (primaryItem?.file) fd.append("primaryImage", primaryItem.file);
-        newImages.forEach(u => { if (u.id !== primaryId && u.file) fd.append("images", u.file); });
-        newDrawings.forEach(u => { if (u.file) fd.append("technicalImages", u.file); });
-        newIcons.forEach(u => { if (u.file) fd.append("icons", u.file); });
-        newDocs.forEach(u => { if (u.file) fd.append("documents", u.file); });
-
-        try {
-            await fetchWithAuth(`${API}/admin/unit/${unitId}/upload-assets`, { method: "POST", credentials: "include", body: fd });
-        } catch (e) {
-            console.error("Asset upload failed", e);
-        }
+        const isNew = (u: Upload): u is Upload & { file: File } => !u.serverId && !!u.file;
+        const primaryItem = images.find((u) => u.id === primaryId && isNew(u));
+        await uploadUnitAssets(unitId, {
+            images: images.filter(isNew).map((u) => u.file),
+            primaryImage: primaryItem?.file ?? null,
+            drawings: drawings.filter(isNew).map((u) => u.file),
+            icons: icons.filter(isNew).map((u) => u.file),
+            documents: documents.filter(isNew).map((u) => u.file),
+        });
     };
 
     const handleAdd = async () => {
@@ -183,8 +175,13 @@ export default function AddHeatPumpModelPage() {
             });
             if (res.ok) {
                 const newId: number = await res.json();
-                await uploadNewAssets(newId);
-                showToast("Heat pump model created. Add its modes from the Mod page.", "success");
+                try {
+                    await uploadNewAssets(newId);
+                    showToast("Heat pump model created. Add its modes from the Mod page.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Heat pump created, but file upload failed.", "error");
+                }
                 resetForm();
             } else {
                 let msg = "Failed to create heat pump model.";
