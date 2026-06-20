@@ -89,6 +89,7 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                 <div className={styles.productInfo}>
                     <div className={styles.productTitle}>
                         <h2>{unit.name || unit.model}</h2>
+                        {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                     </div>
                     {isMobile && (
                         <div className={styles.productImage}>
@@ -126,7 +127,10 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                     <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                 </div>
                 <div className={styles.unitDetailContainer}>
-                    <div className={styles.unitName}><h2>{d.name || d.model}</h2></div>
+                    <div className={styles.unitName}>
+                        <h2>{d.name || d.model}</h2>
+                        {d.name && <p className={styles.modelName}>{d.model}</p>}
+                    </div>
                     <div className={styles.unitImage}>
                         <img src={d.primaryImageUrl || "/icons/profilePic.png"} alt={altText} />
                     </div>
@@ -166,7 +170,10 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                     <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                 </div>
                 <div className={styles.unitDetailContainer}>
-                    <div className={styles.unitName}><h2>{d.name || d.model}</h2></div>
+                    <div className={styles.unitName}>
+                        <h2>{d.name || d.model}</h2>
+                        {d.name && <p className={styles.modelName}>{d.model}</p>}
+                    </div>
                     <div className={styles.unitInfo}>
                         {d.description && (
                             <div className={styles.unitDesc}><p>{d.description}</p></div>
@@ -207,6 +214,10 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
     return (
         <>
             <div className={styles.container}>
+                <div className={styles.backBtnContainer} onClick={() => router.back()}>
+                    <img src="/icons/back-arrow-2.png" className={styles.lightIcon} alt="Back" />
+                    <img src="/icons/back-arrow.png" className={styles.darkIcon} alt="Back" />
+                </div>
                 <div className={styles.category}>
                     <h1>{title}</h1>
                 </div>

@@ -79,6 +79,7 @@ export default function HeatPumpsPage() {
                     <div className={styles.productInfo}>
                         <div className={styles.productTitle}>
                             <h2>{unit.name || unit.model}</h2>
+                            {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                         </div>
                         {isMobile && (
                             <div className={styles.productImage}>
@@ -135,7 +136,10 @@ export default function HeatPumpsPage() {
                             <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                         </div>
                         <div className={styles.unitDetailContainer}>
-                            <div className={styles.unitName}><h2>{selectedUnit.name || selectedUnit.model}</h2></div>
+                            <div className={styles.unitName}>
+                                <h2>{selectedUnit.name || selectedUnit.model}</h2>
+                                {selectedUnit.name && <p className={styles.modelName}>{selectedUnit.model}</p>}
+                            </div>
                             <div className={styles.unitImage}>
                                 <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt="Heat Pump" />
                             </div>
@@ -169,7 +173,10 @@ export default function HeatPumpsPage() {
                             <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
                         </div>
                         <div className={styles.unitDetailContainer}>
-                            <div className={styles.unitName}><h2>{selectedUnit.name || selectedUnit.model}</h2></div>
+                            <div className={styles.unitName}>
+                                <h2>{selectedUnit.name || selectedUnit.model}</h2>
+                                {selectedUnit.name && <p className={styles.modelName}>{selectedUnit.model}</p>}
+                            </div>
                             <div className={styles.unitInfo}>
                                 {selectedUnit.description && <div className={styles.unitDesc}><p>{selectedUnit.description}</p></div>}
                                 <div className={styles.unitImage}>
