@@ -7,6 +7,7 @@ import { Country, State } from "country-state-city";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
+import { formatPhoneForStore, parseStoredPhone } from "@/lib/phone";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -35,8 +36,8 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
 
     const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]); // projects checked for this add
-    const [addedIds, setAddedIds] = useState<number[]>([]);        // projects added to this session (feedback only)
     const [busy, setBusy] = useState(false);
+    const [added, setAdded] = useState(false); // true right after a successful add (until selection changes)
     const [error, setError] = useState<string | null>(null);
 
     // Create-project form states
@@ -45,7 +46,12 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
     const [countryName, setCountryName] = useState("");
     const [countryIsoCode, setCountryIsoCode] = useState("");
     const [city, setCity] = useState("");
-    const [phone, setPhone] = useState("");
+    const [phone, setPhone] = useState("");        // digits value for PhoneInput
+    const [dialCode, setDialCode] = useState("");  // country calling code, for storage format
+
+    // The user's saved address/phone, used to pre-fill the create-project form so they
+    // don't have to retype their own details. Also used to re-seed the form after a create.
+    const [defaults, setDefaults] = useState({ address: "", countryName: "", countryIsoCode: "", city: "", phone: "", dialCode: "" });
 
     const countries = Country.getAllCountries();
     // States used instead of cities (better coverage for countries like Turkey).
@@ -63,13 +69,51 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
         }
     }, []);
 
+    // Pull the logged-in user's saved address/phone so the create-project form starts
+    // pre-filled with their own details. Country is stored as an ISO code, so map it back
+    // to the display name the combobox expects (falling back to the raw value).
+    const loadUserDefaults = useCallback(async () => {
+        const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+        if (!userId) return;
+        try {
+            const res = await fetchWithAuth(`${API}/user/${userId}`, { credentials: "include", cache: "no-store" });
+            if (!res.ok) return;
+            const data = await res.json();
+            let cName = "", cIso = "";
+            if (data.country) {
+                const c = Country.getAllCountries().find(c => c.isoCode === data.country);
+                cName = c ? c.name : data.country;
+                cIso = c ? c.isoCode : data.country;
+            }
+            const parsedPhone = parseStoredPhone(data.phone);
+            const d = {
+                address: data.address || "",
+                countryName: cName,
+                countryIsoCode: cIso,
+                city: data.city || "",
+                phone: parsedPhone.value,
+                dialCode: parsedPhone.dialCode,
+            };
+            setDefaults(d);
+            setAddress(d.address);
+            setCountryName(d.countryName);
+            setCountryIsoCode(d.countryIsoCode);
+            setCity(d.city);
+            setPhone(d.phone);
+            setDialCode(d.dialCode);
+        } catch {
+            // Leave the form blank if the profile can't be loaded.
+        }
+    }, []);
+
     useEffect(() => {
         if (isOpen) {
             setStep(initialStep);
             setError(null);
-            setSelectedIds([]);
-            setAddedIds([]);
+            // Selection is intentionally NOT reset here: once a project is checked it stays
+            // checked until the page is refreshed, even across closing/reopening the modal.
             loadProjects();
+            loadUserDefaults();
             (window as any).__preventScroll = (e: any) => {
                 if (!e.target.closest('[class*="modalContent"], [class*="unitDetails"], [class*="projectsList"]')) {
                     e.preventDefault();
@@ -99,7 +143,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 window.removeEventListener("keydown", (window as any).__preventKeyScroll);
             }
         };
-    }, [isOpen, initialStep, loadProjects]);
+    }, [isOpen, initialStep, loadProjects, loadUserDefaults]);
 
     if (!isOpen) return null;
 
@@ -131,16 +175,18 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
     // membership, so it never reflects what a project already contains.
     const toggleSelected = (projectId: number) => {
         if (busy) return;
+        // Changing the selection means a new add is possible again, so clear the
+        // "added" confirmation and re-enable the Add button.
+        setAdded(false);
         setSelectedIds(prev => prev.includes(projectId)
             ? prev.filter(id => id !== projectId)
             : [...prev, projectId]);
     };
 
-    // Adds the current result to every selected project as a new ProjectDetails row, then
-    // clears the selection. There is no duplicate-blocking by design: the same unit/result
-    // can be added to the same project again — just re-select it and Add again (e.g. after
-    // recalculating). Clearing the selection after a commit is what prevents an accidental
-    // double-add from a single Add click.
+    // Adds the current result to every selected project as a new ProjectDetails row.
+    // The selection is intentionally KEPT after adding, so the chosen projects stay
+    // checked until the page is refreshed (the checkbox is the user's confirmation of
+    // which projects received the result).
     const addToSelected = async () => {
         if (!calc?.unitId || selectedIds.length === 0 || busy) return;
         setBusy(true);
@@ -149,8 +195,8 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
             for (const projectId of selectedIds) {
                 await addUnitToProject(projectId);
             }
-            setAddedIds(prev => Array.from(new Set([...prev, ...selectedIds])));
-            setSelectedIds([]);
+            // Confirm the add and disable the Add button until the selection changes again.
+            setAdded(true);
         } catch {
             setError("Could not add to the selected project(s). Please try again.");
         } finally {
@@ -158,7 +204,10 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
         }
     };
 
-    const handleCreateAndAdd = async () => {
+    // Creating a project only creates it — it does NOT add the current result. After
+    // creation we return to the projects list so the user can check the new project and
+    // press Add to commit the result, just like any other project.
+    const handleCreate = async () => {
         if (!projectName.trim()) {
             setError("Please enter a project name.");
             return;
@@ -170,17 +219,19 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ name: projectName, address, country: countryName, city, phone }),
+                body: JSON.stringify({ name: projectName, address, country: countryName, city, phone: formatPhoneForStore(phone, dialCode) }),
             });
             if (!res.ok) throw new Error();
-            const project = await res.json();
-            if (calc?.unitId) {
-                await addUnitToProject(project.id);
-                setAddedIds(prev => [...prev, project.id]);
-            }
-            // Reset the create form, refresh the list, and go back to the projects
-            // step so the newly created (and now containing this unit) project is visible.
-            setProjectName(""); setAddress(""); setCountryName(""); setCountryIsoCode(""); setCity(""); setPhone("");
+            // Reset the create form (re-seeding address/phone from the user's defaults),
+            // refresh the list, and go back to the projects step so the newly created
+            // project is visible and ready to be selected.
+            setProjectName("");
+            setAddress(defaults.address);
+            setCountryName(defaults.countryName);
+            setCountryIsoCode(defaults.countryIsoCode);
+            setCity(defaults.city);
+            setPhone(defaults.phone);
+            setDialCode(defaults.dialCode);
             await loadProjects();
             setStep("projects");
         } catch {
@@ -220,7 +271,6 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                             {projects.length === 0 && <p>No projects yet. Create one below.</p>}
                             {projects.map(project => {
                                 const selected = selectedIds.includes(project.id);
-                                const added = addedIds.includes(project.id);
                                 return (
                                     <div
                                         key={project.id}
@@ -228,10 +278,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                                         style={busy ? { opacity: 0.6, pointerEvents: 'none' } : undefined}
                                         onClick={() => toggleSelected(project.id)}
                                     >
-                                        <span>
-                                            {project.name}
-                                            {added && <span style={{ marginLeft: 8, opacity: 0.6, fontSize: '0.85em' }}>✓ added</span>}
-                                        </span>
+                                        <span>{project.name}</span>
                                         <div className={`${styles.checkbox} ${selected ? styles.checkboxChecked : ''}`}>
                                             {selected && <div className={styles.tick}></div>}
                                         </div>
@@ -240,11 +287,12 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                             })}
                         </div>
                         {error && <p className={styles.calcError}>{error}</p>}
+                        {added && !error && <p className={styles.calcSuccess}>Added to project.</p>}
                         <div className={styles.modalFooter}>
                             <button
                                 className={styles.btnPrimary}
                                 onClick={addToSelected}
-                                disabled={busy || selectedIds.length === 0}
+                                disabled={busy || added || selectedIds.length === 0}
                             >
                                 {busy ? "Adding…" : "Add"}
                             </button>
@@ -294,14 +342,14 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                                 <PhoneInput
                                     country={'us'}
                                     value={phone}
-                                    onChange={(value: string) => setPhone(value)}
+                                    onChange={(value: string, data: any) => { setPhone(value); setDialCode(data?.dialCode || ""); }}
                                     inputStyle={{ width: '100%', height: '40px', paddingLeft: '48px', borderRadius: '5px' }}
                                 />
                             </div>
                             {error && <p className={styles.calcError}>{error}</p>}
                             <div className={styles.formActions}>
                                 <button className={styles.btnSecondary} onClick={() => setStep('projects')} disabled={busy}>Cancel</button>
-                                <button className={styles.btnPrimary} onClick={handleCreateAndAdd} disabled={busy}>
+                                <button className={styles.btnPrimary} onClick={handleCreate} disabled={busy}>
                                     {busy ? "Saving…" : "Save"}
                                 </button>
                             </div>

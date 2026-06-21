@@ -187,6 +187,18 @@
     z-index: 1000;
 }
 
+.toastError {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #d7292e;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
 .seperator {
     height: 2px;
     width: 100%;
@@ -197,6 +209,12 @@
 
 .unitContainer {
     margin-top: 30px;
+}
+
+/* Only the mobile list shows by default; the desktop list is enabled at >=768px.
+   Without this, both lists rendered on mobile (duplicate unit boxes). */
+.unitsDesktop {
+    display: none;
 }
 
 /* Mobile */
@@ -227,6 +245,18 @@
     font-size: 0.95rem;
     font-weight: 500;
     color: #2a2a2a;
+}
+
+.modelName {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #777;
+}
+
+:global(.dark-mode) .modelName {
+    color: #9a9a9a;
 }
 
 .unitImage {
@@ -308,6 +338,7 @@
         display: flex;
         justify-content: space-between;
         padding: 0;
+        margin-top: 40px;
     }
 
     .dates {
@@ -326,6 +357,10 @@
 
     .unitsMobile {
         display: none;
+    }
+
+    .unitsDesktop {
+        display: block;
     }
 
     .unitDetails {
@@ -403,7 +438,8 @@
 }
 
 @media screen and (min-width: 1200px) {
-    .toast {
+    .toast,
+    .toastError {
         right: 40px;
         padding: 20px 20px;
         font-size: 1rem;
@@ -683,8 +719,8 @@
 
 .createProjectBtn {
     background-color: transparent;
-    color: #d7292e;
-    border: 1px solid #d7292e;
+    color: #282f68;
+    border: 1px solid #282f68;
     border-radius: 5px;
     padding: 8px 15px;
     font-size: 0.85rem;
@@ -693,7 +729,16 @@
 }
 
 .createProjectBtn:hover {
-    background-color: rgba(215, 41, 46, 0.08);
+    background-color: rgba(40, 47, 104, 0.08);
+}
+
+:global(.dark-mode) .createProjectBtn {
+    color: #c4d9ff;
+    border-color: #c4d9ff;
+}
+
+:global(.dark-mode) .createProjectBtn:hover {
+    background-color: rgba(196, 217, 255, 0.1);
 }
 
 @media screen and (min-width: 3000px) {
@@ -705,4 +750,247 @@
     .unitImage img {
         width: 60%;
     }
+}
+
+/* Project header right side: dates + settings button.
+   Mobile: full width with the settings button pushed to the right, just above the
+   header line. Desktop: grouped to the right of the project name. */
+.headerRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.headerRight .dates {
+    margin-top: 0;
+}
+
+@media screen and (min-width: 768px) {
+    .headerRight {
+        flex-direction: row;
+        align-items: center;
+        margin-top: 0;
+        width: auto;
+    }
+}
+
+.settingsWrap {
+    position: relative;
+}
+
+.settingsBtn {
+    background-color: transparent;
+    color: #282f68;
+    border: 1px solid #282f68;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+
+.settingsBtn:hover {
+    background-color: rgba(40, 47, 104, 0.08);
+}
+
+:global(.dark-mode) .settingsBtn {
+    color: #c4d9ff;
+    border-color: #c4d9ff;
+}
+
+:global(.dark-mode) .settingsBtn:hover {
+    background-color: rgba(196, 217, 255, 0.1);
+}
+
+/* Transparent catcher so a click anywhere closes the settings menu */
+.menuBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+}
+
+.settingsMenu {
+    position: absolute;
+    /* Mobile: the button sits on the left, so open the menu from the left edge to keep
+       it inside the page. Desktop overrides this to open from the right. */
+    left: 0;
+    right: auto;
+    top: calc(100% + 6px);
+    z-index: 51;
+    min-width: 180px;
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+@media screen and (min-width: 768px) {
+    .settingsMenu {
+        left: auto;
+        right: 0;
+    }
+}
+
+.settingsMenu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #2a2a2a;
+    font-family: inherit;
+}
+
+.settingsMenu button:hover {
+    background: #f2f2f2;
+}
+
+.settingsMenu .deleteOption {
+    color: #d7292e;
+}
+
+:global(.dark-mode) .settingsMenu {
+    background: #2b2b2b;
+    border-color: #4a4a4a;
+}
+
+:global(.dark-mode) .settingsMenu button {
+    color: #d6d6d6;
+}
+
+:global(.dark-mode) .settingsMenu button:hover {
+    background: #3a3a3a;
+}
+
+:global(.dark-mode) .settingsMenu .deleteOption {
+    color: #ff5a5f;
+}
+
+/* Delete-project confirmation (mirrors the delete-account warning) */
+.deleteWarning {
+    background-color: #fff5f5;
+    border: 1px solid #f5c2c2;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 5px;
+}
+
+.deleteWarning p {
+    font-size: 0.85rem;
+    color: #7a2e2e;
+    margin-bottom: 10px;
+}
+
+.deleteWarning input {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+    border: 1px solid #ef4444;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+}
+
+:global(.dark-mode) .deleteWarning {
+    background-color: #451a1a;
+    border-color: #7f1d1d;
+}
+
+:global(.dark-mode) .deleteWarning p {
+    color: #fca5a5;
+}
+
+:global(.dark-mode) .deleteWarning input {
+    background-color: #262626;
+    border-color: #7f1d1d;
+    color: #d6d6d6;
+}
+
+.deleteConfirmBtn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    background-color: #b91c1c;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.deleteConfirmBtn:hover {
+    background-color: #a01818;
+}
+
+.deleteConfirmBtn:disabled {
+    background-color: #e7a3a3;
+    cursor: not-allowed;
+}
+
+/* Phone input: match the sibling form inputs' background and remove react-tel-input's
+   default border/focus outline so it blends in (scoped to the project modals' .formRow). */
+.formRow :global(.react-tel-input .form-control) {
+    background-color: #ffffff !important;
+    border: 1px solid #cecece !important;
+    box-shadow: none !important;
+}
+
+.formRow :global(.react-tel-input .form-control:focus) {
+    border-color: #cecece !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.formRow :global(.react-tel-input .selected-flag),
+.formRow :global(.react-tel-input .selected-flag:hover),
+.formRow :global(.react-tel-input .selected-flag:focus),
+.formRow :global(.react-tel-input .flag-dropdown.open .selected-flag) {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+/* The country/code (extension) area: transparent so the input's background and outer
+   border show through, with a divider on the right in the input's border color. */
+.formRow :global(.react-tel-input .flag-dropdown) {
+    background-color: transparent !important;
+    border: none !important;
+    border-right: 1px solid #cecece !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .form-control) {
+    background-color: #1e1e1e !important;
+    border: 1px solid #444 !important;
+    color: #dfdfdf !important;
+    box-shadow: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .form-control:focus) {
+    border-color: #444 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag),
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag:hover),
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag:focus),
+:global(.dark-mode) .formRow :global(.react-tel-input .flag-dropdown.open .selected-flag) {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .flag-dropdown) {
+    background-color: transparent !important;
+    border: none !important;
+    border-right: 1px solid #444 !important;
 }

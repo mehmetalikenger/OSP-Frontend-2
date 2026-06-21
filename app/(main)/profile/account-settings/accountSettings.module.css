@@ -160,36 +160,46 @@
 :global(.dark-mode) .field input,
 :global(.dark-mode) .field select,
 :global(.dark-mode) .adressInput {
-    background-color: #5C5C5C;
-    border: none;
+    background-color: #333333;
+    border: 1px solid #5C5C5C;
     color: #d6d6d6;
 }
 
+:global(.dark-mode) .field input:focus,
+:global(.dark-mode) .field select:focus,
+:global(.dark-mode) .adressInput:focus {
+    border-color: #d6d6d6;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 :global(.dark-mode) .field select option {
-    background-color: #5C5C5C;
+    background-color: #333333;
     color: #d6d6d6;
 }
 
 :global(.dark-mode .react-tel-input .form-control) {
-    background-color: #5C5C5C !important;
-    border: none !important;
+    background-color: #333333 !important;
+    border: 1px solid #5C5C5C !important;
     color: #d6d6d6 !important;
     box-shadow: none !important;
 }
 
 :global(.dark-mode .react-tel-input .form-control:focus) {
+    border-color: #d6d6d6 !important;
     box-shadow: none !important;
     outline: none !important;
 }
 
 :global(.dark-mode .react-tel-input .flag-dropdown) {
-    background-color: #5C5C5C !important;
-    border: none !important;
+    background-color: #333333 !important;
+    border: 1px solid #5C5C5C !important;
+    border-right: none !important;
     border-radius: 5px 0 0 5px !important;
 }
 
 :global(.dark-mode .react-tel-input .selected-flag) {
-    background-color: #5C5C5C !important;
+    background-color: #333333 !important;
     border-radius: 5px 0 0 5px !important;
 }
 

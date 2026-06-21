@@ -721,6 +721,17 @@
     background-color: rgba(40, 47, 104, 0.15);
 }
 
+.btnPrimary:disabled,
+.btnSecondary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btnPrimary:disabled:hover,
+.btnSecondary:disabled:hover {
+    background-color: transparent;
+}
+
 :global(.dark-mode) .btnSecondary {
     color: #dfdfdf;
     border: 1px solid #dfdfdf;
@@ -728,6 +739,10 @@
 
 :global(.dark-mode) .btnSecondary:hover {
     background-color: rgba(223, 223, 223, 0.1);
+}
+
+:global(.dark-mode) .btnSecondary:disabled:hover {
+    background-color: transparent;
 }
 
 .resultActions button {
@@ -823,6 +838,9 @@
 .modalFooter {
     margin-top: 25px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .modalFooter button {
@@ -888,6 +906,65 @@
     background: #1e1e1e;
     border: 1px solid #444;
     color: #dfdfdf;
+}
+
+/* Phone input: match the sibling form inputs' background and remove react-tel-input's
+   default border/focus outline so it blends in. */
+.formRow :global(.react-tel-input .form-control) {
+    background-color: #ffffff !important;
+    border: 1px solid #cecece !important;
+    box-shadow: none !important;
+}
+
+.formRow :global(.react-tel-input .form-control:focus) {
+    border-color: #cecece !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.formRow :global(.react-tel-input .selected-flag),
+.formRow :global(.react-tel-input .selected-flag:hover),
+.formRow :global(.react-tel-input .selected-flag:focus),
+.formRow :global(.react-tel-input .flag-dropdown.open .selected-flag) {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+/* The country/code (extension) area: transparent so the input's background and outer
+   border show through, with a divider on the right in the input's border color. */
+.formRow :global(.react-tel-input .flag-dropdown) {
+    background-color: transparent !important;
+    border: none !important;
+    border-right: 1px solid #cecece !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .form-control) {
+    background-color: #1e1e1e !important;
+    border: 1px solid #444 !important;
+    color: #dfdfdf !important;
+    box-shadow: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .form-control:focus) {
+    border-color: #444 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag),
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag:hover),
+:global(.dark-mode) .formRow :global(.react-tel-input .selected-flag:focus),
+:global(.dark-mode) .formRow :global(.react-tel-input .flag-dropdown.open .selected-flag) {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+:global(.dark-mode) .formRow :global(.react-tel-input .flag-dropdown) {
+    background-color: transparent !important;
+    border: none !important;
+    border-right: 1px solid #444 !important;
 }
 
 .formActions {
@@ -1099,6 +1176,14 @@
     margin-top: 20px;
     font-size: 0.82rem;
     color: #d7292e;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.calcSuccess {
+    margin-top: 20px;
+    font-size: 0.82rem;
+    color: #2e9b57;
     align-self: flex-end;
     text-align: right;
 }
