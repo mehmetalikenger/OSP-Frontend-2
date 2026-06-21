@@ -11,8 +11,16 @@ type Evaporator = {
     model: string;
 }
 
+// Evaporator type options -> backend EvaporatorType enum names.
+const EVAPORATOR_TYPES: Record<string, string> = {
+    "Plate": "PLATE",
+    "Coil": "COIL",
+    "Shell & Tube": "SHELL_AND_TUBE",
+};
+
 export default function AddEvaporatorPage() {
     const [model, setModel] = useState("");
+    const [type, setType] = useState("Plate");
 
     // Specs states
     const [evaporator, setEvaporator] = useState("Select Evaporator");
@@ -52,7 +60,7 @@ export default function AddEvaporatorPage() {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/addEvaporator`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model }),
+                body: JSON.stringify({ model, type: EVAPORATOR_TYPES[type] }),
                 credentials: 'include'
             });
 
@@ -140,12 +148,22 @@ export default function AddEvaporatorPage() {
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
                                         <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder="Enter model"
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>Type</label>
+                                        <Combobox
+                                            options={Object.keys(EVAPORATOR_TYPES)}
+                                            value={type}
+                                            onChange={setType}
+                                            className={styles.comboBox}
+                                            containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                             </div>

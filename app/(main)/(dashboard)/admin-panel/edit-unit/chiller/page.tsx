@@ -110,6 +110,14 @@ export default function Page() {
     const [height, setHeight] = useState("");
     const [length, setLength] = useState("");
 
+    // Working envelope (safe-area bounds for the report's Working Limit graph)
+    const [minWaterInlet, setMinWaterInlet] = useState("");
+    const [maxWaterInlet, setMaxWaterInlet] = useState("");
+    const [minWaterOutlet, setMinWaterOutlet] = useState("");
+    const [maxWaterOutlet, setMaxWaterOutlet] = useState("");
+    const [minAmbient, setMinAmbient] = useState("");
+    const [maxAmbient, setMaxAmbient] = useState("");
+
     const [images, setImages] = useState<Upload[]>([]);
     const [primaryId, setPrimaryId] = useState<string | null>(null);
     const [drawings, setDrawings] = useState<Upload[]>([]);
@@ -248,6 +256,9 @@ export default function Page() {
             setLiquidLineDiameter(d.liquidLineDiameter ?? "");
             setSuctionLineDiameter(d.suctionLineDiameter ?? "");
             setGasTank(str(d.gasTank)); setWidth(str(d.width)); setHeight(str(d.height)); setLength(str(d.length));
+            setMinWaterInlet(str(d.minWaterInlet)); setMaxWaterInlet(str(d.maxWaterInlet));
+            setMinWaterOutlet(str(d.minWaterOutlet)); setMaxWaterOutlet(str(d.maxWaterOutlet));
+            setMinAmbient(str(d.minAmbient)); setMaxAmbient(str(d.maxAmbient));
 
             const assets: { id: number; url: string; assetType: string; isPrimary: boolean }[] = d.assets ?? [];
             const imgs = assets.filter(a => a.assetType === "IMAGE").map(fromServerAsset);
@@ -306,6 +317,9 @@ export default function Page() {
                 fanPI: num(fanPI), copErr: num(eer), width: num(width), length: num(length), height: num(height),
                 numberOfFans: int(numberOfFans), fanDiameter: num(fanDiameter), airflowRate: num(airflowRate),
                 dischargeLineDiameter, liquidLineDiameter, suctionLineDiameter, gasTank: num(gasTank),
+                minWaterInlet: num(minWaterInlet), maxWaterInlet: num(maxWaterInlet),
+                minWaterOutlet: num(minWaterOutlet), maxWaterOutlet: num(maxWaterOutlet),
+                minAmbient: num(minAmbient), maxAmbient: num(maxAmbient),
             },
         };
 
@@ -347,6 +361,7 @@ export default function Page() {
         setFanPI(""); setEer(""); setCondenserQty(""); setNumberOfFans(""); setFanDiameter("");
         setExpansionValveQty(""); setAirflowRate(""); setDischargeLineDiameter(""); setLiquidLineDiameter("");
         setSuctionLineDiameter(""); setGasTank(""); setWidth(""); setHeight(""); setLength("");
+        setMinWaterInlet(""); setMaxWaterInlet(""); setMinWaterOutlet(""); setMaxWaterOutlet(""); setMinAmbient(""); setMaxAmbient("");
         clearUploads();
         setActiveTab("model");
     };
@@ -469,6 +484,12 @@ export default function Page() {
                                     <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
                                     <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>Min Water Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterInlet} onChange={(e) => setMinWaterInlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Max Water Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterInlet} onChange={(e) => setMaxWaterInlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Min Water Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterOutlet} onChange={(e) => setMinWaterOutlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Max Water Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterOutlet} onChange={(e) => setMaxWaterOutlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Min Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minAmbient} onChange={(e) => setMinAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Max Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxAmbient} onChange={(e) => setMaxAmbient(e.target.value)} /></div>
                                 </div>
                             )}
                         </div>

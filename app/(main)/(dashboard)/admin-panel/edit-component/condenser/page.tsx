@@ -10,7 +10,13 @@ import { useConfirm } from "../../useConfirm";
 type Condenser = {
     id: number;
     model: string;
+    type?: string; // CondenserType enum name
 }
+
+// Display label <-> backend enum name
+const CONDENSER_TYPES: Record<string, string> = { "Microchannel": "MICROCHANNEL" };
+const condenserTypeLabel = (enumName?: string) =>
+    Object.keys(CONDENSER_TYPES).find(k => CONDENSER_TYPES[k] === enumName) || "Microchannel";
 
 type CondenserSpecs = {
     id: number;
@@ -21,6 +27,7 @@ type CondenserSpecs = {
 export default function EditCondenserPage() {
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Condenser");
     const [model, setModel] = useState("");
+    const [type, setType] = useState("Microchannel");
 
     // Specs states
     const [condenser, setCondenser] = useState("Select Condenser");
@@ -72,6 +79,7 @@ export default function EditCondenserPage() {
             const cond = condensersList.find(c => c.model === selectedItemToEdit);
             if (cond) {
                 setModel(cond.model);
+                setType(condenserTypeLabel(cond.type));
             }
         } else {
             setModel("");
@@ -106,7 +114,7 @@ export default function EditCondenserPage() {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCondenser/${cond.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model }),
+                body: JSON.stringify({ model, type: CONDENSER_TYPES[type] }),
                 credentials: 'include'
             });
 
@@ -223,12 +231,22 @@ export default function EditCondenserPage() {
                                     </div>
                                     <div className={styles.formField}>
                                         <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder="Enter model"
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>Type</label>
+                                        <Combobox
+                                            options={Object.keys(CONDENSER_TYPES)}
+                                            value={type}
+                                            onChange={setType}
+                                            className={styles.comboBox}
+                                            containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                             </div>

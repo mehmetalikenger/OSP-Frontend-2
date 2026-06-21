@@ -31,6 +31,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
 
     const [result, setResult] = useState<CalcResult | null>(null);
     const [loading, setLoading] = useState(false);
+    const [downloading, setDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -101,6 +102,50 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
         }
     };
 
+    // Ask the backend to build the PDF report from the current inputs and download it.
+    const handleDownloadReport = async () => {
+        if (!unitId) return;
+        setDownloading(true);
+        setError(null);
+        try {
+            const res = await fetchWithAuth(`${API}/units/${Number(unitId)}/report`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    mod: "COOLING",
+                    ambient: parseFloat(ambient) || 0,
+                    evapIn: parseFloat(evapIn) || 0,
+                    evapOut: parseFloat(evapOut) || 0,
+                }),
+            });
+
+            if (!res.ok) throw new Error(`Request failed (${res.status})`);
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "unit-report.pdf";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch {
+            setError("We couldn't generate the report. Please try again.");
+        } finally {
+            setDownloading(false);
+        }
+    };
+
+    // Editing any input that feeds the calculation makes the shown results stale —
+    // the Download / Add-to-project actions read the live fields — so close the
+    // results panel to force a fresh Calculate before the user can act on them.
+    const onCalcInput = (setter: (v: string) => void) => (value: string) => {
+        setter(value);
+        setResult(null);
+    };
+
     const fmt = (n: number) =>
         n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -131,7 +176,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                             min="-5"
                             max="50"
                             value={ambient}
-                            onChange={(e) => setAmbient(e.target.value)}
+                            onChange={(e) => onCalcInput(setAmbient)(e.target.value)}
                         />
                     </div>
                     <div className={styles.input}>
@@ -142,7 +187,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                             min="-30"
                             max="25"
                             value={evapIn}
-                            onChange={(e) => setEvapIn(e.target.value)}
+                            onChange={(e) => onCalcInput(setEvapIn)(e.target.value)}
                         />
                     </div>
                     <div className={styles.input}>
@@ -153,7 +198,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                             min="-35"
                             max="20"
                             value={evapOut}
-                            onChange={(e) => setEvapOut(e.target.value)}
+                            onChange={(e) => onCalcInput(setEvapOut)(e.target.value)}
                         />
                     </div>
                     <div className={styles.divider}></div>
@@ -230,13 +275,26 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     </div>
 
                     <div className={styles.resultsCardActions}>
-                        <button className={styles.btnSecondary} onClick={() => window.print()}>Download Result File</button>
+                        <button className={styles.btnSecondary} onClick={handleDownloadReport} disabled={downloading}>
+                            {downloading ? "Preparing…" : "Download Result File"}
+                        </button>
                         <button className={styles.btnPrimary} onClick={() => setModalOpen(true)}>Add to project</button>
                     </div>
                 </div>
             )}
 
-            <CalculationModals isOpen={modalOpen} onClose={() => setModalOpen(false)} initialStep="projects" />
+            <CalculationModals
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                initialStep="projects"
+                calc={{
+                    unitId,
+                    mod: "COOLING",
+                    ambient: parseFloat(ambient) || 0,
+                    evapIn: parseFloat(evapIn) || 0,
+                    evapOut: parseFloat(evapOut) || 0,
+                }}
+            />
         </div>
     );
 }

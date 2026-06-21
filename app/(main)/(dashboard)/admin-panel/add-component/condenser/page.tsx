@@ -11,8 +11,12 @@ type Condenser = {
     model: string;
 }
 
+// Condenser type options -> backend CondenserType enum names.
+const CONDENSER_TYPES: Record<string, string> = { "Microchannel": "MICROCHANNEL" };
+
 export default function AddCondenserPage() {
     const [model, setModel] = useState("");
+    const [type, setType] = useState("Microchannel");
 
     // Specs states
     const [condenser, setCondenser] = useState("Select Condenser");
@@ -52,7 +56,7 @@ export default function AddCondenserPage() {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/addCondenser`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model }),
+                body: JSON.stringify({ model, type: CONDENSER_TYPES[type] }),
                 credentials: 'include'
             });
 
@@ -140,12 +144,22 @@ export default function AddCondenserPage() {
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
                                         <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder="Enter model"
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>Type</label>
+                                        <Combobox
+                                            options={Object.keys(CONDENSER_TYPES)}
+                                            value={type}
+                                            onChange={setType}
+                                            className={styles.comboBox}
+                                            containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                             </div>
