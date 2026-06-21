@@ -242,8 +242,8 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
     };
 
     return (
-        <div className={styles.modalOverlay} onClick={handleClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
                 <div className={styles.modalCloseBtn} onClick={handleClose}>
                     <img src="../../icons/closeBtn.png" className={styles.lightIcon} alt="Close" />
                     <img src="../../icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />

@@ -475,8 +475,8 @@ export default function ProjectsPage() {
             </div>
 
             {isCreateModalOpen && (
-                <div className={styles.modalOverlay} onClick={() => setIsCreateModalOpen(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
                         <div className={styles.modalCloseBtn} onClick={() => setIsCreateModalOpen(false)}>
                             <img src="/icons/closeBtn.png" className={styles.lightIcon} alt="Close" />
                             <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
@@ -539,8 +539,8 @@ export default function ProjectsPage() {
             )}
 
             {isEditModalOpen && openProjectObj && (
-                <div className={styles.modalOverlay} onClick={() => setIsEditModalOpen(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
                         <div className={styles.modalCloseBtn} onClick={() => setIsEditModalOpen(false)}>
                             <img src="/icons/closeBtn.png" className={styles.lightIcon} alt="Close" />
                             <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
