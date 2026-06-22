@@ -156,8 +156,8 @@ export default function ChillersPage() {
                                 <div className={styles.unitSpecs}>
                                     <h3>Technical Specifications</h3>
                                     <ul>
-                                        {selectedUnit.specs.map(s => (
-                                            <li key={s.label}>
+                                        {selectedUnit.specs.map((s, i) => (
+                                            <li key={`${s.label}-${i}`}>
                                                 <span className={styles.specTitle}>{s.label}:</span>
                                                 <span className={styles.specValue}>{s.value}</span>
                                             </li>
@@ -195,8 +195,8 @@ export default function ChillersPage() {
                                 <div className={styles.unitSpecs}>
                                     <h3>Technical Specifications</h3>
                                     <ul>
-                                        {selectedUnit.specs.map(s => (
-                                            <li key={s.label}>
+                                        {selectedUnit.specs.map((s, i) => (
+                                            <li key={`${s.label}-${i}`}>
                                                 <span className={styles.specTitle}>{s.label}:</span>
                                                 <span className={styles.specValue}>{s.value}</span>
                                             </li>

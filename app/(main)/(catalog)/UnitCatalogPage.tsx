@@ -97,8 +97,8 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                         </div>
                     )}
                     <div className={styles.productSpecs}>
-                        {cardSpecs(unit).map(s => (
-                            <div className={styles.spec} key={s.label}>
+                        {cardSpecs(unit).map((s, i) => (
+                            <div className={styles.spec} key={`${s.label}-${i}`}>
                                 <div className={styles.specTitle}><h4>{s.label}:</h4></div>
                                 <div className={styles.specValue}><p>{s.value}</p></div>
                             </div>
@@ -152,8 +152,8 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
                             <ul>
-                                {d.specs.map(s => (
-                                    <li key={s.label}>
+                                {d.specs.map((s, i) => (
+                                    <li key={`${s.label}-${i}`}>
                                         <span className={styles.specTitle}>{s.label}:</span>
                                         <span className={styles.specValue}>{s.value}</span>
                                     </li>
@@ -197,8 +197,8 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                         <div className={styles.unitSpecs}>
                             <h3>Technical Specifications</h3>
                             <ul>
-                                {d.specs.map(s => (
-                                    <li key={s.label}>
+                                {d.specs.map((s, i) => (
+                                    <li key={`${s.label}-${i}`}>
                                         <span className={styles.specTitle}>{s.label}:</span>
                                         <span className={styles.specValue}>{s.value}</span>
                                     </li>
