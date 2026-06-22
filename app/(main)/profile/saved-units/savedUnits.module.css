@@ -78,7 +78,7 @@ body {
 }
 
 .cardIcons {
-    margin-top: 20px;
+    margin-top: 40px;
     width: 100%;
     grid-column: 1 / -1;
     display: flex;
