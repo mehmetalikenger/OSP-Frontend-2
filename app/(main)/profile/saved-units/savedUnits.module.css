@@ -482,6 +482,12 @@ body {
         grid-template-columns: 1fr 1fr;
     }
 
+    .icons img,
+    .cardIcons img {
+        width: 22px;
+        height: 22px;
+    }
+
     .productInfo {
         grid-template-columns: 1fr 33%;
     }
@@ -525,6 +531,11 @@ body {
         width: 60%;
     }
 
+    /* Keep the icons row the same width as the description above it. */
+    .icons {
+        width: 60%;
+    }
+
     .unitImage {
         width: 40%;
         display: flex;
@@ -542,6 +553,12 @@ body {
 }
 
 @media screen and (min-width: 1200px) {
+
+    .icons img,
+    .cardIcons img {
+        width: 24px;
+        height: 24px;
+    }
 
     .container {
         width: 90%;
@@ -595,6 +612,12 @@ body {
 }
 
 @media screen and (min-width: 2000px) {
+
+    .icons img,
+    .cardIcons img {
+        width: 30px;
+        height: 30px;
+    }
 
     .products {
         grid-template-columns: 1fr 1fr 1fr;
