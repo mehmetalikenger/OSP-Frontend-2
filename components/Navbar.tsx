@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from './Navbar.module.css';
+import { fetchWithAuth } from '@/lib/api';
 
 export default function Navbar({ initialDark = false }: { initialDark?: boolean }) {
     const [isDarkMode, setIsDarkMode] = useState(initialDark);
@@ -11,9 +12,20 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
     const [isVisible, setIsVisible] = useState(true);
 
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
 
     useEffect(() => {
         setUserRole(localStorage.getItem('userRole'));
+
+        // Show the user's profile picture in place of the default icon when they have one.
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+        fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`, { credentials: 'include' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data?.imageUrl) setProfilePicUrl(data.imageUrl);
+            })
+            .catch(() => {});
     }, []);
 
     const handleLogout = async () => {
@@ -120,11 +132,13 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
                         <img src={language === 'en' ? "/icons/english-lan-icon.png" : "/icons/german-lan-icon.png"} alt={language.toUpperCase()} />
                     </div>
                     <div className={styles.userIcon} ref={userMenuRef}>
-                        <img 
-                            src={isDarkMode ? "/icons/user-icon-second.png" : "/icons/user-icon.png"} 
-                            alt="User" 
-                            style={{ cursor: 'pointer' }} 
-                            className={styles.desktopUserIcon} 
+                        <img
+                            src={profilePicUrl || (isDarkMode ? "/icons/user-icon-second.png" : "/icons/user-icon.png")}
+                            alt="User"
+                            style={profilePicUrl
+                                ? { cursor: 'pointer', width: '37px', height: '37px', borderRadius: '50%', objectFit: 'cover' }
+                                : { cursor: 'pointer' }}
+                            className={styles.desktopUserIcon}
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                         />
                         <div 

@@ -68,12 +68,14 @@ export default function Page() {
     const [condOut, setCondOut] = useState("");
 
     const [capacity, setCapacity] = useState("");
+    const [maxCapacity, setMaxCapacity] = useState("");
     const [compressorQty, setCompressorQty] = useState("");
     const [condenserRequiredDuty, setCondenserRequiredDuty] = useState("");
     const [quietCondenserRequiredDuty, setQuietCondenserRequiredDuty] = useState("");
     const [fanPI, setFanPI] = useState("");
     const [eer, setEer] = useState("");
     const [condenserQty, setCondenserQty] = useState("");
+    const [fanType, setFanType] = useState("EC");
     const [numberOfFans, setNumberOfFans] = useState("");
     const [fanDiameter, setFanDiameter] = useState("");
     const [expansionValveQty, setExpansionValveQty] = useState("");
@@ -82,6 +84,8 @@ export default function Page() {
     const [liquidLineDiameter, setLiquidLineDiameter] = useState("");
     const [suctionLineDiameter, setSuctionLineDiameter] = useState("");
     const [gasTank, setGasTank] = useState("");
+    const [waterInletConnection, setWaterInletConnection] = useState("");
+    const [waterOutletConnection, setWaterOutletConnection] = useState("");
     const [width, setWidth] = useState("");
     const [height, setHeight] = useState("");
     const [length, setLength] = useState("");
@@ -183,10 +187,10 @@ export default function Page() {
         setExpansionValve(SELECT.expansionValve); setReversingValve(SELECT.reversingValve);
         setChasis(SELECT.chassis); setRefrigerant(SELECT.refrigerant);
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
-        setCapacity(""); setCompressorQty(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
-        setFanPI(""); setEer(""); setCondenserQty(""); setNumberOfFans(""); setFanDiameter("");
+        setCapacity(""); setMaxCapacity(""); setCompressorQty(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
+        setFanPI(""); setEer(""); setCondenserQty(""); setFanType("EC"); setNumberOfFans(""); setFanDiameter("");
         setExpansionValveQty(""); setAirflowRate(""); setDischargeLineDiameter(""); setLiquidLineDiameter("");
-        setSuctionLineDiameter(""); setGasTank(""); setWidth(""); setHeight(""); setLength("");
+        setSuctionLineDiameter(""); setGasTank(""); setWaterInletConnection(""); setWaterOutletConnection(""); setWidth(""); setHeight(""); setLength("");
         setMinWaterInlet(""); setMaxWaterInlet(""); setMinWaterOutlet(""); setMaxWaterOutlet(""); setMinAmbient(""); setMaxAmbient("");
         [...images, ...drawings, ...icons, ...documents].forEach((u) => URL.revokeObjectURL(u.url));
         setImages([]); setPrimaryId(null); setDrawings([]); setIcons([]); setDocuments([]);
@@ -222,6 +226,7 @@ export default function Page() {
             chillerDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW", mod: "COOLING" },
             unitTechSpecsDTO: {
                 capacity: num(capacity),
+                maxCapacity: num(maxCapacity),
                 compressorSpecsId: compressorSpec.id,
                 compressorQty: int(compressorQty),
                 condenserSpecsId: condenserSpec.id,
@@ -239,6 +244,7 @@ export default function Page() {
                 width: num(width),
                 length: num(length),
                 height: num(height),
+                fanType,
                 numberOfFans: int(numberOfFans),
                 fanDiameter: num(fanDiameter),
                 airflowRate: num(airflowRate),
@@ -246,6 +252,8 @@ export default function Page() {
                 liquidLineDiameter,
                 suctionLineDiameter,
                 gasTank: num(gasTank),
+                waterInletConnection,
+                waterOutletConnection,
                 minWaterInlet: num(minWaterInlet),
                 maxWaterInlet: num(maxWaterInlet),
                 minWaterOutlet: num(minWaterOutlet),
@@ -401,6 +409,7 @@ export default function Page() {
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
                                     <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Max Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
@@ -408,6 +417,7 @@ export default function Page() {
                                     <div className={styles.formField}><label>EER</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
                                     <div className={styles.formField}><label>COP</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
                                     <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Fan Type</label><Combobox options={["EC"]} value={fanType} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
                                     <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
@@ -416,6 +426,8 @@ export default function Page() {
                                     <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Water Inlet Connection</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>Water Outlet Connection</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
                                     <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>

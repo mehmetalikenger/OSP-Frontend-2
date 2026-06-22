@@ -21,6 +21,7 @@ export interface UnitCard {
     unitType: string;
     category: string;
     saved: boolean;
+    iconUrls: string[];
 }
 
 interface UnitDetail extends UnitCard {
@@ -29,42 +30,72 @@ interface UnitDetail extends UnitCard {
     specs: TechSpecItem[];
 }
 
+// One page of cards, as returned by the paginated backend endpoints.
+export interface UnitPage {
+    content: UnitCard[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+
+const PAGE_SIZE = 24; // matches the backend default page size
+
+// Accept either the paginated envelope or a bare array (older/uncached backend), so a
+// shape mismatch degrades to "everything on one page" instead of crashing.
+function normalizePage(data: unknown): { content: UnitCard[]; page: number; hasNext: boolean } {
+    if (Array.isArray(data)) return { content: data as UnitCard[], page: 0, hasNext: false };
+    const d = (data ?? {}) as Partial<UnitPage>;
+    return { content: d.content ?? [], page: d.page ?? 0, hasNext: !!d.hasNext };
+}
+
 interface Props {
     title: string;
     apiPath: string;                 // backend path, e.g. "/units/chillers?type=AW"
     calcRoute: string;
     altText: string;
-    initialUnits?: unknown;          // raw JSON from the server render (SSR)
+    initialData?: UnitPage | null;   // first page, provided by the server render (SSR)
 }
 
-// The list endpoints return a paginated envelope ({ content: [...] }); be tolerant
-// of a bare array too. Always normalize to a UnitCard[] so the render never sees a
-// non-array (which would crash on .map).
-function toUnitCards(data: unknown): UnitCard[] {
-    if (Array.isArray(data)) return data as UnitCard[];
-    if (data && typeof data === "object" && Array.isArray((data as { content?: unknown }).content)) {
-        return (data as { content: UnitCard[] }).content;
-    }
-    return [];
-}
-
-export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, initialUnits }: Props) {
-    // Seeded from the server render so the cards are in the initial HTML.
-    const [units, setUnits] = useState<UnitCard[]>(() => toUnitCards(initialUnits));
+export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, initialData }: Props) {
+    // Seeded from the server render so the first page is in the initial HTML.
+    const seed = normalizePage(initialData);
+    const [units, setUnits] = useState<UnitCard[]>(seed.content);
+    const [page, setPage] = useState<number>(seed.page);
+    const [hasNext, setHasNext] = useState<boolean>(seed.hasNext);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState<UnitDetail | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const router = useRouter();
 
     useScrollLock(isDetailsOpen);
 
+    // apiPath already carries a query string (e.g. "?type=AW"); append paging params.
+    const pagedUrl = (p: number) =>
+        `${API}${apiPath}${apiPath.includes("?") ? "&" : "?"}page=${p}&size=${PAGE_SIZE}`;
+
+    const fetchPage = (p: number, replace: boolean) => {
+        setLoadingMore(true);
+        fetchWithAuth(pagedUrl(p), { credentials: "include" })
+            .then(r => (r.ok ? r.json() : null))
+            .then((data: unknown) => {
+                if (!data) return;
+                const { content, page: pageNum, hasNext: more } = normalizePage(data);
+                setUnits(prev => (replace ? content : [...prev, ...content]));
+                setPage(pageNum);
+                setHasNext(more);
+            })
+            .catch(() => {})
+            .finally(() => setLoadingMore(false));
+    };
+
     useEffect(() => {
-        // Fallback: only fetch on the client if the server didn't provide the list.
-        if (initialUnits) return;
-        fetchWithAuth(`${API}${apiPath}`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : null)
-            .then((data: unknown) => setUnits(toUnitCards(data)))
-            .catch(() => {});
-    }, [apiPath, initialUnits]);
+        // Fallback: only fetch on the client if the server didn't provide the first page.
+        if (initialData) return;
+        fetchPage(0, true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiPath, initialData]);
 
     const handleView = async (id: number) => {
         try {
@@ -94,36 +125,38 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
         return items;
     };
 
-    const renderCard = (unit: UnitCard, isMobile: boolean) => (
-        <div className={styles.product} key={`${isMobile ? "m" : "d"}-${unit.id}`}>
+    // Rendered once per unit; the image sits inside productInfo and CSS repositions it
+    // (stacked on mobile, beside the text on desktop) instead of duplicating the card.
+    const renderCard = (unit: UnitCard) => (
+        <div className={styles.product} key={unit.id}>
             <div className={styles.productDetails}>
                 <div className={styles.productInfo}>
                     <div className={styles.productTitle}>
                         <h2>{unit.name || unit.model}</h2>
                         {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                     </div>
-                    {isMobile && (
-                        <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
-                        </div>
-                    )}
+                    <div className={styles.productImage}>
+                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
+                    </div>
                     <div className={styles.productSpecs}>
-                        {cardSpecs(unit).map(s => (
-                            <div className={styles.spec} key={s.label}>
+                        {cardSpecs(unit).map((s, i) => (
+                            <div className={styles.spec} key={`${s.label}-${i}`}>
                                 <div className={styles.specTitle}><h4>{s.label}:</h4></div>
                                 <div className={styles.specValue}><p>{s.value}</p></div>
                             </div>
                         ))}
                     </div>
+                    {unit.iconUrls && unit.iconUrls.length > 0 && (
+                        <div className={styles.cardIcons}>
+                            {unit.iconUrls.map((url, i) => (
+                                <img key={i} src={url} alt="Unit feature icon" loading="lazy" />
+                            ))}
+                        </div>
+                    )}
                 </div>
-                {!isMobile && (
-                    <div className={styles.productImage}>
-                        <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={altText} loading="lazy" />
-                    </div>
-                )}
             </div>
             <div className={styles.productBottom}>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>View</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
                 <BookmarkToggle unitId={unit.id} initialSaved={unit.saved} onSavedChange={(s) => handleBookmarkChange(unit.id, s)} />
             </div>
         </div>
@@ -155,16 +188,16 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>Technical Specifications</h3>
+                            <h3>{"Technical Specifications"}</h3>
                             <ul>
-                                {d.specs.map(s => (
-                                    <li key={s.label}>
+                                {d.specs.map((s, i) => (
+                                    <li key={`${s.label}-${i}`}>
                                         <span className={styles.specTitle}>{s.label}:</span>
                                         <span className={styles.specValue}>{s.value}</span>
                                     </li>
@@ -200,16 +233,16 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>Technical Specifications</h3>
+                            <h3>{"Technical Specifications"}</h3>
                             <ul>
-                                {d.specs.map(s => (
-                                    <li key={s.label}>
+                                {d.specs.map((s, i) => (
+                                    <li key={`${s.label}-${i}`}>
                                         <span className={styles.specTitle}>{s.label}:</span>
                                         <span className={styles.specValue}>{s.value}</span>
                                     </li>
@@ -232,12 +265,20 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                 <div className={styles.category}>
                     <h1>{title}</h1>
                 </div>
-                <div className={`${styles.products} ${styles.productsMobile}`}>
-                    {units.map(u => renderCard(u, true))}
+                <div className={styles.products}>
+                    {units.map(u => renderCard(u))}
                 </div>
-                <div className={`${styles.products} ${styles.productsDesktop}`}>
-                    {units.map(u => renderCard(u, false))}
-                </div>
+                {hasNext && (
+                    <div className={styles.loadMoreContainer}>
+                        <button
+                            className={styles.loadMoreBtn}
+                            onClick={() => fetchPage(page + 1, false)}
+                            disabled={loadingMore}
+                        >
+                            {loadingMore ? "Loading…" : "Load more"}
+                        </button>
+                    </div>
+                )}
                 <div className={styles.bottomLogo}>
                     <img src="/logo/logo.png" alt="OffiTec Logo" />
                 </div>

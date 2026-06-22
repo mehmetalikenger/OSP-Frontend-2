@@ -332,28 +332,12 @@
     color: #323232;
 }
 
-.input input,
-.input select {
+.input input {
     font-size: 0.9rem;
     padding: 8px 10px;
     outline: none;
     border: 1px solid #C2C2C2;
     border-radius: 5px;
-}
-
-/* Selects share the text-input look, but get a custom chevron so they don't
-   render as native OS dropdowns. */
-.input select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    color: inherit;
-    cursor: pointer;
-    padding-right: 30px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23323232' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
 }
 
 .input input[type="number"]::-webkit-outer-spin-button,
@@ -393,15 +377,10 @@
     color: #aeaeae;
 }
 
-:global(.dark-mode) .input input,
-:global(.dark-mode) .input select {
+:global(.dark-mode) .input input {
     background-color: #5C5C5C;
     border: none;
     color: #d6d6d6;
-}
-
-:global(.dark-mode) .input select {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d6d6d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
 }
 
 :global(.dark-mode) .coolingSectionHeader {

@@ -12,6 +12,8 @@ type Compressor = {
     brand: string;
     model: string;
     type: string;
+    moc: number;
+    lra: number;
 }
 
 type CompressorSpecs = {
@@ -32,6 +34,8 @@ export default function EditCompressorPage() {
     const [brand, setBrand] = useState("Select Brand");
     const [type, setType] = useState("Select Type");
     const [model, setModel] = useState("");
+    const [moc, setMoc] = useState("");
+    const [lra, setLra] = useState("");
 
     const [compressor, setCompressor] = useState("Select Compressor");
     const [capacity, setCapacity] = useState("");
@@ -87,11 +91,15 @@ export default function EditCompressorPage() {
                 setBrand(comp.brand);
                 setType(comp.type);
                 setModel(comp.model);
+                setMoc(String(comp.moc ?? ""));
+                setLra(String(comp.lra ?? ""));
             }
         } else {
             setBrand("Select Brand");
             setType("Select Type");
             setModel("");
+            setMoc("");
+            setLra("");
         }
     }, [selectedItemToEdit, compressorsList]);
 
@@ -139,7 +147,7 @@ export default function EditCompressorPage() {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressor/${comp.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand, type, model }),
+                body: JSON.stringify({ brand, type, model, moc: parseFloat(moc), lra: parseFloat(lra) }),
                 credentials: 'include'
             });
 
@@ -270,7 +278,7 @@ export default function EditCompressorPage() {
                                 <div className={styles.formField}>
                                     <label>Brand</label>
                                     <Combobox
-                                        options={["Select Brand", "Frescold", "Copelant"]}
+                                        options={["Select Brand", "Frascold", "Copelant"]}
                                         value={brand}
                                         onChange={setBrand}
                                         className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
@@ -295,6 +303,26 @@ export default function EditCompressorPage() {
                                         placeholder="Enter model"
                                         value={model}
                                         onChange={(e) => setModel(e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>MOC (A)</label>
+                                    <input
+                                        type="number" onWheel={(e) => e.currentTarget.blur()}
+                                        className={styles.inputElement}
+                                        placeholder="Enter MOC"
+                                        value={moc}
+                                        onChange={(e) => setMoc(e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>LRA (A)</label>
+                                    <input
+                                        type="number" onWheel={(e) => e.currentTarget.blur()}
+                                        className={styles.inputElement}
+                                        placeholder="Enter LRA"
+                                        value={lra}
+                                        onChange={(e) => setLra(e.target.value)}
                                     />
                                 </div>
                             </div>

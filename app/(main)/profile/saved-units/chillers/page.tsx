@@ -20,6 +20,7 @@ interface UnitCard {
     refrigerant: string | null;
     unitType: string;
     saved: boolean;
+    iconUrls: string[];
 }
 
 interface UnitDetail extends UnitCard {
@@ -28,10 +29,31 @@ interface UnitDetail extends UnitCard {
     specs: TechSpecItem[];
 }
 
+interface UnitPage {
+    content: UnitCard[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+
+const PAGE_SIZE = 24; // matches the backend default page size
+
+// Accept either the paginated envelope or a bare array (older/uncached backend).
+function normalizePage(data: unknown): { content: UnitCard[]; page: number; hasNext: boolean } {
+    if (Array.isArray(data)) return { content: data as UnitCard[], page: 0, hasNext: false };
+    const d = (data ?? {}) as Partial<UnitPage>;
+    return { content: d.content ?? [], page: d.page ?? 0, hasNext: !!d.hasNext };
+}
+
 export default function ChillersPage() {
     const router = useRouter();
     const { selectedType } = useContext(SavedUnitsContext);
     const [units, setUnits] = useState<UnitCard[]>([]);
+    const [page, setPage] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState<UnitDetail | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -40,17 +62,27 @@ export default function ChillersPage() {
     const unitTypeParam = selectedType === "Air Cooled" ? "AW" : "WW";
     const calcRoute = selectedType === "Air Cooled" ? "/calculation/air-cooled-chiller" : "/calculation/water-cooled-chiller";
 
-    useEffect(() => {
-        fetchWithAuth(`${API}/units/saved?category=CHILLER&type=${unitTypeParam}`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : null)
+    const pagedUrl = (p: number) =>
+        `${API}/units/saved?category=CHILLER&type=${unitTypeParam}&page=${p}&size=${PAGE_SIZE}`;
+
+    const fetchPage = (p: number, replace: boolean) => {
+        setLoadingMore(true);
+        fetchWithAuth(pagedUrl(p), { credentials: "include" })
+            .then(r => (r.ok ? r.json() : null))
             .then((data: unknown) => {
-                // The endpoint returns a paginated envelope ({ content: [...] }); fall back to [].
-                const list = Array.isArray(data) ? data
-                    : (data && Array.isArray((data as { content?: unknown }).content)) ? (data as { content: UnitCard[] }).content
-                    : [];
-                setUnits(list);
+                if (!data) return;
+                const { content, page: pageNum, hasNext: more } = normalizePage(data);
+                setUnits(prev => (replace ? content : [...prev, ...content]));
+                setPage(pageNum);
+                setHasNext(more);
             })
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => setLoadingMore(false));
+    };
+
+    useEffect(() => {
+        fetchPage(0, true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unitTypeParam]);
 
     const handleRemove = async (id: number) => {
@@ -72,12 +104,12 @@ export default function ChillersPage() {
 
     const handleClose = () => { setIsDetailsOpen(false); setSelectedUnit(null); };
 
-    const renderCard = (unit: UnitCard, isMobile: boolean) => (
-        <div className={styles.product} key={`${isMobile ? "m" : "d"}-${unit.id}`}>
+    const renderCard = (unit: UnitCard) => (
+        <div className={styles.product} key={unit.id}>
             <div className={styles.removeBtnContainer}>
                 <div className={styles.closeBtn} onClick={() => handleRemove(unit.id)}>
-                    <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Remove" />
-                    <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Remove" />
+                    <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Remove"} />
+                    <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Remove"} />
                 </div>
             </div>
             <div className={styles.productContent}>
@@ -87,33 +119,33 @@ export default function ChillersPage() {
                             <h2>{unit.name || unit.model}</h2>
                             {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                         </div>
-                        {isMobile && (
-                            <div className={styles.productImage}>
-                                <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
-                            </div>
-                        )}
+                        <div className={styles.productImage}>
+                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
+                        </div>
                         <div className={styles.productSpecs}>
                             {unit.capacityRange && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>Capacity:</h4></div>
+                                    <div className={styles.specTitle}><h4>{"Capacity:"}</h4></div>
                                     <div className={styles.specValue}><p>{unit.capacityRange}</p></div>
                                 </div>
                             )}
                             {unit.refrigerant && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>Refrigerant:</h4></div>
+                                    <div className={styles.specTitle}><h4>{"Refrigerant:"}</h4></div>
                                     <div className={styles.specValue}><p>{unit.refrigerant}</p></div>
                                 </div>
                             )}
                         </div>
+                        {unit.iconUrls && unit.iconUrls.length > 0 && (
+                            <div className={styles.cardIcons}>
+                                {unit.iconUrls.map((url, i) => (
+                                    <img key={i} src={url} alt="Unit feature icon" />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    {!isMobile && (
-                        <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
-                        </div>
-                    )}
                 </div>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>View</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
             </div>
         </div>
     );
@@ -121,14 +153,21 @@ export default function ChillersPage() {
     return (
         <>
             <div className={styles.container} style={{ minHeight: "auto", paddingBottom: "50px" }}>
-                <div className={`${styles.products} ${styles.productsMobile}`}>
-                    {units.map(u => renderCard(u, true))}
-                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>No saved chillers.</p>}
+                <div className={styles.products}>
+                    {units.map(u => renderCard(u))}
+                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>{"No saved chillers."}</p>}
                 </div>
-                <div className={`${styles.products} ${styles.productsDesktop}`}>
-                    {units.map(u => renderCard(u, false))}
-                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>No saved chillers.</p>}
-                </div>
+                {hasNext && (
+                    <div className={styles.loadMoreContainer}>
+                        <button
+                            className={styles.loadMoreBtn}
+                            onClick={() => fetchPage(page + 1, false)}
+                            disabled={loadingMore}
+                        >
+                            {loadingMore ? "Loading…" : "Load more"}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {isDetailsOpen && selectedUnit && (
@@ -138,8 +177,8 @@ export default function ChillersPage() {
                 <>
                     <div className={`${styles.unitDetails} ${styles.unitDetailsMobile}`}>
                         <div className={styles.closeBtn} onClick={handleClose}>
-                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Close" />
-                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
+                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Close"} />
+                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Close"} />
                         </div>
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
@@ -147,23 +186,23 @@ export default function ChillersPage() {
                                 {selectedUnit.name && <p className={styles.modelName}>{selectedUnit.model}</p>}
                             </div>
                             <div className={styles.unitImage}>
-                                <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
+                                <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
                             </div>
                             {selectedUnit.description && <div className={styles.unitDesc}><p>{selectedUnit.description}</p></div>}
                             <div className={styles.btnIcons}>
                                 <div className={styles.icons}>
-                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt="icon" />)}
+                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>Calculate</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>Technical Specifications</h3>
+                                    <h3>{"Technical Specifications"}</h3>
                                     <ul>
-                                        {selectedUnit.specs.map(s => (
-                                            <li key={s.label}>
+                                        {selectedUnit.specs.map((s, i) => (
+                                            <li key={`${s.label}-${i}`}>
                                                 <span className={styles.specTitle}>{s.label}:</span>
                                                 <span className={styles.specValue}>{s.value}</span>
                                             </li>
@@ -175,8 +214,8 @@ export default function ChillersPage() {
                     </div>
                     <div className={`${styles.unitDetails} ${styles.unitDetailsDesktop}`}>
                         <div className={styles.closeBtn} onClick={handleClose}>
-                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Close" />
-                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
+                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Close"} />
+                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Close"} />
                         </div>
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
@@ -186,23 +225,23 @@ export default function ChillersPage() {
                             <div className={styles.unitInfo}>
                                 {selectedUnit.description && <div className={styles.unitDesc}><p>{selectedUnit.description}</p></div>}
                                 <div className={styles.unitImage}>
-                                    <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
+                                    <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
                                 </div>
                             </div>
                             <div className={styles.btnIcons}>
                                 <div className={styles.icons}>
-                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt="icon" />)}
+                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>Calculate</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>Technical Specifications</h3>
+                                    <h3>{"Technical Specifications"}</h3>
                                     <ul>
-                                        {selectedUnit.specs.map(s => (
-                                            <li key={s.label}>
+                                        {selectedUnit.specs.map((s, i) => (
+                                            <li key={`${s.label}-${i}`}>
                                                 <span className={styles.specTitle}>{s.label}:</span>
                                                 <span className={styles.specValue}>{s.value}</span>
                                             </li>

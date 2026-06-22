@@ -4,8 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { fetchWithAuth } from "@/lib/api";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
+import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
+
+// Glycol options shared by the mixture/ratio comboboxes.
+const GLYCOL_TYPES = ["None", "Ethylene Glycol", "Propylene Glycol"];
+const GLYCOL_RATIOS = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50"];
 
 interface CalcDefaults {
     ambient: number;
@@ -28,6 +33,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     const [ambient, setAmbient] = useState("");
     const [evapIn, setEvapIn] = useState("");
     const [evapOut, setEvapOut] = useState("");
+    const [glycolType, setGlycolType] = useState("");
+    const [glycolRatio, setGlycolRatio] = useState("");
 
     const [result, setResult] = useState<CalcResult | null>(null);
     const [loading, setLoading] = useState(false);
@@ -71,6 +78,10 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
             setError("Water outlet temperature must be between -35 and 20 °C.");
             return;
         }
+        if (glycolType && !glycolRatio) {
+            setError("Please select a mixture ratio for the selected glycol.");
+            return;
+        }
 
         setLoading(true);
         setError(null);
@@ -88,6 +99,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     evapOut: parseFloat(evapOut) || 0,
                     condIn: 0,
                     condOut: 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }),
             });
 
@@ -117,6 +130,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     ambient: parseFloat(ambient) || 0,
                     evapIn: parseFloat(evapIn) || 0,
                     evapOut: parseFloat(evapOut) || 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }),
             });
 
@@ -147,35 +162,33 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     };
 
     const fmt = (n: number) =>
-        n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
 
     return (
         <div className={styles.calcLayout}>
             <div className={styles.sectionContent}>
                 <div className={styles.calcFormColumn}>
                     <div className={styles.input}>
-                        <label htmlFor="glycolMixture">Glycol Mixture</label>
-                        <select id="glycolMixture" defaultValue="">
-                            <option value="">None</option>
-                            <option value="Ethylene Glycol">Ethylene Glycol</option>
-                            <option value="Propylene Glycol">Propylene Glycol</option>
-                        </select>
+                        <label>Glycol Mixture</label>
+                        <AdminCombobox
+                            value={glycolType || "None"}
+                            options={GLYCOL_TYPES}
+                            onChange={(v) => {
+                                const val = v === "None" ? "" : v;
+                                setGlycolType(val);
+                                if (!val) setGlycolRatio("");
+                                setResult(null);
+                            }}
+                        />
                     </div>
                     <div className={styles.input}>
-                        <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                        <select id="mixtureRatio" defaultValue="">
-                            <option value="">None</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30">30</option>
-                            <option value="35">35</option>
-                            <option value="40">40</option>
-                            <option value="45">45</option>
-                            <option value="50">50</option>
-                        </select>
+                        <label>Mixture Ratio (%)</label>
+                        <AdminCombobox
+                            value={glycolRatio || "Select Ratio"}
+                            options={GLYCOL_RATIOS}
+                            disabled={!glycolType}
+                            onChange={(v) => { setGlycolRatio(v); setResult(null); }}
+                        />
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
@@ -309,6 +322,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     ambient: parseFloat(ambient) || 0,
                     evapIn: parseFloat(evapIn) || 0,
                     evapOut: parseFloat(evapOut) || 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }}
             />
         </div>

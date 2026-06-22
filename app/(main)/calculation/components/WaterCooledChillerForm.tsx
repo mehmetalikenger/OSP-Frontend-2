@@ -3,6 +3,11 @@
 import { useState } from "react";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
+import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
+
+// Glycol options shared by the mixture/ratio comboboxes.
+const GLYCOL_TYPES = ["None", "Ethylene Glycol", "Propylene Glycol"];
+const GLYCOL_RATIOS = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50"];
 
 interface CalcDefaults {
     evapIn: number;
@@ -17,6 +22,10 @@ interface Props {
 
 export default function WaterCooledChillerForm({ defaults }: Props) {
     const [isModalsOpen, setIsModalsOpen] = useState(false);
+    const [coolingGlycolType, setCoolingGlycolType] = useState("");
+    const [coolingGlycolRatio, setCoolingGlycolRatio] = useState("");
+    const [condenserGlycolType, setCondenserGlycolType] = useState("");
+    const [condenserGlycolRatio, setCondenserGlycolRatio] = useState("");
 
     return (
         <div className={styles.sectionContent}>
@@ -46,29 +55,26 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="coolingGlycolMixture">Glycol Mixture (%)</label>
-                <select id="coolingGlycolMixture" defaultValue="">
-                    <option value="">None</option>
-                    <option value="Ethylene Glycol">Ethylene Glycol</option>
-                    <option value="Propylene Glycol">Propylene Glycol</option>
-                </select>
+                <label>Glycol Mixture (%)</label>
+                <AdminCombobox
+                    value={coolingGlycolType || "None"}
+                    options={GLYCOL_TYPES}
+                    onChange={(v) => {
+                        const val = v === "None" ? "" : v;
+                        setCoolingGlycolType(val);
+                        if (!val) setCoolingGlycolRatio("");
+                    }}
+                />
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label htmlFor="coolingMixtureRatio">Mixture Ratio (%)</label>
-                <select id="coolingMixtureRatio" defaultValue="">
-                    <option value="">None</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="30">30</option>
-                    <option value="35">35</option>
-                    <option value="40">40</option>
-                    <option value="45">45</option>
-                    <option value="50">50</option>
-                </select>
+                <label>Mixture Ratio (%)</label>
+                <AdminCombobox
+                    value={coolingGlycolRatio || "Select Ratio"}
+                    options={GLYCOL_RATIOS}
+                    disabled={!coolingGlycolType}
+                    onChange={(v) => setCoolingGlycolRatio(v)}
+                />
             </div>
             <div className={`${styles.sectionHeader} ${styles.condenserSectionHeader}`}>
                 <h3>Condenser</h3>
@@ -92,29 +98,26 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="condenserGlycolMixture">Glycol Mixture (%)</label>
-                <select id="condenserGlycolMixture" defaultValue="">
-                    <option value="">None</option>
-                    <option value="Ethylene Glycol">Ethylene Glycol</option>
-                    <option value="Propylene Glycol">Propylene Glycol</option>
-                </select>
+                <label>Glycol Mixture (%)</label>
+                <AdminCombobox
+                    value={condenserGlycolType || "None"}
+                    options={GLYCOL_TYPES}
+                    onChange={(v) => {
+                        const val = v === "None" ? "" : v;
+                        setCondenserGlycolType(val);
+                        if (!val) setCondenserGlycolRatio("");
+                    }}
+                />
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label htmlFor="condenserMixtureRatio">Mixture Ratio (%)</label>
-                <select id="condenserMixtureRatio" defaultValue="">
-                    <option value="">None</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="30">30</option>
-                    <option value="35">35</option>
-                    <option value="40">40</option>
-                    <option value="45">45</option>
-                    <option value="50">50</option>
-                </select>
+                <label>Mixture Ratio (%)</label>
+                <AdminCombobox
+                    value={condenserGlycolRatio || "Select Ratio"}
+                    options={GLYCOL_RATIOS}
+                    disabled={!condenserGlycolType}
+                    onChange={(v) => setCondenserGlycolRatio(v)}
+                />
             </div>
             <div className={styles.input}>
                 <label htmlFor="condenserFoulingFactor">Fouling Factor (m²K/W)</label>

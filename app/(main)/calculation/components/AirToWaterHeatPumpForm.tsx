@@ -3,6 +3,11 @@
 import { useState } from "react";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
+import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
+
+// Glycol options shared by the mixture/ratio comboboxes.
+const GLYCOL_TYPES = ["None", "Ethylene Glycol", "Propylene Glycol"];
+const GLYCOL_RATIOS = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50"];
 
 interface CalcDefaults {
     ambient: number;
@@ -19,32 +24,31 @@ interface Props {
 
 export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefaults }: Props) {
     const [isModalsOpen, setIsModalsOpen] = useState(false);
+    const [glycolType, setGlycolType] = useState("");
+    const [glycolRatio, setGlycolRatio] = useState("");
 
     return (
         <div className={styles.sectionContent}>
             <div className={styles.input}>
-                <label htmlFor="glycolMixture">Glycol Mixture</label>
-                <select id="glycolMixture" defaultValue="">
-                    <option value="">None</option>
-                    <option value="Ethylene Glycol">Ethylene Glycol</option>
-                    <option value="Propylene Glycol">Propylene Glycol</option>
-                </select>
+                <label>Glycol Mixture</label>
+                <AdminCombobox
+                    value={glycolType || "None"}
+                    options={GLYCOL_TYPES}
+                    onChange={(v) => {
+                        const val = v === "None" ? "" : v;
+                        setGlycolType(val);
+                        if (!val) setGlycolRatio("");
+                    }}
+                />
             </div>
             <div className={styles.input}>
-                <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                <select id="mixtureRatio" defaultValue="">
-                    <option value="">None</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="30">30</option>
-                    <option value="35">35</option>
-                    <option value="40">40</option>
-                    <option value="45">45</option>
-                    <option value="50">50</option>
-                </select>
+                <label>Mixture Ratio (%)</label>
+                <AdminCombobox
+                    value={glycolRatio || "Select Ratio"}
+                    options={GLYCOL_RATIOS}
+                    disabled={!glycolType}
+                    onChange={(v) => setGlycolRatio(v)}
+                />
             </div>
             <div className={styles.input}>
                 <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
