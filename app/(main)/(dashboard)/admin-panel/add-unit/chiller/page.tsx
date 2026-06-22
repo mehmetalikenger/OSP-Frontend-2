@@ -115,9 +115,6 @@ export default function Page() {
     const scrollToFormTop = () => topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     const [submitting, setSubmitting] = useState(false);
-    // How many identical copies to create when "Add Unit" is clicked. Each copy is a
-    // fully independent unit: its own DB row and its own files uploaded to R2.
-    const [quantity, setQuantity] = useState(30);
     const [toastInfo, setToastInfo] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const showToast = (message: string, type: "success" | "error" = "success") => {
         setToastInfo({ message, type });
@@ -269,47 +266,26 @@ export default function Page() {
             },
         };
 
-        // Fire the whole create + asset-upload flow once per requested copy. Runs
-        // sequentially (not 30 parallel requests) so the server/R2 aren't hammered;
-        // a failed copy is reported and skipped without aborting the rest.
-        const copies = Math.max(1, Math.floor(quantity) || 1);
         setSubmitting(true);
-        let ok = 0;
         try {
-            for (let i = 0; i < copies; i++) {
-                // The backend rejects duplicate models (validateUniqueModel), so give each
-                // copy a unique model — and name — by suffixing the index when making >1.
-                const suffix = copies > 1 ? `-${i + 1}` : "";
-                const copyPayload = {
-                    ...payload,
-                    chillerDto: {
-                        ...payload.chillerDto,
-                        model: `${payload.chillerDto.model}${suffix}`,
-                        name: payload.chillerDto.name ? `${payload.chillerDto.name}${suffix}` : payload.chillerDto.name,
-                    },
-                };
+            const res = await fetchWithAuth(`${API}/admin/unit/addChiller`, {
+                method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+                const unitId: number = await res.json();
                 try {
-                    const res = await fetchWithAuth(`${API}/admin/unit/addChiller`, {
-                        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(copyPayload),
-                    });
-                    if (!res.ok) {
-                        let msg = "Failed to add chiller.";
-                        try { const data = await res.json(); msg = data.message || data.error || msg; } catch { /* keep default */ }
-                        showToast(`Copy ${i + 1}/${copies} failed: ${msg}`, "error");
-                        continue;
-                    }
-                    const unitId: number = await res.json();
                     await uploadAssets(unitId);
-                    ok++;
-                } catch (copyErr) {
-                    console.error(`Copy ${i + 1} failed`, copyErr);
-                    showToast(`Copy ${i + 1}/${copies} failed during upload.`, "error");
+                    showToast("Chiller added successfully.", "success");
+                } catch (uploadErr) {
+                    console.error("Asset upload failed", uploadErr);
+                    showToast(uploadErr instanceof Error ? uploadErr.message : "Chiller created, but file upload failed.", "error");
                 }
-            }
-            if (ok > 0) {
-                showToast(`Added ${ok}/${copies} chiller${copies > 1 ? "s" : ""}.`, ok === copies ? "success" : "error");
                 resetForm();
                 setActiveTab("model");
+            } else {
+                let msg = "Failed to add chiller.";
+                try { const data = await res.json(); msg = data.message || data.error || msg; } catch { /* keep default */ }
+                showToast(msg, "error");
             }
         } catch (e) {
             console.error(e);
@@ -649,18 +625,8 @@ export default function Page() {
                             </div>
                             {activeTab === 'calc' && (
                                 <div className={styles.stepNavRight}>
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        value={quantity}
-                                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                        onWheel={(e) => e.currentTarget.blur()}
-                                        disabled={submitting}
-                                        title="How many identical copies to create"
-                                        style={{ width: 64, marginRight: 10, padding: "6px 8px" }}
-                                    />
                                     <button className={styles.saveBtn} onClick={handleAddUnit} disabled={submitting}>
-                                        {submitting ? 'Adding...' : `Add Unit${quantity > 1 ? ` ×${quantity}` : ''}`}
+                                        {submitting ? 'Adding...' : 'Add Unit'}
                                     </button>
                                 </div>
                             )}
