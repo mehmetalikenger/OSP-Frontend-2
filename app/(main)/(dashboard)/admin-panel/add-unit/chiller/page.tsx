@@ -277,9 +277,20 @@ export default function Page() {
         let ok = 0;
         try {
             for (let i = 0; i < copies; i++) {
+                // The backend rejects duplicate models (validateUniqueModel), so give each
+                // copy a unique model — and name — by suffixing the index when making >1.
+                const suffix = copies > 1 ? `-${i + 1}` : "";
+                const copyPayload = {
+                    ...payload,
+                    chillerDto: {
+                        ...payload.chillerDto,
+                        model: `${payload.chillerDto.model}${suffix}`,
+                        name: payload.chillerDto.name ? `${payload.chillerDto.name}${suffix}` : payload.chillerDto.name,
+                    },
+                };
                 try {
                     const res = await fetchWithAuth(`${API}/admin/unit/addChiller`, {
-                        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload),
+                        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(copyPayload),
                     });
                     if (!res.ok) {
                         let msg = "Failed to add chiller.";
