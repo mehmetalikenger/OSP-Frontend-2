@@ -166,6 +166,32 @@ body {
     margin-top: 0;
 }
 
+.loadMoreContainer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 40px;
+}
+
+.loadMoreBtn {
+    padding: 10px 30px;
+    border: 1px solid #d7292e;
+    border-radius: 5px;
+    color: #d7292e;
+    background-color: transparent;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.loadMoreBtn:hover {
+    background-color: rgba(215, 41, 46, 0.08);
+}
+
+.loadMoreBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
 .bottomLogo {
     position: absolute;
     bottom: 10px;
@@ -429,12 +455,30 @@ body {
     }
 
     .productInfo {
-        width: 60%;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 30%;
+        grid-template-areas:
+            "title image"
+            "specs image";
+        column-gap: 30px;
+        align-items: start;
+    }
+
+    .productTitle {
+        grid-area: title;
+    }
+
+    .productSpecs {
+        grid-area: specs;
     }
 
     .productImage {
-        width: 30%;
+        grid-area: image;
+        width: 100%;
         margin-top: 0;
+        align-self: center;
+        justify-content: center;
     }
 
     .productImage img {
@@ -494,7 +538,7 @@ body {
     }
 
     .productImage {
-        width: 30%;
+        width: 100%;
     }
 
     .unitDetailsMobile {
@@ -554,7 +598,7 @@ body {
     }
 
     .productImage {
-        width: 30%;
+        width: 100%;
     }
 
     .viewBtn:hover {
@@ -607,8 +651,8 @@ body {
         width: 70%;
     }
 
-    .productImage {
-        width: 35%;
+    .productInfo {
+        grid-template-columns: 1fr 35%;
     }
 
     .bottomLogo {

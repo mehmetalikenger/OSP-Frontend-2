@@ -386,12 +386,30 @@ body {
     }
 
     .productInfo {
-        width: 70%;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 25%;
+        grid-template-areas:
+            "title image"
+            "specs image";
+        column-gap: 30px;
+        align-items: start;
+    }
+
+    .productTitle {
+        grid-area: title;
+    }
+
+    .productSpecs {
+        grid-area: specs;
     }
 
     .productImage {
-        width: 25%;
+        grid-area: image;
+        width: 100%;
         margin-top: 0;
+        align-self: center;
+        justify-content: center;
     }
 
     .productImage img {
@@ -446,11 +464,11 @@ body {
     }
 
     .productInfo {
-        width: 65%;
+        grid-template-columns: 1fr 33%;
     }
 
     .productImage {
-        width: 33%;
+        width: 100%;
     }
 
     .viewBtn {
@@ -549,11 +567,11 @@ body {
 
 @media screen and (min-width:1600px) {
     .productInfo {
-        width: 60%;
+        grid-template-columns: 1fr 30%;
     }
 
     .productImage {
-        width: 30%;
+        width: 100%;
     }
 }
 
@@ -577,6 +595,32 @@ body {
     .unitDetails {
         width: 40%;
     }
+}
+
+.loadMoreContainer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 40px;
+}
+
+.loadMoreBtn {
+    padding: 10px 30px;
+    border: 1px solid #d7292e;
+    border-radius: 5px;
+    color: #d7292e;
+    background-color: transparent;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.loadMoreBtn:hover {
+    background-color: rgba(215, 41, 46, 0.08);
+}
+
+.loadMoreBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .removeBtnContainer {

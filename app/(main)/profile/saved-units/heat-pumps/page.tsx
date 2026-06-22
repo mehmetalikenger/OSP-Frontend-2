@@ -28,10 +28,31 @@ interface UnitDetail extends UnitCard {
     specs: TechSpecItem[];
 }
 
+interface UnitPage {
+    content: UnitCard[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+
+const PAGE_SIZE = 24; // matches the backend default page size
+
+// Accept either the paginated envelope or a bare array (older/uncached backend).
+function normalizePage(data: unknown): { content: UnitCard[]; page: number; hasNext: boolean } {
+    if (Array.isArray(data)) return { content: data as UnitCard[], page: 0, hasNext: false };
+    const d = (data ?? {}) as Partial<UnitPage>;
+    return { content: d.content ?? [], page: d.page ?? 0, hasNext: !!d.hasNext };
+}
+
 export default function HeatPumpsPage() {
     const router = useRouter();
     const { selectedType } = useContext(SavedUnitsContext);
     const [units, setUnits] = useState<UnitCard[]>([]);
+    const [page, setPage] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState<UnitDetail | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -40,11 +61,27 @@ export default function HeatPumpsPage() {
     const unitTypeParam = selectedType === "Air to Water" ? "AW" : "WW";
     const calcRoute = selectedType === "Air to Water" ? "/calculation/air-to-water-heat-pump" : "/calculation/water-to-water-heat-pump";
 
+    const pagedUrl = (p: number) =>
+        `${API}/units/saved?category=HEAT_PUMP&type=${unitTypeParam}&page=${p}&size=${PAGE_SIZE}`;
+
+    const fetchPage = (p: number, replace: boolean) => {
+        setLoadingMore(true);
+        fetchWithAuth(pagedUrl(p), { credentials: "include" })
+            .then(r => (r.ok ? r.json() : null))
+            .then((data: unknown) => {
+                if (!data) return;
+                const { content, page: pageNum, hasNext: more } = normalizePage(data);
+                setUnits(prev => (replace ? content : [...prev, ...content]));
+                setPage(pageNum);
+                setHasNext(more);
+            })
+            .catch(() => {})
+            .finally(() => setLoadingMore(false));
+    };
+
     useEffect(() => {
-        fetchWithAuth(`${API}/units/saved?category=HEAT_PUMP&type=${unitTypeParam}`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : [])
-            .then((data: UnitCard[]) => setUnits(data))
-            .catch(() => {});
+        fetchPage(0, true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unitTypeParam]);
 
     const handleRemove = async (id: number) => {
@@ -66,8 +103,8 @@ export default function HeatPumpsPage() {
 
     const handleClose = () => { setIsDetailsOpen(false); setSelectedUnit(null); };
 
-    const renderCard = (unit: UnitCard, isMobile: boolean) => (
-        <div className={styles.product} key={`${isMobile ? "m" : "d"}-${unit.id}`}>
+    const renderCard = (unit: UnitCard) => (
+        <div className={styles.product} key={unit.id}>
             <div className={styles.removeBtnContainer}>
                 <div className={styles.closeBtn} onClick={() => handleRemove(unit.id)}>
                     <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Remove" />
@@ -81,11 +118,9 @@ export default function HeatPumpsPage() {
                             <h2>{unit.name || unit.model}</h2>
                             {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                         </div>
-                        {isMobile && (
-                            <div className={styles.productImage}>
-                                <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Heat Pump" />
-                            </div>
-                        )}
+                        <div className={styles.productImage}>
+                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Heat Pump" />
+                        </div>
                         <div className={styles.productSpecs}>
                             {unit.capacityRange && (
                                 <div className={styles.spec}>
@@ -101,11 +136,6 @@ export default function HeatPumpsPage() {
                             )}
                         </div>
                     </div>
-                    {!isMobile && (
-                        <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Heat Pump" />
-                        </div>
-                    )}
                 </div>
                 <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>View</button>
             </div>
@@ -115,14 +145,21 @@ export default function HeatPumpsPage() {
     return (
         <>
             <div className={styles.container} style={{ minHeight: "auto", paddingBottom: "50px" }}>
-                <div className={`${styles.products} ${styles.productsMobile}`}>
-                    {units.map(u => renderCard(u, true))}
+                <div className={styles.products}>
+                    {units.map(u => renderCard(u))}
                     {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>No saved heat pumps.</p>}
                 </div>
-                <div className={`${styles.products} ${styles.productsDesktop}`}>
-                    {units.map(u => renderCard(u, false))}
-                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>No saved heat pumps.</p>}
-                </div>
+                {hasNext && (
+                    <div className={styles.loadMoreContainer}>
+                        <button
+                            className={styles.loadMoreBtn}
+                            onClick={() => fetchPage(page + 1, false)}
+                            disabled={loadingMore}
+                        >
+                            {loadingMore ? "Loading…" : "Load more"}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {isDetailsOpen && selectedUnit && (

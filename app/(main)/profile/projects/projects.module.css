@@ -718,9 +718,9 @@
 }
 
 .createProjectBtn {
-    background-color: transparent;
-    color: #282f68;
-    border: 1px solid #282f68;
+    background-color: #282f68;
+    color: #ffffff;
+    border: none;
     border-radius: 5px;
     padding: 8px 15px;
     font-size: 0.85rem;
@@ -729,12 +729,13 @@
 }
 
 .createProjectBtn:hover {
-    background-color: rgba(40, 47, 104, 0.08);
+    background-color: #20264f;
 }
 
 :global(.dark-mode) .createProjectBtn {
+    background-color: transparent;
     color: #c4d9ff;
-    border-color: #c4d9ff;
+    border: 1px solid #c4d9ff;
 }
 
 :global(.dark-mode) .createProjectBtn:hover {
