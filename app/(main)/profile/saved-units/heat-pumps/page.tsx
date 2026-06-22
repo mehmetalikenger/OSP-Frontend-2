@@ -42,8 +42,14 @@ export default function HeatPumpsPage() {
 
     useEffect(() => {
         fetchWithAuth(`${API}/units/saved?category=HEAT_PUMP&type=${unitTypeParam}`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : [])
-            .then((data: UnitCard[]) => setUnits(data))
+            .then(r => r.ok ? r.json() : null)
+            .then((data: unknown) => {
+                // The endpoint returns a paginated envelope ({ content: [...] }); fall back to [].
+                const list = Array.isArray(data) ? data
+                    : (data && Array.isArray((data as { content?: unknown }).content)) ? (data as { content: UnitCard[] }).content
+                    : [];
+                setUnits(list);
+            })
             .catch(() => {});
     }, [unitTypeParam]);
 

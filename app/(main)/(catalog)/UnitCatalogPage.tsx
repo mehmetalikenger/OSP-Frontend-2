@@ -34,12 +34,23 @@ interface Props {
     apiPath: string;                 // backend path, e.g. "/units/chillers?type=AW"
     calcRoute: string;
     altText: string;
-    initialUnits?: UnitCard[] | null; // provided by the server render (SSR)
+    initialUnits?: unknown;          // raw JSON from the server render (SSR)
+}
+
+// The list endpoints return a paginated envelope ({ content: [...] }); be tolerant
+// of a bare array too. Always normalize to a UnitCard[] so the render never sees a
+// non-array (which would crash on .map).
+function toUnitCards(data: unknown): UnitCard[] {
+    if (Array.isArray(data)) return data as UnitCard[];
+    if (data && typeof data === "object" && Array.isArray((data as { content?: unknown }).content)) {
+        return (data as { content: UnitCard[] }).content;
+    }
+    return [];
 }
 
 export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, initialUnits }: Props) {
     // Seeded from the server render so the cards are in the initial HTML.
-    const [units, setUnits] = useState<UnitCard[]>(initialUnits ?? []);
+    const [units, setUnits] = useState<UnitCard[]>(() => toUnitCards(initialUnits));
     const [selectedUnit, setSelectedUnit] = useState<UnitDetail | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const router = useRouter();
@@ -50,8 +61,8 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
         // Fallback: only fetch on the client if the server didn't provide the list.
         if (initialUnits) return;
         fetchWithAuth(`${API}${apiPath}`, { credentials: "include" })
-            .then(r => r.ok ? r.json() : [])
-            .then((data: UnitCard[]) => setUnits(data))
+            .then(r => r.ok ? r.json() : null)
+            .then((data: unknown) => setUnits(toUnitCards(data)))
             .catch(() => {});
     }, [apiPath, initialUnits]);
 

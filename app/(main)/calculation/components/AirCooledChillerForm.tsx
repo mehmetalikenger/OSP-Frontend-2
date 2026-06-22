@@ -155,11 +155,27 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                 <div className={styles.calcFormColumn}>
                     <div className={styles.input}>
                         <label htmlFor="glycolMixture">Glycol Mixture</label>
-                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="glycolMixture" min="0" />
+                        <select id="glycolMixture" defaultValue="">
+                            <option value="">None</option>
+                            <option value="Ethylene Glycol">Ethylene Glycol</option>
+                            <option value="Propylene Glycol">Propylene Glycol</option>
+                        </select>
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="mixtureRatio" min="0" />
+                        <select id="mixtureRatio" defaultValue="">
+                            <option value="">None</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                        </select>
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>

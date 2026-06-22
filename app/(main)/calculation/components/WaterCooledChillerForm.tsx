@@ -47,12 +47,28 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
             </div>
             <div className={styles.input}>
                 <label htmlFor="coolingGlycolMixture">Glycol Mixture (%)</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="coolingGlycolMixture" min="0" />
+                <select id="coolingGlycolMixture" defaultValue="">
+                    <option value="">None</option>
+                    <option value="Ethylene Glycol">Ethylene Glycol</option>
+                    <option value="Propylene Glycol">Propylene Glycol</option>
+                </select>
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
                 <label htmlFor="coolingMixtureRatio">Mixture Ratio (%)</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="coolingMixtureRatio" min="0" />
+                <select id="coolingMixtureRatio" defaultValue="">
+                    <option value="">None</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                </select>
             </div>
             <div className={`${styles.sectionHeader} ${styles.condenserSectionHeader}`}>
                 <h3>Condenser</h3>
@@ -77,12 +93,28 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
             </div>
             <div className={styles.input}>
                 <label htmlFor="condenserGlycolMixture">Glycol Mixture (%)</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="condenserGlycolMixture" min="0" />
+                <select id="condenserGlycolMixture" defaultValue="">
+                    <option value="">None</option>
+                    <option value="Ethylene Glycol">Ethylene Glycol</option>
+                    <option value="Propylene Glycol">Propylene Glycol</option>
+                </select>
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
                 <label htmlFor="condenserMixtureRatio">Mixture Ratio (%)</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="condenserMixtureRatio" min="0" />
+                <select id="condenserMixtureRatio" defaultValue="">
+                    <option value="">None</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                </select>
             </div>
             <div className={styles.input}>
                 <label htmlFor="condenserFoulingFactor">Fouling Factor (m²K/W)</label>
