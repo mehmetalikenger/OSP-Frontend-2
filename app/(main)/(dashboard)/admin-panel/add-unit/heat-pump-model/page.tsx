@@ -34,6 +34,10 @@ export default function AddHeatPumpModelPage() {
     const [chassisList, setChassisList] = useState<Chassis[]>([]);
     const [chassisId, setChassisId] = useState<number | null>(null);
 
+    const [fanType, setFanType] = useState("EC");
+    const [waterInletConnection, setWaterInletConnection] = useState("");
+    const [waterOutletConnection, setWaterOutletConnection] = useState("");
+
     const [f, setF] = useState({
         compressorQty: "", condenserQty: "", expansionValveQty: "",
         fanPI: "", width: "", length: "", height: "",
@@ -140,6 +144,9 @@ export default function AddHeatPumpModelPage() {
         setUnitType("air_to_water");
         setRefrigerantId(null);
         setChassisId(null);
+        setFanType("EC");
+        setWaterInletConnection("");
+        setWaterOutletConnection("");
         setF({
             compressorQty: "", condenserQty: "", expansionValveQty: "",
             fanPI: "", width: "", length: "", height: "",
@@ -173,9 +180,10 @@ export default function AddHeatPumpModelPage() {
                 compressorQty: int(f.compressorQty), condenserQty: int(f.condenserQty),
                 expansionValveQty: int(f.expansionValveQty), refrigerantId, chassisId,
                 fanPI: num(f.fanPI), width: num(f.width), length: num(f.length), height: num(f.height),
-                numberOfFans: int(f.numberOfFans), fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
+                numberOfFans: int(f.numberOfFans), fanType, fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
                 dischargeLineDiameter: f.dischargeLineDiameter, liquidLineDiameter: f.liquidLineDiameter,
                 suctionLineDiameter: f.suctionLineDiameter, gasTank: num(f.gasTank),
+                waterInletConnection, waterOutletConnection,
             },
         };
 
@@ -252,6 +260,10 @@ export default function AddHeatPumpModelPage() {
                                 <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
                                 <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
                                 <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
+                                <div className={styles.formField}>
+                                    <label>Fan Type</label>
+                                    <Combobox options={["EC"]} value={fanType} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
+                                </div>
                                 <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
                                 <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
                                 <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
@@ -260,6 +272,8 @@ export default function AddHeatPumpModelPage() {
                                 <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
                                 <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
+                                <div className={styles.formField}><label>Water Inlet Connection</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
+                                <div className={styles.formField}><label>Water Outlet Connection</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
                                 <div className={styles.formField}>
                                     <label>Chasis</label>
                                     <Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : CHASSIS_SELECT} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />

@@ -13,7 +13,7 @@ type CompressorSpecs = { id: number; brand?: string | null; model: string; type?
 type HeatPumpSummary = { id: number; model: string; type: string; mods: string[] };
 type HeatPumpMode = {
     mod: string;
-    capacity: number; copErr: number; condenserRequiredDuty: number; quietCondenserRequiredDuty: number;
+    capacity: number; maxCapacity: number; copErr: number; condenserRequiredDuty: number; quietCondenserRequiredDuty: number;
     compressorSpecsId: number | null; condenserSpecsId: number | null; evaporatorSpecsId: number | null;
     expansionValveSpecsId: number | null; fourWayReversingValveSpecsId: number | null;
     ambient: number; evapIn: number; evapOut: number; condIn: number; condOut: number;
@@ -56,6 +56,7 @@ export default function EditHeatPumpModPage() {
     const [reversingValveList, setReversingValveList] = useState<ComponentSpecs[]>([]);
 
     const [capacity, setCapacity] = useState("");
+    const [maxCapacity, setMaxCapacity] = useState("");
     const [eer, setEer] = useState("");
     const [cop, setCop] = useState("");
     const [condenserRequiredDuty, setCondenserRequiredDuty] = useState("");
@@ -110,7 +111,7 @@ export default function EditHeatPumpModPage() {
     const resetModeFields = () => {
         setCompressorSpecsId(null); setEvaporatorSpecsId(null); setCondenserSpecsId(null);
         setExpansionValveSpecsId(null); setReversingValveSpecsId(null);
-        setCapacity(""); setEer(""); setCop(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
+        setCapacity(""); setMaxCapacity(""); setEer(""); setCop(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
     };
 
@@ -122,6 +123,7 @@ export default function EditHeatPumpModPage() {
         setExpansionValveSpecsId(m.expansionValveSpecsId ?? null);
         setReversingValveSpecsId(m.fourWayReversingValveSpecsId ?? null);
         setCapacity(str(m.capacity));
+        setMaxCapacity(str(m.maxCapacity));
         if (m.mod === "COOLING") { setEer(str(m.copErr)); setCop(""); }
         else { setCop(str(m.copErr)); setEer(""); }
         setCondenserRequiredDuty(str(m.condenserRequiredDuty));
@@ -187,6 +189,7 @@ export default function EditHeatPumpModPage() {
             mod: selectedMod === "cooling" ? "COOLING" : "HEATING",
             modeSpecsDto: {
                 capacity: num(capacity),
+                maxCapacity: num(maxCapacity),
                 copErr: selectedMod === "cooling" ? num(eer) : num(cop),
                 condenserRequiredDuty: num(condenserRequiredDuty),
                 quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
@@ -289,6 +292,10 @@ export default function EditHeatPumpModPage() {
                             <div className={styles.formField}>
                                 <label>Capacity (Kw)</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                            </div>
+                            <div className={styles.formField}>
+                                <label>Max Capacity (Kw)</label>
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>EER</label>

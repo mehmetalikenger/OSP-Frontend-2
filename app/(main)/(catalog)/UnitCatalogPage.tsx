@@ -21,6 +21,7 @@ export interface UnitCard {
     unitType: string;
     category: string;
     saved: boolean;
+    iconUrls: string[];
 }
 
 interface UnitDetail extends UnitCard {
@@ -145,6 +146,13 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             </div>
                         ))}
                     </div>
+                    {unit.iconUrls && unit.iconUrls.length > 0 && (
+                        <div className={styles.cardIcons}>
+                            {unit.iconUrls.map((url, i) => (
+                                <img key={i} src={url} alt="Unit feature icon" loading="lazy" />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
             <div className={styles.productBottom}>

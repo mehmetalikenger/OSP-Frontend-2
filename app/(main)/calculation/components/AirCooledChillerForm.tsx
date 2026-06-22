@@ -147,7 +147,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     };
 
     const fmt = (n: number) =>
-        n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
 
     return (
         <div className={styles.calcLayout}>

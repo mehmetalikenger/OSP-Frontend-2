@@ -20,6 +20,7 @@ interface UnitCard {
     refrigerant: string | null;
     unitType: string;
     saved: boolean;
+    iconUrls: string[];
 }
 
 interface UnitDetail extends UnitCard {
@@ -135,6 +136,13 @@ export default function HeatPumpsPage() {
                                 </div>
                             )}
                         </div>
+                        {unit.iconUrls && unit.iconUrls.length > 0 && (
+                            <div className={styles.cardIcons}>
+                                {unit.iconUrls.map((url, i) => (
+                                    <img key={i} src={url} alt="Unit feature icon" />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>

@@ -123,6 +123,22 @@ body {
     margin-top: 30px;
 }
 
+.cardIcons {
+    margin-top: 20px;
+    width: 100%;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.cardIcons img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
 .spec {
     margin-top: 5px;
     display: flex;
@@ -252,11 +268,17 @@ body {
 
 .icons {
     margin-top: 30px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
 }
 
 .icons img {
-    width: 8.5%;
-    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 .calcBtn {
@@ -432,6 +454,12 @@ body {
 
 @media screen and (min-width: 768px) {
 
+    .icons img,
+    .cardIcons img {
+        width: 20px;
+        height: 20px;
+    }
+
     .product {
         width: 70%;
         margin: 0 auto;
@@ -507,13 +535,10 @@ body {
 
     .btnIcons {
         display: flex;
+        flex-wrap: wrap;
         margin-top: 30px;
         justify-content: space-between;
         align-items: center;
-    }
-
-    .icons img {
-        width: 5%
     }
 
     .bottomLogo {
@@ -524,6 +549,17 @@ body {
 }
 
 @media screen and (min-width: 1024px) {
+
+    /* Match the description column width in the desktop modal layout. */
+    .icons {
+        width: 60%;
+    }
+
+    .icons img,
+    .cardIcons img {
+        width: 22px;
+        height: 22px;
+    }
 
     .category {
         width: 35%;
@@ -589,6 +625,12 @@ body {
 }
 
 @media screen and (min-width: 1200px) {
+
+    .icons img,
+    .cardIcons img {
+        width: 24px;
+        height: 24px;
+    }
     .category {
         width: 25%;
     }
@@ -635,6 +677,12 @@ body {
 }
 
 @media screen and (min-width: 2000px) {
+
+    .icons img,
+    .cardIcons img {
+        width: 30px;
+        height: 30px;
+    }
     .backBtnContainer {
         margin-top: 80px;
     }
