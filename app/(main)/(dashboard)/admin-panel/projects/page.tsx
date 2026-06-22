@@ -1,52 +1,95 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import styles from "./projects.module.css";
 import AdminCombobox from "../AdminCombobox";
+import { fetchWithAuth } from "@/lib/api";
 
-// Mock Data
-const mockProjects = [
-    { id: 1, projectName: "Alpha Cooling System", username: "john_doe", country: "USA", category: "Chiller", type: "Air to Water", model: "OffiTec Modular", document: "spec_sheet_v1.pdf" },
-    { id: 2, projectName: "Beta Heating Plant", username: "sarah_smith", country: "Canada", category: "Heat Pump", type: "Water to Water", model: "EcoTherm Ground Source", document: "installation_guide.pdf" },
-    { id: 3, projectName: "Gamma Data Center", username: "tech_guru", country: "UK", category: "Chiller", type: "Water to Water", model: "AquaChill Industrial", document: "blueprint_final.pdf" },
-    { id: 4, projectName: "Delta Residential", username: "jane_doe", country: "Australia", category: "Heat Pump", type: "Air to Water", model: "AeroHeat Packaged", document: "warranty_info.pdf" },
-    { id: 5, projectName: "Epsilon Office Park", username: "admin_master", country: "Germany", category: "Chiller", type: "Water to Water", model: "Centrifugal High-Efficiency", document: "service_manual.pdf" },
-    { id: 6, projectName: "Zeta Factory Cool", username: "industrial_corp", country: "Japan", category: "Chiller", type: "Air to Water", model: "OffiTec Modular", document: "maintenance_log.pdf" },
-    { id: 7, projectName: "Eta School District", username: "public_works", country: "France", category: "Heat Pump", type: "Air to Water", model: "MiniSplit Residential", document: "compliance_cert.pdf" },
-    { id: 8, projectName: "Theta Supermarket", username: "retail_king", country: "USA", category: "Chiller", type: "Water to Water", model: "Absorption Chiller System", document: "energy_audit.pdf" },
-];
+const API = process.env.NEXT_PUBLIC_API_URL;
+
+// One row per project-detail (unit evaluation), as returned by GET /admin/projects.
+interface AdminProjectRow {
+    projectId: number;
+    detailId: number | null;
+    projectName: string;
+    username: string | null;
+    company: string | null;
+    country: string | null;
+    category: string | null;   // CHILLER / HEAT_PUMP
+    type: string | null;       // AW / WW
+    model: string | null;
+    documentUrl: string | null;
+}
+
+const categoryLabel = (c: string | null) =>
+    c === "CHILLER" ? "Chiller" : c === "HEAT_PUMP" ? "Heat Pump" : "";
+
+// AW/WW means different things per category, so label by both.
+const typeLabel = (cat: string | null, t: string | null) => {
+    if (!t) return "";
+    if (cat === "CHILLER") return t === "AW" ? "Air Cooled" : "Water Cooled";
+    if (cat === "HEAT_PUMP") return t === "AW" ? "Air to Water" : "Water to Water";
+    return t;
+};
+
+// Owner username plus the project's company, shown together in the Username column.
+const ownerLabel = (row: AdminProjectRow) =>
+    [row.username, row.company].filter(Boolean).join(" / ") || "-";
 
 export default function ProjectsPage() {
+    const [rows, setRows] = useState<AdminProjectRow[]>([]);
+
     // Filter States
     const [usernameSearch, setUsernameSearch] = useState("");
     const [countryFilter, setCountryFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [typeFilter, setTypeFilter] = useState("All");
+    const [modelFilter, setModelFilter] = useState("All");
 
-    // Derived Data for Combobox Filters
-    const countriesList = ["All", ...Array.from(new Set(mockProjects.map(p => p.country)))];
-    const categoriesList = ["All", ...Array.from(new Set(mockProjects.map(p => p.category)))];
-    const typesList = ["All", ...Array.from(new Set(mockProjects.map(p => p.type)))];
+    useEffect(() => {
+        fetchWithAuth(`${API}/admin/projects`, { credentials: "include", cache: "no-store" })
+            .then(r => (r.ok ? r.json() : []))
+            .then((data: AdminProjectRow[]) => setRows(Array.isArray(data) ? data : []))
+            .catch(() => setRows([]));
+    }, []);
 
-    // Filtered Table Data
+    // Derived options for the filter comboboxes (distinct, with an "All" entry).
+    const countriesList = useMemo(
+        () => ["All", ...Array.from(new Set(rows.map(r => r.country).filter(Boolean) as string[]))],
+        [rows],
+    );
+    const categoriesList = useMemo(
+        () => ["All", ...Array.from(new Set(rows.map(r => categoryLabel(r.category)).filter(Boolean)))],
+        [rows],
+    );
+    const typesList = useMemo(
+        () => ["All", ...Array.from(new Set(rows.map(r => typeLabel(r.category, r.type)).filter(Boolean)))],
+        [rows],
+    );
+    const modelsList = useMemo(
+        () => ["All", ...Array.from(new Set(rows.map(r => r.model).filter(Boolean) as string[]))],
+        [rows],
+    );
+
     const filteredProjects = useMemo(() => {
-        return mockProjects.filter(project => {
-            if (usernameSearch.trim() !== "" && !project.username.toLowerCase().includes(usernameSearch.toLowerCase())) return false;
-            if (countryFilter !== "All" && project.country !== countryFilter) return false;
-            if (categoryFilter !== "All" && project.category !== categoryFilter) return false;
-            if (typeFilter !== "All" && project.type !== typeFilter) return false;
+        return rows.filter(row => {
+            if (usernameSearch.trim() !== "" && !ownerLabel(row).toLowerCase().includes(usernameSearch.toLowerCase())) return false;
+            if (countryFilter !== "All" && row.country !== countryFilter) return false;
+            if (categoryFilter !== "All" && categoryLabel(row.category) !== categoryFilter) return false;
+            if (typeFilter !== "All" && typeLabel(row.category, row.type) !== typeFilter) return false;
+            if (modelFilter !== "All" && row.model !== modelFilter) return false;
             return true;
         });
-    }, [usernameSearch, countryFilter, categoryFilter, typeFilter]);
+    }, [rows, usernameSearch, countryFilter, categoryFilter, typeFilter, modelFilter]);
 
     return (
         <div className={styles.container}>
             <div className={styles.card}>
                 {/* Header (Title & Total Count) */}
                 <div className={styles.pageHeader}>
-                    <h2 className={styles.pageTitle}>Projects</h2>
+                    <h2 className={styles.pageTitle}>{"Projects"}</h2>
                     <p className={styles.totalCount}>
-                        Total Projects {filteredProjects.length}
+                        {"Total Projects"} {filteredProjects.length}
                     </p>
                 </div>
 
@@ -54,7 +97,7 @@ export default function ProjectsPage() {
                     {/* Left Panel: Filters */}
                     <div className={styles.filtersContainer}>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>Category</span>
+                            <span className={styles.filterLabel}>{"Category"}</span>
                             <AdminCombobox
                                 value={categoryFilter}
                                 onChange={(val) => setCategoryFilter(val)}
@@ -63,7 +106,7 @@ export default function ProjectsPage() {
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>Type</span>
+                            <span className={styles.filterLabel}>{"Type"}</span>
                             <AdminCombobox
                                 value={typeFilter}
                                 onChange={(val) => setTypeFilter(val)}
@@ -72,7 +115,16 @@ export default function ProjectsPage() {
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>Country</span>
+                            <span className={styles.filterLabel}>{"Model"}</span>
+                            <AdminCombobox
+                                value={modelFilter}
+                                onChange={(val) => setModelFilter(val)}
+                                options={modelsList}
+                                containerClassName={styles.filterCombobox}
+                            />
+                        </div>
+                        <div className={styles.filterItem}>
+                            <span className={styles.filterLabel}>{"Country"}</span>
                             <AdminCombobox
                                 value={countryFilter}
                                 onChange={(val) => setCountryFilter(val)}
@@ -81,11 +133,11 @@ export default function ProjectsPage() {
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>Username</span>
-                            <input 
+                            <span className={styles.filterLabel}>{"Username"}</span>
+                            <input
                                 type="text"
                                 className={styles.textInput}
-                                placeholder="Search username..."
+                                placeholder={"Search username..."}
                                 value={usernameSearch}
                                 onChange={(e) => setUsernameSearch(e.target.value)}
                             />
@@ -97,32 +149,44 @@ export default function ProjectsPage() {
                         <table className={styles.dataTable}>
                             <thead>
                                 <tr>
-                                    <th>Project Name</th>
-                                    <th>Username</th>
-                                    <th>Country</th>
-                                    <th>Category</th>
-                                    <th>Type</th>
-                                    <th>Model</th>
-                                    <th>Document</th>
+                                    <th>{"Project Name"}</th>
+                                    <th>{"Username"}</th>
+                                    <th>{"Country"}</th>
+                                    <th>{"Category"}</th>
+                                    <th>{"Type"}</th>
+                                    <th>{"Model"}</th>
+                                    <th>{"Document"}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredProjects.length > 0 ? (
                                     filteredProjects.map((project) => (
-                                        <tr key={project.id}>
+                                        <tr key={project.detailId ?? `proj-${project.projectId}`}>
                                             <td>{project.projectName}</td>
-                                            <td>{project.username}</td>
-                                            <td>{project.country}</td>
-                                            <td>{project.category}</td>
-                                            <td>{project.type}</td>
-                                            <td>{project.model}</td>
-                                            <td>{project.document}</td>
+                                            <td>{ownerLabel(project)}</td>
+                                            <td>{project.country || "-"}</td>
+                                            <td>{categoryLabel(project.category) || "-"}</td>
+                                            <td>{typeLabel(project.category, project.type) || "-"}</td>
+                                            <td>{project.model || "-"}</td>
+                                            <td>
+                                                {project.documentUrl ? (
+                                                    <button
+                                                        type="button"
+                                                        className={styles.documentLink}
+                                                        onClick={() => window.open(project.documentUrl!, "_blank", "noopener,noreferrer")}
+                                                    >
+                                                        {"Open"}
+                                                    </button>
+                                                ) : (
+                                                    "-"
+                                                )}
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
                                         <td colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
-                                            No projects match the selected filters.
+                                            {"No projects match the selected filters."}
                                         </td>
                                     </tr>
                                 )}

@@ -107,8 +107,8 @@ export default function ChillersPage() {
         <div className={styles.product} key={unit.id}>
             <div className={styles.removeBtnContainer}>
                 <div className={styles.closeBtn} onClick={() => handleRemove(unit.id)}>
-                    <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Remove" />
-                    <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Remove" />
+                    <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Remove"} />
+                    <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Remove"} />
                 </div>
             </div>
             <div className={styles.productContent}>
@@ -119,25 +119,25 @@ export default function ChillersPage() {
                             {unit.name && <p className={styles.modelName}>{unit.model}</p>}
                         </div>
                         <div className={styles.productImage}>
-                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
+                            <img src={unit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
                         </div>
                         <div className={styles.productSpecs}>
                             {unit.capacityRange && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>Capacity:</h4></div>
+                                    <div className={styles.specTitle}><h4>{"Capacity:"}</h4></div>
                                     <div className={styles.specValue}><p>{unit.capacityRange}</p></div>
                                 </div>
                             )}
                             {unit.refrigerant && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>Refrigerant:</h4></div>
+                                    <div className={styles.specTitle}><h4>{"Refrigerant:"}</h4></div>
                                     <div className={styles.specValue}><p>{unit.refrigerant}</p></div>
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>View</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
             </div>
         </div>
     );
@@ -147,7 +147,7 @@ export default function ChillersPage() {
             <div className={styles.container} style={{ minHeight: "auto", paddingBottom: "50px" }}>
                 <div className={styles.products}>
                     {units.map(u => renderCard(u))}
-                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>No saved chillers.</p>}
+                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>{"No saved chillers."}</p>}
                 </div>
                 {hasNext && (
                     <div className={styles.loadMoreContainer}>
@@ -169,8 +169,8 @@ export default function ChillersPage() {
                 <>
                     <div className={`${styles.unitDetails} ${styles.unitDetailsMobile}`}>
                         <div className={styles.closeBtn} onClick={handleClose}>
-                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Close" />
-                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
+                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Close"} />
+                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Close"} />
                         </div>
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
@@ -178,20 +178,20 @@ export default function ChillersPage() {
                                 {selectedUnit.name && <p className={styles.modelName}>{selectedUnit.model}</p>}
                             </div>
                             <div className={styles.unitImage}>
-                                <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
+                                <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
                             </div>
                             {selectedUnit.description && <div className={styles.unitDesc}><p>{selectedUnit.description}</p></div>}
                             <div className={styles.btnIcons}>
                                 <div className={styles.icons}>
-                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt="icon" />)}
+                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>Calculate</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>Technical Specifications</h3>
+                                    <h3>{"Technical Specifications"}</h3>
                                     <ul>
                                         {selectedUnit.specs.map((s, i) => (
                                             <li key={`${s.label}-${i}`}>
@@ -206,8 +206,8 @@ export default function ChillersPage() {
                     </div>
                     <div className={`${styles.unitDetails} ${styles.unitDetailsDesktop}`}>
                         <div className={styles.closeBtn} onClick={handleClose}>
-                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt="Close" />
-                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt="Close" />
+                            <img src="/icons/closeBtn.png" className={styles.closeBtnLight} alt={"Close"} />
+                            <img src="/icons/closeBtn-second.png" className={styles.closeBtnDark} alt={"Close"} />
                         </div>
                         <div className={styles.unitDetailContainer}>
                             <div className={styles.unitName}>
@@ -217,20 +217,20 @@ export default function ChillersPage() {
                             <div className={styles.unitInfo}>
                                 {selectedUnit.description && <div className={styles.unitDesc}><p>{selectedUnit.description}</p></div>}
                                 <div className={styles.unitImage}>
-                                    <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt="Chiller" />
+                                    <img src={selectedUnit.primaryImageUrl || "/icons/profilePic.png"} alt={"Chiller"} />
                                 </div>
                             </div>
                             <div className={styles.btnIcons}>
                                 <div className={styles.icons}>
-                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt="icon" />)}
+                                    {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>Calculate</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>Technical Specifications</h3>
+                                    <h3>{"Technical Specifications"}</h3>
                                     <ul>
                                         {selectedUnit.specs.map((s, i) => (
                                             <li key={`${s.label}-${i}`}>

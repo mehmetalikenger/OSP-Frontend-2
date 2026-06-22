@@ -148,7 +148,7 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                 </div>
             </div>
             <div className={styles.productBottom}>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>View</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
                 <BookmarkToggle unitId={unit.id} initialSaved={unit.saved} onSavedChange={(s) => handleBookmarkChange(unit.id, s)} />
             </div>
         </div>
@@ -180,13 +180,13 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>Technical Specifications</h3>
+                            <h3>{"Technical Specifications"}</h3>
                             <ul>
                                 {d.specs.map((s, i) => (
                                     <li key={`${s.label}-${i}`}>
@@ -225,13 +225,13 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>Calculate</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>Technical Specifications</h3>
+                            <h3>{"Technical Specifications"}</h3>
                             <ul>
                                 {d.specs.map((s, i) => (
                                     <li key={`${s.label}-${i}`}>

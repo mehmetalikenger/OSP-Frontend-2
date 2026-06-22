@@ -163,6 +163,25 @@
     background-color: rgba(255, 0, 0, 0.08); /* Faint red for light mode */
 }
 
+.documentLink {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #d7292e;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.documentLink:hover {
+    opacity: 0.8;
+}
+
+:global(.dark-mode) .documentLink {
+    color: #ff7a7d;
+}
+
 :global(.dark-mode) .dataTable th,
 :global(.dark-mode) .dataTable td {
     border-bottom-color: #444;
