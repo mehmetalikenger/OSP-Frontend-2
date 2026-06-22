@@ -19,16 +19,36 @@ interface Props {
 
 export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefaults }: Props) {
     const [isModalsOpen, setIsModalsOpen] = useState(false);
+    const [glycolType, setGlycolType] = useState("");
+    const [glycolRatio, setGlycolRatio] = useState("");
 
     return (
         <div className={styles.sectionContent}>
             <div className={styles.input}>
                 <label htmlFor="glycolMixture">Glycol Mixture</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="glycolMixture" min="0" />
+                <select
+                    id="glycolMixture"
+                    value={glycolType}
+                    onChange={(e) => { setGlycolType(e.target.value); if (!e.target.value) setGlycolRatio(""); }}
+                >
+                    <option value="">None</option>
+                    <option value="Ethylene Glycol">Ethylene Glycol</option>
+                    <option value="Propylene Glycol">Propylene Glycol</option>
+                </select>
             </div>
             <div className={styles.input}>
                 <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                <input type="number" onWheel={(e) => e.currentTarget.blur()} id="mixtureRatio" min="0" />
+                <select
+                    id="mixtureRatio"
+                    value={glycolRatio}
+                    disabled={!glycolType}
+                    onChange={(e) => setGlycolRatio(e.target.value)}
+                >
+                    <option value="">Select Ratio</option>
+                    {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                    ))}
+                </select>
             </div>
             <div className={styles.input}>
                 <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>

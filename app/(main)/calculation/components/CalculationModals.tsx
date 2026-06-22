@@ -17,6 +17,8 @@ interface CalcContext {
     ambient: number;
     evapIn: number;
     evapOut: number;
+    glycolType?: string | null;
+    glycolPercentage?: number | null;
 }
 
 interface CalculationModalsProps {
@@ -166,6 +168,8 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 ambient: calc.ambient,
                 evapIn: calc.evapIn,
                 evapOut: calc.evapOut,
+                glycolType: calc.glycolType ?? null,
+                glycolPercentage: calc.glycolPercentage ?? null,
             }),
         });
         if (!res.ok) throw new Error(`Request failed (${res.status})`);

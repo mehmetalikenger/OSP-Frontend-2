@@ -28,6 +28,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     const [ambient, setAmbient] = useState("");
     const [evapIn, setEvapIn] = useState("");
     const [evapOut, setEvapOut] = useState("");
+    const [glycolType, setGlycolType] = useState("");
+    const [glycolRatio, setGlycolRatio] = useState("");
 
     const [result, setResult] = useState<CalcResult | null>(null);
     const [loading, setLoading] = useState(false);
@@ -71,6 +73,10 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
             setError("Water outlet temperature must be between -35 and 20 °C.");
             return;
         }
+        if (glycolType && !glycolRatio) {
+            setError("Please select a mixture ratio for the selected glycol.");
+            return;
+        }
 
         setLoading(true);
         setError(null);
@@ -88,6 +94,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     evapOut: parseFloat(evapOut) || 0,
                     condIn: 0,
                     condOut: 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }),
             });
 
@@ -117,6 +125,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     ambient: parseFloat(ambient) || 0,
                     evapIn: parseFloat(evapIn) || 0,
                     evapOut: parseFloat(evapOut) || 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }),
             });
 
@@ -155,11 +165,34 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                 <div className={styles.calcFormColumn}>
                     <div className={styles.input}>
                         <label htmlFor="glycolMixture">Glycol Mixture</label>
-                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="glycolMixture" min="0" />
+                        <select
+                            id="glycolMixture"
+                            value={glycolType}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                setGlycolType(v);
+                                if (!v) setGlycolRatio("");
+                                setResult(null);
+                            }}
+                        >
+                            <option value="">None</option>
+                            <option value="Ethylene Glycol">Ethylene Glycol</option>
+                            <option value="Propylene Glycol">Propylene Glycol</option>
+                        </select>
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="mixtureRatio">Mixture Ratio (%)</label>
-                        <input type="number" onWheel={(e) => e.currentTarget.blur()} id="mixtureRatio" min="0" />
+                        <select
+                            id="mixtureRatio"
+                            value={glycolRatio}
+                            disabled={!glycolType}
+                            onChange={(e) => { setGlycolRatio(e.target.value); setResult(null); }}
+                        >
+                            <option value="">Select Ratio</option>
+                            {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((v) => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className={styles.input}>
                         <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
@@ -293,6 +326,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     ambient: parseFloat(ambient) || 0,
                     evapIn: parseFloat(evapIn) || 0,
                     evapOut: parseFloat(evapOut) || 0,
+                    glycolType: glycolType || null,
+                    glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                 }}
             />
         </div>
