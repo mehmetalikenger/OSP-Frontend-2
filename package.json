@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
+    "@swc/helpers": "0.5.23",
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
     "@tailwindcss/postcss": "^4",
