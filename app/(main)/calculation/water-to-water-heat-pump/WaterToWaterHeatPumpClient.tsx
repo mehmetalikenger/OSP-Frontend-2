@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import ProductAccordion from "../components/ProductAccordion";
 import WaterToWaterHeatPumpForm from "../components/WaterToWaterHeatPumpForm";
@@ -28,6 +29,7 @@ export default function WaterToWaterHeatPumpClient({
     id: string | null;
     initialData: UnitCalcData | null;
 }) {
+    const t = useTranslations("Calc");
     const [calcData, setCalcData] = useState<UnitCalcData | null>(initialData);
 
     // Fallback: only fetch on the client if the server didn't provide the data.
@@ -42,7 +44,7 @@ export default function WaterToWaterHeatPumpClient({
 
     return (
         <ProductAccordion
-            title="Water to Water Heat Pump"
+            title={t("waterToWaterHeatPump")}
             unitName={calcData?.name || undefined}
             modelName={calcData?.model || undefined}
             images={calcData?.images}

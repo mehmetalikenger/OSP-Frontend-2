@@ -6,6 +6,7 @@ import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
+import { useTranslations } from "next-intl";
 
 type Condenser = {
     id: number;
@@ -25,6 +26,7 @@ type CondenserSpecs = {
 }
 
 export default function EditCondenserPage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Condenser");
     const [model, setModel] = useState("");
     const [type, setType] = useState("Microchannel");
@@ -99,11 +101,11 @@ export default function EditCondenserPage() {
 
     const handleEditCondenser = async () => {
         if (selectedItemToEdit === "Select Condenser") {
-            showToast("Please select a condenser to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.condenser.low") }), "error");
             return;
         }
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -119,31 +121,31 @@ export default function EditCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.condenser.cap") }), "success");
                 setSelectedItemToEdit("Select Condenser");
                 fetchCondensers();
                 fetchCondenserSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit condenser.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.condenser.low") }), "error");
                 } catch {
-                    showToast("Failed to edit condenser.", "error");
+                    showToast(t("failedEdit", { name: t("names.condenser.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleEditCondenserSpecs = async () => {
         if (condenser === "Select Condenser") {
-            showToast("Please select condenser specs.", "error");
+            showToast(t("selectSpecs", { name: t("names.condenser.cap") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
 
@@ -159,20 +161,20 @@ export default function EditCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser Specs updated successfully.", "success");
+                showToast(t("specsUpdatedSuccess", { name: t("names.condenser.cap") }), "success");
                 setCondenser("Select Condenser");
                 fetchCondenserSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit condenser specs.", "error");
+                    showToast(data.message || t("failedEditSpecs", { name: t("names.condenser.low") }), "error");
                 } catch {
-                    showToast("Failed to edit condenser specs.", "error");
+                    showToast(t("failedEditSpecs", { name: t("names.condenser.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -180,22 +182,22 @@ export default function EditCondenserPage() {
     const specsOptions = ["Select Condenser", ...condenserSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Condenser") { showToast("Please select a condenser to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select Condenser") { showToast(t("selectToDelete", { name: t("names.condenser.low") }), "error"); return; }
         const item = condensersList.find(c => c.model === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete condenser", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.condenser.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/condenser/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("Condenser deleted.", "success");
+                showToast(t("deleted", { name: t("names.condenser.cap") }), "success");
                 setSelectedItemToEdit("Select Condenser");
                 fetchCondensers();
                 fetchCondenserSpecs();
             } else {
-                showToast("Failed to delete condenser.", "error");
+                showToast(t("failedDelete", { name: t("names.condenser.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -209,7 +211,7 @@ export default function EditCondenserPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Condenser
+                        {t("names.condenser.cap")}
                     </span>
                 </div>
 
@@ -220,27 +222,28 @@ export default function EditCondenserPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Condenser</label>
-                                        <Combobox 
+                                        <label>{t("names.condenser.cap")}</label>
+                                        <Combobox
                                             options={condenserOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
+                                            getLabel={(v) => v === "Select Condenser" ? t("selectName", { name: t("names.condenser.cap") }) : v}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
+                                        <label>{t("model")}</label>
                                         <input
                                             type="text"
                                             className={styles.inputElement}
-                                            placeholder="Enter model"
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Type</label>
+                                        <label>{t("type")}</label>
                                         <Combobox
                                             options={Object.keys(CONDENSER_TYPES)}
                                             value={type}
@@ -251,35 +254,36 @@ export default function EditCondenserPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditCondenser}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditCondenser}>{t("save")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Condenser Specs</label>
-                                        <Combobox 
+                                        <label>{t("specsSuffix", { name: t("names.condenser.cap") })}</label>
+                                        <Combobox
                                             options={specsOptions}
                                             value={condenser}
                                             onChange={setCondenser}
+                                            getLabel={(v) => v === "Select Condenser" ? t("selectName", { name: t("names.condenser.cap") }) : v}
                                             className={`${styles.comboBox} ${condenser.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleEditCondenserSpecs}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditCondenserSpecs}>{t("save")}</button>
                             </div>
                         </div>
                     </div>

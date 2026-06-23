@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useTranslations } from "next-intl";
 
 type ExpansionValve = {
     id: number;
@@ -12,6 +13,7 @@ type ExpansionValve = {
 }
 
 export default function AddExpansionValvePage() {
+    const t = useTranslations("AdminComp");
     const [model, setModel] = useState("");
 
     // Specs states
@@ -44,7 +46,7 @@ export default function AddExpansionValvePage() {
 
     const handleAddExpansionValve = async () => {
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -57,36 +59,36 @@ export default function AddExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.expansionValve.cap") }), "success");
                 setModel("");
                 fetchExpansionValves(); // Refresh the list
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add expansion valve.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.expansionValve.low") }), "error");
                 } catch {
-                    showToast("Failed to add expansion valve.", "error");
+                    showToast(t("failedAdd", { name: t("names.expansionValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleAddExpansionValveSpecs = async () => {
         if (expansionValve === "Select Expansion Valve") {
-            showToast("Please select an expansion valve.", "error");
+            showToast(t("pleaseSelect", { name: t("names.expansionValve.low") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please enter capacity.", "error");
+            showToast(t("pleaseEnterCapacity"), "error");
             return;
         }
 
         const selectedValve = expansionValvesList.find(v => v.model === expansionValve);
         if (!selectedValve) {
-            showToast("Invalid expansion valve selected.", "error");
+            showToast(t("invalidSelected", { name: t("names.expansionValve.low") }), "error");
             return;
         }
 
@@ -99,20 +101,20 @@ export default function AddExpansionValvePage() {
             });
 
             if (res.ok) {
-                showToast("Expansion Valve Specs added successfully.", "success");
+                showToast(t("specsAddedSuccess", { name: t("names.expansionValve.cap") }), "success");
                 setExpansionValve("Select Expansion Valve");
                 setCapacity("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add expansion valve specs.", "error");
+                    showToast(data.message || t("failedAddSpecs", { name: t("names.expansionValve.low") }), "error");
                 } catch {
-                    showToast("Failed to add expansion valve specs.", "error");
+                    showToast(t("failedAddSpecs", { name: t("names.expansionValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -128,7 +130,7 @@ export default function AddExpansionValvePage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Expansion Valve
+                        {t("names.expansionValve.cap")}
                     </span>
                 </div>
 
@@ -139,45 +141,46 @@ export default function AddExpansionValvePage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <label>{t("model")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddExpansionValve}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddExpansionValve}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Expansion Valve</label>
-                                        <Combobox 
+                                        <label>{t("names.expansionValve.cap")}</label>
+                                        <Combobox
                                             options={expansionValveOptions}
                                             value={expansionValve}
                                             onChange={setExpansionValve}
+                                            getLabel={(v) => v === "Select Expansion Valve" ? t("selectName", { name: t("names.expansionValve.cap") }) : v}
                                             className={`${styles.comboBox} ${expansionValve.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddExpansionValveSpecs}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddExpansionValveSpecs}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

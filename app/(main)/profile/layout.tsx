@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import styles from "./profile.module.css";
 import { fetchWithAuth } from "../../../lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
+    const t = useTranslations("Profile");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [userName, setUserName] = useState("");
     const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
@@ -157,7 +159,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                                 </>
                             )}
                         </div>
-                        <p>Projects</p>
+                        <p>{t("projects")}</p>
                     </div>
                     <div className={styles.optionArea}>
                         <div
@@ -174,7 +176,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                                     </>
                                 )}
                             </div>
-                            <p>Saved Units</p>
+                            <p>{t("savedUnits")}</p>
                         </div>
                         <div className={styles.subOptionsArea}>
                             <div className={styles.optionsLine}></div>
@@ -183,13 +185,13 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                                     className={`${styles.subOption} ${pathname.includes('/chillers') ? styles.subOptionActive : ''}`}
                                     onClick={(e) => { e.stopPropagation(); handleOptionClick('/profile/saved-units/chillers'); }}
                                 >
-                                    <p>Chiller</p>
+                                    <p>{t("chiller")}</p>
                                 </div>
-                                <div 
+                                <div
                                     className={`${styles.subOption} ${pathname.includes('/heat-pumps') ? styles.subOptionActive : ''}`}
                                     onClick={(e) => { e.stopPropagation(); handleOptionClick('/profile/saved-units/heat-pumps'); }}
                                 >
-                                    <p>Heat Pump</p>
+                                    <p>{t("heatPump")}</p>
                                 </div>
                             </div>
                         </div>
@@ -208,9 +210,9 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                                 </>
                             )}
                         </div>
-                        <p>Account Settings</p>
+                        <p>{t("accountSettings")}</p>
                     </div>
-                    
+
                     <div className={`${styles.optionsLine} ${styles.mobileLogout}`} style={{ width: '100%', height: '1px', margin: '20px 0' }}></div>
                     
                     <div
@@ -225,7 +227,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
                         }}
                         style={{ marginTop: 'auto' }}
                     >
-                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>Log out</p>
+                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>{t("logout")}</p>
                     </div>
                 </div>
             </div>

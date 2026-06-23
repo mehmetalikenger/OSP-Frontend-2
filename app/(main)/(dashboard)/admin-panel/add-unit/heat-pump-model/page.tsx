@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -24,6 +25,13 @@ const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
 const chassisLabel = (c: Chassis) => c.model;
 
 export default function AddHeatPumpModelPage() {
+    const t = useTranslations("AdminUnit");
+    const display = (v: string): string => (({
+      "Select Refrigerant": t("selectRefrigerant"),
+      "Select Chasis": t("selectChasis"),
+      "Air to water": t("airToWater"),
+      "Water to water": t("waterToWater"),
+    } as Record<string, string>)[v] ?? v);
     const [unitType, setUnitType] = useState("air_to_water");
     const [model, setModel] = useState("");
     const [name, setName] = useState("");
@@ -76,7 +84,7 @@ export default function AddHeatPumpModelPage() {
     const toUploads = (files: FileList | null): Upload[] => {
         if (!files?.length) return [];
         const arr = Array.from(files);
-        if (totalBytes(arr) > MAX_TOTAL_BYTES) { showToast("Total upload can't exceed 25 MB.", "error"); return []; }
+        if (totalBytes(arr) > MAX_TOTAL_BYTES) { showToast(t("uploadTooLarge"), "error"); return []; }
         return arr.map((file) => ({ file, url: URL.createObjectURL(file), id: uid() }));
     };
 
@@ -170,9 +178,9 @@ export default function AddHeatPumpModelPage() {
     };
 
     const handleAdd = async () => {
-        if (!model.trim()) { showToast("Please enter a model name.", "error"); return; }
-        if (refrigerantId === null) { showToast("Please select a refrigerant.", "error"); return; }
-        if (chassisId === null) { showToast("Please select a chassis.", "error"); return; }
+        if (!model.trim()) { showToast(t("pleaseEnterModelName"), "error"); return; }
+        if (refrigerantId === null) { showToast(t("pleaseSelectRefrigerant"), "error"); return; }
+        if (chassisId === null) { showToast(t("pleaseSelectChassis"), "error"); return; }
 
         const payload = {
             heatPumpDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW" },
@@ -196,20 +204,20 @@ export default function AddHeatPumpModelPage() {
                 const newId: number = await res.json();
                 try {
                     await uploadNewAssets(newId);
-                    showToast("Heat pump model created. Add its modes from the Mod page.", "success");
+                    showToast(t("hpModelCreated"), "success");
                 } catch (uploadErr) {
                     console.error("Asset upload failed", uploadErr);
-                    showToast(uploadErr instanceof Error ? uploadErr.message : "Heat pump created, but file upload failed.", "error");
+                    showToast(uploadErr instanceof Error ? uploadErr.message : t("hpUploadFailed"), "error");
                 }
                 resetForm();
             } else {
-                let msg = "Failed to create heat pump model.";
+                let msg = t("failedCreateHpModel");
                 try { const data = await res.json(); msg = data.message || data.error || msg; } catch { /* keep default */ }
                 showToast(msg, "error");
             }
         } catch (e) {
             console.error(e);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -229,7 +237,7 @@ export default function AddHeatPumpModelPage() {
             )}
             <div className={styles.sectionContent}>
                 <div className={styles.breadcrumbContainer}>
-                    <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>Model Information</span>
+                    <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>{t("modelInfo")}</span>
                 </div>
                 <div className={styles.horizontalSeperator}></div>
 
@@ -238,49 +246,49 @@ export default function AddHeatPumpModelPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>Model</label>
-                                    <input type="text" className={styles.inputElement} placeholder="Enter model name" value={model} onChange={(e) => setModel(e.target.value)} />
+                                    <label>{t("model")}</label>
+                                    <input type="text" className={styles.inputElement} placeholder={t("enterModelName")} value={model} onChange={(e) => setModel(e.target.value)} />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Name</label>
-                                    <input type="text" className={styles.inputElement} placeholder="Enter display name" value={name} onChange={(e) => setName(e.target.value)} />
+                                    <label>{t("name")}</label>
+                                    <input type="text" className={styles.inputElement} placeholder={t("enterDisplayName")} value={name} onChange={(e) => setName(e.target.value)} />
                                 </div>
                                 <div className={`${styles.formField} ${styles.formFieldFullWidth}`}>
-                                    <label>Description</label>
-                                    <textarea className={styles.inputElement} placeholder="Enter unit description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+                                    <label>{t("description")}</label>
+                                    <textarea className={styles.inputElement} placeholder={t("enterUnitDescription")} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Type</label>
-                                    <Combobox options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
+                                    <label>{t("type")}</label>
+                                    <Combobox getLabel={display} options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Refrigerant</label>
-                                    <Combobox options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    <label>{t("refrigerant")}</label>
+                                    <Combobox getLabel={display} options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
-                                <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
-                                <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
-                                <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
+                                <div className={styles.formField}><label>{t("compressorQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
+                                <div className={styles.formField}><label>{t("condenserQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
+                                <div className={styles.formField}><label>{t("fanPowerInput")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>
                                 <div className={styles.formField}>
-                                    <label>Fan Type</label>
-                                    <Combobox options={["EC"]} value={fanType} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
+                                    <label>{t("fanType")}</label>
+                                    <Combobox getLabel={display} options={["EC"]} value={fanType} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
-                                <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
-                                <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
-                                <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
-                                <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
-                                <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
-                                <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
-                                <div className={styles.formField}><label>Water Inlet Connection</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
-                                <div className={styles.formField}><label>Water Outlet Connection</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
+                                <div className={styles.formField}><label>{t("fanQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.numberOfFans} onChange={upd("numberOfFans")} /></div>
+                                <div className={styles.formField}><label>{t("fanDiameter")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanDiameter} onChange={upd("fanDiameter")} /></div>
+                                <div className={styles.formField}><label>{t("airflowRate")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.airflowRate} onChange={upd("airflowRate")} /></div>
+                                <div className={styles.formField}><label>{t("expansionValveQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.expansionValveQty} onChange={upd("expansionValveQty")} /></div>
+                                <div className={styles.formField}><label>{t("dischargeLineDiameter")}</label><input type="text" className={styles.inputElement} value={f.dischargeLineDiameter} onChange={upd("dischargeLineDiameter")} /></div>
+                                <div className={styles.formField}><label>{t("liquidLineDiameter")}</label><input type="text" className={styles.inputElement} value={f.liquidLineDiameter} onChange={upd("liquidLineDiameter")} /></div>
+                                <div className={styles.formField}><label>{t("suctionLineDiameter")}</label><input type="text" className={styles.inputElement} value={f.suctionLineDiameter} onChange={upd("suctionLineDiameter")} /></div>
+                                <div className={styles.formField}><label>{t("gasTank")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.gasTank} onChange={upd("gasTank")} /></div>
+                                <div className={styles.formField}><label>{t("waterInletConnection")}</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
+                                <div className={styles.formField}><label>{t("waterOutletConnection")}</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
                                 <div className={styles.formField}>
-                                    <label>Chasis</label>
-                                    <Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : CHASSIS_SELECT} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    <label>{t("chasis")}</label>
+                                    <Combobox getLabel={display} options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : CHASSIS_SELECT} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
-                                <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
-                                <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
-                                <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
+                                <div className={styles.formField}><label>{t("width")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.width} onChange={upd("width")} /></div>
+                                <div className={styles.formField}><label>{t("length")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.length} onChange={upd("length")} /></div>
+                                <div className={styles.formField}><label>{t("height")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.height} onChange={upd("height")} /></div>
                             </div>
                         </div>
                     </div>
@@ -291,7 +299,7 @@ export default function AddHeatPumpModelPage() {
                         <div className={styles.uploadSection}>
 
                             <div className={styles.sizeBar}>
-                                <span className={styles.sizeBarLabel}>Storage</span>
+                                <span className={styles.sizeBarLabel}>{t("storage")}</span>
                                 <div className={styles.sizeBarTrack}>
                                     <div className={`${styles.sizeBarFill}${totalBytes() > MAX_TOTAL_BYTES * 0.9 ? ` ${styles.sizeBarFillDanger}` : totalBytes() > MAX_TOTAL_BYTES * 0.7 ? ` ${styles.sizeBarFillWarn}` : ""}`} style={{ width: `${Math.min(100, (totalBytes() / MAX_TOTAL_BYTES) * 100)}%` }} />
                                 </div>
@@ -300,26 +308,26 @@ export default function AddHeatPumpModelPage() {
 
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Images</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>{t("images")}</div>
                                     {images.length > 0 && <span className={styles.uploadBadge}>{images.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "image" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => imageInputRef.current?.click()} {...dropHandlers("image", onImageFiles)}>
                                     <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onImageFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop images here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · JPG · WEBP — multiple files supported</span>
+                                        <span className={styles.dropZoneText}>{t("dropImages")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintImages")}</span>
                                     </div>
                                 </div>
                                 {images.length > 0 && (
                                     <>
-                                        <span className={styles.uploadGridHint}>Click ☆ to mark as primary · click thumbnail to preview</span>
+                                        <span className={styles.uploadGridHint}>{t("primaryHint")}</span>
                                         <div className={styles.imageGrid}>
                                             {images.map((u) => (
                                                 <div key={u.id} className={`${styles.imageTile}${primaryId === u.id ? ` ${styles.imageTilePrimary}` : ""}`}>
                                                     <img src={u.url} alt="" className={styles.imageTileImg} onClick={() => setLightbox(u.url)} />
-                                                    {primaryId === u.id && <span className={styles.primaryRing}>Primary</span>}
-                                                    <button type="button" className={`${styles.starBtn}${primaryId === u.id ? ` ${styles.starBtnActive}` : ""}`} title="Set as primary" onClick={(e) => { e.stopPropagation(); setPrimaryId(u.id); }}>{primaryId === u.id ? "★" : "☆"}</button>
+                                                    {primaryId === u.id && <span className={styles.primaryRing}>{t("primary")}</span>}
+                                                    <button type="button" className={`${styles.starBtn}${primaryId === u.id ? ` ${styles.starBtnActive}` : ""}`} title={t("setAsPrimary")} onClick={(e) => { e.stopPropagation(); setPrimaryId(u.id); }}>{primaryId === u.id ? "★" : "☆"}</button>
                                                     <button type="button" className={styles.removeTileBtn} onClick={() => removeImage(u.id)}>×</button>
                                                 </div>
                                             ))}
@@ -330,15 +338,15 @@ export default function AddHeatPumpModelPage() {
 
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Technical Drawings</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>{t("technicalDrawings")}</div>
                                     {drawings.length > 0 && <span className={styles.uploadBadge}>{drawings.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "drawing" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => drawingInputRef.current?.click()} {...dropHandlers("drawing", onDrawingFiles)}>
                                     <input ref={drawingInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onDrawingFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop drawings here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · JPG — technical diagrams &amp; schematics</span>
+                                        <span className={styles.dropZoneText}>{t("dropDrawings")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintDrawings")}</span>
                                     </div>
                                 </div>
                                 {drawings.length > 0 && (
@@ -355,15 +363,15 @@ export default function AddHeatPumpModelPage() {
 
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>{t("documents")}</div>
                                     {documents.length > 0 && <span className={styles.uploadBadge}>{documents.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "document" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => documentInputRef.current?.click()} {...dropHandlers("document", onDocumentFiles)}>
                                     <input ref={documentInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style={{ display: "none" }} onChange={(e) => { onDocumentFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop files here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PDF · DOC · DOCX · XLS · XLSX</span>
+                                        <span className={styles.dropZoneText}>{t("dropFiles")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintDocuments")}</span>
                                     </div>
                                 </div>
                                 {documents.length > 0 && (
@@ -386,15 +394,15 @@ export default function AddHeatPumpModelPage() {
 
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Icons</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>{t("icons")}</div>
                                     {icons.length > 0 && <span className={styles.uploadBadge}>{icons.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "icon" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => iconInputRef.current?.click()} {...dropHandlers("icon", onIconFiles)}>
                                     <input ref={iconInputRef} type="file" accept="image/png, image/svg+xml, .ico" multiple style={{ display: "none" }} onChange={(e) => { onIconFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop icons here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · SVG · ICO</span>
+                                        <span className={styles.dropZoneText}>{t("dropIcons")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintIcons")}</span>
                                     </div>
                                 </div>
                                 {icons.length > 0 && (
@@ -412,7 +420,7 @@ export default function AddHeatPumpModelPage() {
                         </div>
                         <div className={styles.stepNavContainer} style={{ justifyContent: "flex-end" }}>
                             <button className={styles.saveBtn} onClick={handleAdd} disabled={submitting}>
-                                {submitting ? "Adding..." : "Add"}
+                                {submitting ? t("adding") : t("add")}
                             </button>
                         </div>
                     </div>

@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useTranslations } from "next-intl";
 
 type Condenser = {
     id: number;
@@ -15,6 +16,7 @@ type Condenser = {
 const CONDENSER_TYPES: Record<string, string> = { "Microchannel": "MICROCHANNEL" };
 
 export default function AddCondenserPage() {
+    const t = useTranslations("AdminComp");
     const [model, setModel] = useState("");
     const [type, setType] = useState("Microchannel");
 
@@ -48,7 +50,7 @@ export default function AddCondenserPage() {
 
     const handleAddCondenser = async () => {
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -61,36 +63,36 @@ export default function AddCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.condenser.cap") }), "success");
                 setModel("");
                 fetchCondensers(); // Refresh the list
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add condenser.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.condenser.low") }), "error");
                 } catch {
-                    showToast("Failed to add condenser.", "error");
+                    showToast(t("failedAdd", { name: t("names.condenser.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleAddCondenserSpecs = async () => {
         if (condenser === "Select Condenser") {
-            showToast("Please select a condenser.", "error");
+            showToast(t("pleaseSelect", { name: t("names.condenser.low") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please enter capacity.", "error");
+            showToast(t("pleaseEnterCapacity"), "error");
             return;
         }
 
         const selectedCond = condensersList.find(c => c.model === condenser);
         if (!selectedCond) {
-            showToast("Invalid condenser selected.", "error");
+            showToast(t("invalidSelected", { name: t("names.condenser.low") }), "error");
             return;
         }
 
@@ -103,20 +105,20 @@ export default function AddCondenserPage() {
             });
 
             if (res.ok) {
-                showToast("Condenser Specs added successfully.", "success");
+                showToast(t("specsAddedSuccess", { name: t("names.condenser.cap") }), "success");
                 setCondenser("Select Condenser");
                 setCapacity("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add condenser specs.", "error");
+                    showToast(data.message || t("failedAddSpecs", { name: t("names.condenser.low") }), "error");
                 } catch {
-                    showToast("Failed to add condenser specs.", "error");
+                    showToast(t("failedAddSpecs", { name: t("names.condenser.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -132,7 +134,7 @@ export default function AddCondenserPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Condenser
+                        {t("names.condenser.cap")}
                     </span>
                 </div>
 
@@ -143,17 +145,17 @@ export default function AddCondenserPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
+                                        <label>{t("model")}</label>
                                         <input
                                             type="text"
                                             className={styles.inputElement}
-                                            placeholder="Enter model"
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Type</label>
+                                        <label>{t("type")}</label>
                                         <Combobox
                                             options={Object.keys(CONDENSER_TYPES)}
                                             value={type}
@@ -164,34 +166,35 @@ export default function AddCondenserPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCondenser}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddCondenser}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Condenser</label>
-                                        <Combobox 
+                                        <label>{t("names.condenser.cap")}</label>
+                                        <Combobox
                                             options={condenserOptions}
                                             value={condenser}
                                             onChange={setCondenser}
+                                            getLabel={(v) => v === "Select Condenser" ? t("selectName", { name: t("names.condenser.cap") }) : v}
                                             className={`${styles.comboBox} ${condenser.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCondenserSpecs}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddCondenserSpecs}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

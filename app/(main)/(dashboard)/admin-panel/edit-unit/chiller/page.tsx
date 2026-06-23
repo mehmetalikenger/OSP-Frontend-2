@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -59,6 +60,23 @@ const chillerLabel = (c: ChillerSummary) => `${c.model} (${c.type})`;
 const str = (n: number | null | undefined) => (n === null || n === undefined ? "" : String(n));
 
 export default function Page() {
+    const t = useTranslations("AdminUnit");
+    const display = (v: string) => {
+        const map: Record<string, string> = {
+            "Select Chiller": t("selectChiller"),
+            "Select Compressor": t("selectCompressor"),
+            "Select Evaporator": t("selectEvaporator"),
+            "Select Condenser": t("selectCondenser"),
+            "Select Expansion Valve": t("selectExpansionValve"),
+            "Select Reversing Valve": t("selectReversingValve"),
+            "Select Chasis": t("selectChasis"),
+            "Select Refrigerant": t("selectRefrigerant"),
+            "Air to water": t("airToWater"),
+            "Water to water": t("waterToWater"),
+            "Cooling": t("cooling"),
+        };
+        return map[v] ?? v;
+    };
     const [activeTab, setActiveTab] = useState("model");
     const [unitType, setUnitType] = useState("air_to_water");
     const [unitMod] = useState("cooling");
@@ -154,7 +172,7 @@ export default function Page() {
     const toUploads = (files: FileList | null): Upload[] => {
         if (!files?.length) return [];
         const arr = Array.from(files);
-        if (totalBytes(arr) > MAX_TOTAL_BYTES) { showToast("Total upload can't exceed 25 MB.", "error"); return []; }
+        if (totalBytes(arr) > MAX_TOTAL_BYTES) { showToast(t("uploadTooLarge"), "error"); return []; }
         return arr.map((file) => ({ file, url: URL.createObjectURL(file), id: uid() }));
     };
 
@@ -235,7 +253,7 @@ export default function Page() {
     const loadChiller = async (id: number) => {
         try {
             const res = await fetchWithAuth(`${API}/admin/unit/${id}`, { credentials: "include", cache: "no-store" });
-            if (!res.ok) { showToast("Failed to load chiller.", "error"); return; }
+            if (!res.ok) { showToast(t("failedToLoadChiller"), "error"); return; }
             const d = await res.json();
             setModel(d.model ?? "");
             setName(d.name ?? "");
@@ -279,7 +297,7 @@ export default function Page() {
             setPrimaryId(primaryMatch?.id ?? imgs[0]?.id ?? null);
         } catch (e) {
             console.error(e);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -305,11 +323,11 @@ export default function Page() {
     };
 
     const handleSave = async () => {
-        if (selectedChillerId === null) { showToast("Please select a chiller to edit.", "error"); return; }
-        if (!model.trim()) { showToast("Please enter a model name.", "error"); setActiveTab("model"); return; }
+        if (selectedChillerId === null) { showToast(t("selectChillerToEdit"), "error"); return; }
+        if (!model.trim()) { showToast(t("enterModelNameError"), "error"); setActiveTab("model"); return; }
         if (compressorSpecsId === null || evaporatorSpecsId === null || condenserSpecsId === null ||
             expansionValveSpecsId === null || chassisId === null || refrigerantId === null) {
-            showToast("Please select compressor, evaporator, condenser, expansion valve, chassis and refrigerant.", "error");
+            showToast(t("selectComponentsError"), "error");
             setActiveTab("model"); return;
         }
 
@@ -340,21 +358,21 @@ export default function Page() {
             if (res.ok) {
                 try {
                     await uploadNewAssets(selectedChillerId);
-                    showToast("Chiller updated successfully.", "success");
+                    showToast(t("chillerUpdatedSuccess"), "success");
                 } catch (uploadErr) {
                     console.error("Asset upload failed", uploadErr);
-                    showToast(uploadErr instanceof Error ? uploadErr.message : "Chiller saved, but file upload failed.", "error");
+                    showToast(uploadErr instanceof Error ? uploadErr.message : t("chillerSavedUploadFailed"), "error");
                 }
                 const listRes = await fetchWithAuth(`${API}/admin/unit/chillers`, { credentials: "include", cache: "no-store" });
                 if (listRes.ok) setChillers(await listRes.json());
             } else {
-                let msg = "Failed to update chiller.";
+                let msg = t("failedToUpdateChiller");
                 try { const data = await res.json(); msg = data.message || data.error || msg; } catch { /* keep default */ }
                 showToast(msg, "error");
             }
         } catch (e) {
             console.error(e);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -376,23 +394,23 @@ export default function Page() {
     };
 
     const handleDelete = async () => {
-        if (selectedChillerId === null) { showToast("Please select a chiller to delete.", "error"); return; }
-        const ok = await confirm({ title: "Delete chiller", message: "This will hide it from the catalog and admin lists. Users' saved copies are kept but hidden.", confirmText: "Delete" });
+        if (selectedChillerId === null) { showToast(t("selectChillerToDelete"), "error"); return; }
+        const ok = await confirm({ title: t("deleteChillerTitle"), message: t("deleteChillerMessage"), confirmText: t("delete") });
         if (!ok) return;
         setSubmitting(true);
         try {
             const res = await fetchWithAuth(`${API}/admin/unit/${selectedChillerId}`, { method: "DELETE", credentials: "include" });
             if (res.ok) {
-                showToast("Chiller deleted.", "success");
+                showToast(t("chillerDeleted"), "success");
                 handleCancel();
                 const listRes = await fetchWithAuth(`${API}/admin/unit/chillers`, { credentials: "include", cache: "no-store" });
                 if (listRes.ok) setChillers(await listRes.json());
             } else {
-                showToast("Failed to delete chiller.", "error");
+                showToast(t("failedToDeleteChiller"), "error");
             }
         } catch (e) {
             console.error(e);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -436,11 +454,11 @@ export default function Page() {
             )}
             <div className={styles.sectionContent} ref={topRef}>
                 <div className={styles.breadcrumbContainer}>
-                    <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>Model Information</span>
+                    <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>{t("modelInfo")}</span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
-                    <span className={`${styles.breadcrumbItem} ${activeTab === 'tech' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('tech')}>Tech Details</span>
+                    <span className={`${styles.breadcrumbItem} ${activeTab === 'tech' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('tech')}>{t("techDetails")}</span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
-                    <span className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('calc')}>Calculation Values</span>
+                    <span className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('calc')}>{t("calcValues")}</span>
                 </div>
                 <div className={styles.horizontalSeperator}></div>
                 <div className={styles.splitContent}>
@@ -448,61 +466,61 @@ export default function Page() {
                         <div className={styles.formSection}>
                             {activeTab === 'model' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Chiller to Edit</label><Combobox options={chillerOptions} value={selectedChiller ? chillerLabel(selectedChiller) : SELECT.chiller} onChange={handleChillerSelect} className={`${styles.comboBox} ${selectedChillerId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Model</label><input type="text" className={styles.inputElement} placeholder="Enter model name" value={model} onChange={(e) => setModel(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Name</label><input type="text" className={styles.inputElement} placeholder="Enter display name" value={name} onChange={(e) => setName(e.target.value)} /></div>
-                                    <div className={`${styles.formField} ${styles.formFieldFullWidth}`}><label>Description</label><textarea className={styles.inputElement} placeholder="Enter unit description" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
-                                    <div className={styles.formField}><label>Type</label><Combobox options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Mod</label><Combobox options={["Cooling"]} value="Cooling" onChange={() => {}} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Compressor</label><Combobox options={compressorOptions} value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor} onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Evaporator</label><Combobox options={evaporatorOptions} value={evaporatorValue ? specLabel(evaporatorValue) : SELECT.evaporator} onChange={(label) => setEvaporatorSpecsId(evaporatorList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${evaporatorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Condenser</label><Combobox options={condenserOptions} value={condenserValue ? specLabel(condenserValue) : SELECT.condenser} onChange={(label) => setCondenserSpecsId(condenserList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${condenserSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve</label><Combobox options={expansionValveOptions} value={expansionValveValue ? specLabel(expansionValveValue) : SELECT.expansionValve} onChange={(label) => setExpansionValveSpecsId(expansionValveList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${expansionValveSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>4-way Reversing Valve</label><Combobox options={reversingValveOptions} value={reversingValveValue ? specLabel(reversingValveValue) : SELECT.reversingValve} onChange={(label) => setReversingValveSpecsId(reversingValveList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${reversingValveSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Chasis</label><Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : SELECT.chassis} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Refrigerant</label><Combobox options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : SELECT.refrigerant} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("chillerToEdit")}</label><Combobox options={chillerOptions} value={selectedChiller ? chillerLabel(selectedChiller) : SELECT.chiller} getLabel={display} onChange={handleChillerSelect} className={`${styles.comboBox} ${selectedChillerId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("model")}</label><input type="text" className={styles.inputElement} placeholder={t("enterModelName")} value={model} onChange={(e) => setModel(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("name")}</label><input type="text" className={styles.inputElement} placeholder={t("enterDisplayName")} value={name} onChange={(e) => setName(e.target.value)} /></div>
+                                    <div className={`${styles.formField} ${styles.formFieldFullWidth}`}><label>{t("description")}</label><textarea className={styles.inputElement} placeholder={t("enterUnitDescription")} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
+                                    <div className={styles.formField}><label>{t("type")}</label><Combobox options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} getLabel={display} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("mod")}</label><Combobox options={["Cooling"]} value="Cooling" getLabel={display} onChange={() => {}} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("compressor")}</label><Combobox options={compressorOptions} value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor} getLabel={display} onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("evaporator")}</label><Combobox options={evaporatorOptions} value={evaporatorValue ? specLabel(evaporatorValue) : SELECT.evaporator} getLabel={display} onChange={(label) => setEvaporatorSpecsId(evaporatorList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${evaporatorSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("condenser")}</label><Combobox options={condenserOptions} value={condenserValue ? specLabel(condenserValue) : SELECT.condenser} getLabel={display} onChange={(label) => setCondenserSpecsId(condenserList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${condenserSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("expansionValve")}</label><Combobox options={expansionValveOptions} value={expansionValveValue ? specLabel(expansionValveValue) : SELECT.expansionValve} getLabel={display} onChange={(label) => setExpansionValveSpecsId(expansionValveList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${expansionValveSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("reversingValve")}</label><Combobox options={reversingValveOptions} value={reversingValveValue ? specLabel(reversingValveValue) : SELECT.reversingValve} getLabel={display} onChange={(label) => setReversingValveSpecsId(reversingValveList.find((s) => specLabel(s) === label)?.id ?? null)} className={`${styles.comboBox} ${reversingValveSpecsId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("chasis")}</label><Combobox options={chassisOptions} value={chassisValue ? chassisLabel(chassisValue) : SELECT.chassis} getLabel={display} onChange={(label) => setChassisId(chassisList.find((c) => chassisLabel(c) === label)?.id ?? null)} className={`${styles.comboBox} ${chassisId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("refrigerant")}</label><Combobox options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : SELECT.refrigerant} getLabel={display} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                 </div>
                             )}
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Max Capacity (Kw)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Compressor Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Quiet Condenser Required Duty (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Power Input (kW)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>EER</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
-                                    <div className={styles.formField}><label>COP</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
-                                    <div className={styles.formField}><label>Condenser Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Type</label><Combobox options={["EC"]} value={fanType} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
-                                    <div className={styles.formField}><label>Fan Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Fan Diameter</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Airflow Rate (m3/h)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Expansion Valve Qty</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Discharge Line Diameter</label><input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Liquid Line Diameter</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Suction Line Diameter</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Gas Tank (L)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Water Inlet Connection</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Water Outlet Connection</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Width</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Length</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Height</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("capacityKw")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("maxCapacityKw")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("compressorQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("condenserRequiredDuty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("quietCondenserRequiredDuty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("fanPowerInput")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanPI} onChange={(e) => setFanPI(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("eer")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} /></div>
+                                    <div className={styles.formField}><label>{t("cop")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} disabled={unitMod === 'cooling'} /></div>
+                                    <div className={styles.formField}><label>{t("condenserQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserQty} onChange={(e) => setCondenserQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("fanType")}</label><Combobox options={["EC"]} value={fanType} getLabel={display} onChange={setFanType} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
+                                    <div className={styles.formField}><label>{t("fanQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={numberOfFans} onChange={(e) => setNumberOfFans(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("fanDiameter")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={fanDiameter} onChange={(e) => setFanDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("airflowRate")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={airflowRate} onChange={(e) => setAirflowRate(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("expansionValveQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={expansionValveQty} onChange={(e) => setExpansionValveQty(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("dischargeLineDiameter")}</label><input type="text" className={styles.inputElement} value={dischargeLineDiameter} onChange={(e) => setDischargeLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("liquidLineDiameter")}</label><input type="text" className={styles.inputElement} value={liquidLineDiameter} onChange={(e) => setLiquidLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("suctionLineDiameter")}</label><input type="text" className={styles.inputElement} value={suctionLineDiameter} onChange={(e) => setSuctionLineDiameter(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("gasTank")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={gasTank} onChange={(e) => setGasTank(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("waterInletConnection")}</label><input type="text" className={styles.inputElement} value={waterInletConnection} onChange={(e) => setWaterInletConnection(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("waterOutletConnection")}</label><input type="text" className={styles.inputElement} value={waterOutletConnection} onChange={(e) => setWaterOutletConnection(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("width")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={width} onChange={(e) => setWidth(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("length")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={length} onChange={(e) => setLength(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("height")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={height} onChange={(e) => setHeight(e.target.value)} /></div>
                                 </div>
                             )}
                             {activeTab === 'calc' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Evaporator Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Condenser Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
-                                    <div className={styles.formField}><label>Condenser Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
-                                    <div className={styles.formField}><label>Min Water Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterInlet} onChange={(e) => setMinWaterInlet(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Max Water Inlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterInlet} onChange={(e) => setMaxWaterInlet(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Min Water Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterOutlet} onChange={(e) => setMinWaterOutlet(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Max Water Outlet (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterOutlet} onChange={(e) => setMaxWaterOutlet(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Min Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minAmbient} onChange={(e) => setMinAmbient(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>Max Ambient (°C)</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxAmbient} onChange={(e) => setMaxAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("ambient")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("evapInlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("evapOutlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("condInlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>{t("condOutlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} /></div>
+                                    <div className={styles.formField}><label>{t("minWaterInlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterInlet} onChange={(e) => setMinWaterInlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("maxWaterInlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterInlet} onChange={(e) => setMaxWaterInlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("minWaterOutlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minWaterOutlet} onChange={(e) => setMinWaterOutlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("maxWaterOutlet")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxWaterOutlet} onChange={(e) => setMaxWaterOutlet(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("minAmbient")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={minAmbient} onChange={(e) => setMinAmbient(e.target.value)} /></div>
+                                    <div className={styles.formField}><label>{t("maxAmbient")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxAmbient} onChange={(e) => setMaxAmbient(e.target.value)} /></div>
                                 </div>
                             )}
                         </div>
@@ -511,7 +529,7 @@ export default function Page() {
                     <div className={styles.rightContent}>
                         <div className={styles.uploadSection}>
                             <div className={styles.sizeBar}>
-                                <span className={styles.sizeBarLabel}>Storage</span>
+                                <span className={styles.sizeBarLabel}>{t("storage")}</span>
                                 <div className={styles.sizeBarTrack}>
                                     <div className={`${styles.sizeBarFill}${totalBytes() > MAX_TOTAL_BYTES * 0.9 ? ` ${styles.sizeBarFillDanger}` : totalBytes() > MAX_TOTAL_BYTES * 0.7 ? ` ${styles.sizeBarFillWarn}` : ""}`} style={{ width: `${Math.min(100, (totalBytes() / MAX_TOTAL_BYTES) * 100)}%` }} />
                                 </div>
@@ -521,26 +539,26 @@ export default function Page() {
                             {/* Images */}
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Images</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>{t("images")}</div>
                                     {images.length > 0 && <span className={styles.uploadBadge}>{images.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "image" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => imageInputRef.current?.click()} {...dropHandlers("image", onImageFiles)}>
                                     <input ref={imageInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onImageFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop images here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · JPG · WEBP — multiple files supported</span>
+                                        <span className={styles.dropZoneText}>{t("dropImages")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintImages")}</span>
                                     </div>
                                 </div>
                                 {images.length > 0 && (
                                     <>
-                                        <span className={styles.uploadGridHint}>Click ☆ to mark as primary · click thumbnail to preview</span>
+                                        <span className={styles.uploadGridHint}>{t("primaryHint")}</span>
                                         <div className={styles.imageGrid}>
                                             {images.map((u) => (
                                                 <div key={u.id} className={`${styles.imageTile}${primaryId === u.id ? ` ${styles.imageTilePrimary}` : ""}`}>
                                                     <img src={u.url} alt="" className={styles.imageTileImg} onClick={() => setLightbox(u.url)} />
-                                                    {primaryId === u.id && <span className={styles.primaryRing}>Primary</span>}
-                                                    <button type="button" className={`${styles.starBtn}${primaryId === u.id ? ` ${styles.starBtnActive}` : ""}`} title="Set as primary" onClick={(e) => { e.stopPropagation(); handleSetPrimary(u.id); }}>{primaryId === u.id ? "★" : "☆"}</button>
+                                                    {primaryId === u.id && <span className={styles.primaryRing}>{t("primary")}</span>}
+                                                    <button type="button" className={`${styles.starBtn}${primaryId === u.id ? ` ${styles.starBtnActive}` : ""}`} title={t("setAsPrimary")} onClick={(e) => { e.stopPropagation(); handleSetPrimary(u.id); }}>{primaryId === u.id ? "★" : "☆"}</button>
                                                     <button type="button" className={styles.removeTileBtn} onClick={() => removeImage(u.id)}>×</button>
                                                 </div>
                                             ))}
@@ -552,15 +570,15 @@ export default function Page() {
                             {/* Technical Drawings */}
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Technical Drawings</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>{t("technicalDrawings")}</div>
                                     {drawings.length > 0 && <span className={styles.uploadBadge}>{drawings.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "drawing" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => drawingInputRef.current?.click()} {...dropHandlers("drawing", onDrawingFiles)}>
                                     <input ref={drawingInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={(e) => { onDrawingFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop drawings here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · JPG — technical diagrams &amp; schematics</span>
+                                        <span className={styles.dropZoneText}>{t("dropDrawings")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintDrawings")}</span>
                                     </div>
                                 </div>
                                 {drawings.length > 0 && (
@@ -578,15 +596,15 @@ export default function Page() {
                             {/* Documents */}
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>{t("documents")}</div>
                                     {documents.length > 0 && <span className={styles.uploadBadge}>{documents.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "document" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => documentInputRef.current?.click()} {...dropHandlers("document", onDocumentFiles)}>
                                     <input ref={documentInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple style={{ display: "none" }} onChange={(e) => { onDocumentFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop files here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PDF · DOC · DOCX · XLS · XLSX</span>
+                                        <span className={styles.dropZoneText}>{t("dropFiles")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintDocuments")}</span>
                                     </div>
                                 </div>
                                 {documents.length > 0 && (
@@ -610,15 +628,15 @@ export default function Page() {
                             {/* Icons */}
                             <div className={styles.uploadCard}>
                                 <div className={styles.uploadCardHeader}>
-                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Icons</div>
+                                    <div className={styles.uploadCardTitle}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>{t("icons")}</div>
                                     {icons.length > 0 && <span className={styles.uploadBadge}>{icons.length}</span>}
                                 </div>
                                 <div className={`${styles.dropZone}${dragOver === "icon" ? ` ${styles.dropZoneActive}` : ""}`} onClick={() => iconInputRef.current?.click()} {...dropHandlers("icon", onIconFiles)}>
                                     <input ref={iconInputRef} type="file" accept="image/png, image/svg+xml, .ico" multiple style={{ display: "none" }} onChange={(e) => { onIconFiles(e.target.files); e.target.value = ""; }} />
                                     <div className={styles.dropZoneInner}>
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span className={styles.dropZoneText}>Drop icons here or click to browse</span>
-                                        <span className={styles.dropZoneHint}>PNG · SVG · ICO</span>
+                                        <span className={styles.dropZoneText}>{t("dropIcons")}</span>
+                                        <span className={styles.dropZoneHint}>{t("hintIcons")}</span>
                                     </div>
                                 </div>
                                 {icons.length > 0 && (
@@ -635,14 +653,14 @@ export default function Page() {
                         </div>
                         <div className={styles.stepNavContainer}>
                             <div className={styles.stepNavLeft}>
-                                {activeTab !== 'model' && <button className={styles.stepBtn} onClick={() => setActiveTab(activeTab === 'calc' ? 'tech' : 'model')}>Previous</button>}
-                                {activeTab !== 'calc' && <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab(activeTab === 'model' ? 'tech' : 'calc'); scrollToFormTop(); }}>Next</button>}
+                                {activeTab !== 'model' && <button className={styles.stepBtn} onClick={() => setActiveTab(activeTab === 'calc' ? 'tech' : 'model')}>{t("previous")}</button>}
+                                {activeTab !== 'calc' && <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab(activeTab === 'model' ? 'tech' : 'calc'); scrollToFormTop(); }}>{t("next")}</button>}
                             </div>
                             {activeTab === 'calc' && (
                                 <div className={styles.stepNavRight}>
-                                    {selectedChillerId !== null && <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e' }} onClick={handleDelete} disabled={submitting}>Delete</button>}
-                                    <button className={styles.cancelBtn} onClick={handleCancel}>Cancel</button>
-                                    <button className={styles.saveBtn} onClick={handleSave} disabled={submitting}>{submitting ? 'Saving...' : 'Save'}</button>
+                                    {selectedChillerId !== null && <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e' }} onClick={handleDelete} disabled={submitting}>{t("delete")}</button>}
+                                    <button className={styles.cancelBtn} onClick={handleCancel}>{t("cancel")}</button>
+                                    <button className={styles.saveBtn} onClick={handleSave} disabled={submitting}>{submitting ? t("saving") : t("save")}</button>
                                 </div>
                             )}
                         </div>

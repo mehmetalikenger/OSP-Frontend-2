@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import { fetchWithAuth } from "../../../../../../lib/api";
 
 export default function AddChassisPage() {
+    const t = useTranslations("AdminComp");
     const [model, setModel] = useState("");
     const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
@@ -16,7 +18,7 @@ export default function AddChassisPage() {
 
     const handleAddChassis = async () => {
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -29,19 +31,19 @@ export default function AddChassisPage() {
             });
 
             if (res.ok) {
-                showToast("Chassis added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.chassis.cap") }), "success");
                 setModel("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add chassis.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.chassis.low") }), "error");
                 } catch {
-                    showToast("Failed to add chassis.", "error");
+                    showToast(t("failedAdd", { name: t("names.chassis.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -55,7 +57,7 @@ export default function AddChassisPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Chassis
+                        {t("names.chassis.cap")}
                     </span>
                 </div>
 
@@ -66,18 +68,18 @@ export default function AddChassisPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <label>{t("model")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddChassis}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddChassis}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import ProductAccordion from "../components/ProductAccordion";
 import AirCooledChillerForm from "../components/AirCooledChillerForm";
@@ -27,6 +28,7 @@ export default function AirCooledChillerClient({
     id: string | null;
     initialData: UnitCalcData | null;
 }) {
+    const t = useTranslations("Calc");
     // Seeded from the server render, so the name/model/specs are present on first paint.
     const [calcData, setCalcData] = useState<UnitCalcData | null>(initialData);
 
@@ -44,7 +46,7 @@ export default function AirCooledChillerClient({
 
     return (
         <ProductAccordion
-            title="Air Cooled Chiller"
+            title={t("airCooledChiller")}
             unitName={calcData?.name || undefined}
             modelName={calcData?.model || undefined}
             images={calcData?.images}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
 import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
@@ -21,6 +22,13 @@ interface Props {
 }
 
 export default function WaterCooledChillerForm({ defaults }: Props) {
+    const t = useTranslations("Calc");
+    const glycolLabel = (v: string): string => (({
+        "None": t("none"),
+        "Ethylene Glycol": t("ethyleneGlycol"),
+        "Propylene Glycol": t("propyleneGlycol"),
+        "Select Ratio": t("selectRatio"),
+    } as Record<string, string>)[v] ?? v);
     const [isModalsOpen, setIsModalsOpen] = useState(false);
     const [coolingGlycolType, setCoolingGlycolType] = useState("");
     const [coolingGlycolRatio, setCoolingGlycolRatio] = useState("");
@@ -30,14 +38,14 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
     return (
         <div className={styles.sectionContent}>
             <div className={styles.input}>
-                <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
+                <label htmlFor="distanceForSound">{t("distanceForSound")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="distanceForSound" min="0" />
             </div>
             <div className={`${styles.sectionHeader} ${styles.coolingSectionHeader}`}>
-                <h3>Cooling</h3>
+                <h3>{t("cooling")}</h3>
             </div>
             <div className={styles.input}>
-                <label htmlFor="coolingWaterInlet">Water Inlet Temperature (°C)</label>
+                <label htmlFor="coolingWaterInlet">{t("waterInletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingWaterInlet"
@@ -46,7 +54,7 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="coolingWaterOutlet">Water Outlet Temperature (°C)</label>
+                <label htmlFor="coolingWaterOutlet">{t("waterOutletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingWaterOutlet"
@@ -55,8 +63,9 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label>Glycol Mixture (%)</label>
+                <label>{t("glycolMixturePct")}</label>
                 <AdminCombobox
+                    getLabel={glycolLabel}
                     value={coolingGlycolType || "None"}
                     options={GLYCOL_TYPES}
                     onChange={(v) => {
@@ -68,8 +77,9 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label>Mixture Ratio (%)</label>
+                <label>{t("mixtureRatio")}</label>
                 <AdminCombobox
+                    getLabel={glycolLabel}
                     value={coolingGlycolRatio || "Select Ratio"}
                     options={GLYCOL_RATIOS}
                     disabled={!coolingGlycolType}
@@ -77,10 +87,10 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={`${styles.sectionHeader} ${styles.condenserSectionHeader}`}>
-                <h3>Condenser</h3>
+                <h3>{t("condenser")}</h3>
             </div>
             <div className={styles.input}>
-                <label htmlFor="condenserWaterInlet">Water Inlet Temperature (°C)</label>
+                <label htmlFor="condenserWaterInlet">{t("waterInletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="condenserWaterInlet"
@@ -89,7 +99,7 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="condenserWaterOutlet">Water Outlet Temperature (°C)</label>
+                <label htmlFor="condenserWaterOutlet">{t("waterOutletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="condenserWaterOutlet"
@@ -98,8 +108,9 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label>Glycol Mixture (%)</label>
+                <label>{t("glycolMixturePct")}</label>
                 <AdminCombobox
+                    getLabel={glycolLabel}
                     value={condenserGlycolType || "None"}
                     options={GLYCOL_TYPES}
                     onChange={(v) => {
@@ -111,8 +122,9 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label>Mixture Ratio (%)</label>
+                <label>{t("mixtureRatio")}</label>
                 <AdminCombobox
+                    getLabel={glycolLabel}
                     value={condenserGlycolRatio || "Select Ratio"}
                     options={GLYCOL_RATIOS}
                     disabled={!condenserGlycolType}
@@ -120,28 +132,28 @@ export default function WaterCooledChillerForm({ defaults }: Props) {
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="condenserFoulingFactor">Fouling Factor (m²K/W)</label>
+                <label htmlFor="condenserFoulingFactor">{t("foulingFactor")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="condenserFoulingFactor" min="0" />
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label htmlFor="calculationMethod">Calculation Method</label>
+                <label htmlFor="calculationMethod">{t("calcMethod")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="calculationMethod" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="deltaT">ΔT (°C)</label>
+                <label htmlFor="deltaT">{t("deltaT")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="deltaT" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
+                <label htmlFor="foulingFactor">{t("foulingFactor")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="foulingFactor" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
+                <label htmlFor="heightAboveSeaLevel">{t("heightAboveSea")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="heightAboveSeaLevel" min="0" />
             </div>
             <button className={styles.calcBtn} onClick={() => setIsModalsOpen(true)}>
-                Calculate
+                {t("calculate")}
             </button>
 
             <CalculationModals

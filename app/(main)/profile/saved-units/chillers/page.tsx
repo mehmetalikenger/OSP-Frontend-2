@@ -2,6 +2,7 @@
 
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SavedUnitsContext } from "../layout";
 import styles from "../savedUnits.module.css";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -48,6 +49,7 @@ function normalizePage(data: unknown): { content: UnitCard[]; page: number; hasN
 }
 
 export default function ChillersPage() {
+    const t = useTranslations("SavedUnits");
     const router = useRouter();
     const { selectedType } = useContext(SavedUnitsContext);
     const [units, setUnits] = useState<UnitCard[]>([]);
@@ -125,13 +127,13 @@ export default function ChillersPage() {
                         <div className={styles.productSpecs}>
                             {unit.capacityRange && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>{"Capacity:"}</h4></div>
+                                    <div className={styles.specTitle}><h4>{t("capacity")}</h4></div>
                                     <div className={styles.specValue}><p>{unit.capacityRange}</p></div>
                                 </div>
                             )}
                             {unit.refrigerant && (
                                 <div className={styles.spec}>
-                                    <div className={styles.specTitle}><h4>{"Refrigerant:"}</h4></div>
+                                    <div className={styles.specTitle}><h4>{t("refrigerant")}</h4></div>
                                     <div className={styles.specValue}><p>{unit.refrigerant}</p></div>
                                 </div>
                             )}
@@ -145,7 +147,7 @@ export default function ChillersPage() {
                         )}
                     </div>
                 </div>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{t("view")}</button>
             </div>
         </div>
     );
@@ -155,7 +157,7 @@ export default function ChillersPage() {
             <div className={styles.container} style={{ minHeight: "auto", paddingBottom: "50px" }}>
                 <div className={styles.products}>
                     {units.map(u => renderCard(u))}
-                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>{"No saved chillers."}</p>}
+                    {units.length === 0 && <p style={{ padding: "20px", color: "#888" }}>{t("noSavedChillers")}</p>}
                 </div>
                 {hasNext && (
                     <div className={styles.loadMoreContainer}>
@@ -164,7 +166,7 @@ export default function ChillersPage() {
                             onClick={() => fetchPage(page + 1, false)}
                             disabled={loadingMore}
                         >
-                            {loadingMore ? "Loading…" : "Load more"}
+                            {loadingMore ? t("loading") : t("loadMore")}
                         </button>
                     </div>
                 )}
@@ -194,12 +196,12 @@ export default function ChillersPage() {
                                     {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{t("calculate")}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>{"Technical Specifications"}</h3>
+                                    <h3>{t("technicalSpecs")}</h3>
                                     <ul>
                                         {selectedUnit.specs.map((s, i) => (
                                             <li key={`${s.label}-${i}`}>
@@ -233,12 +235,12 @@ export default function ChillersPage() {
                                     {selectedUnit.iconUrls.map((url, i) => <img key={i} src={url} alt={"icon"} />)}
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{"Calculate"}</button>
+                                    <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${selectedUnit.id}`)}>{t("calculate")}</button>
                                 </div>
                             </div>
                             {selectedUnit.specs.length > 0 && (
                                 <div className={styles.unitSpecs}>
-                                    <h3>{"Technical Specifications"}</h3>
+                                    <h3>{t("technicalSpecs")}</h3>
                                     <ul>
                                         {selectedUnit.specs.map((s, i) => (
                                             <li key={`${s.label}-${i}`}>

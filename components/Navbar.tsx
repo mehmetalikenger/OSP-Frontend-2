@@ -1,13 +1,19 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import styles from './Navbar.module.css';
 import { fetchWithAuth } from '@/lib/api';
+import { setUserLocale } from '@/i18n/locale';
 
 export default function Navbar({ initialDark = false }: { initialDark?: boolean }) {
+    const t = useTranslations('Navbar');
+    const locale = useLocale();
+    const router = useRouter();
+    const [, startLocaleTransition] = useTransition();
+
     const [isDarkMode, setIsDarkMode] = useState(initialDark);
-    const [language, setLanguage] = useState<'en' | 'de'>('en');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
 
@@ -40,6 +46,16 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
         localStorage.removeItem('userId');
         localStorage.removeItem('userRole');
         window.location.href = '/login';
+    };
+
+    // Persist the language choice in a cookie, then refresh so the server
+    // re-renders every component with the new locale's messages.
+    const toggleLanguage = () => {
+        const next = locale === 'en' ? 'de' : 'en';
+        startLocaleTransition(async () => {
+            await setUserLocale(next);
+            router.refresh();
+        });
     };
 
     const pathname = usePathname();
@@ -126,10 +142,10 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
                     </div>
                     <div
                         className={styles.languageButtons}
-                        onClick={() => setLanguage(prev => prev === 'en' ? 'de' : 'en')}
+                        onClick={toggleLanguage}
                         style={{ cursor: 'pointer' }}
                     >
-                        <img src={language === 'en' ? "/icons/english-lan-icon.png" : "/icons/german-lan-icon.png"} alt={language.toUpperCase()} />
+                        <img src={locale === 'en' ? "/icons/english-lan-icon.png" : "/icons/german-lan-icon.png"} alt={locale.toUpperCase()} />
                     </div>
                     <div className={styles.userIcon} ref={userMenuRef}>
                         <img
@@ -160,11 +176,11 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
                         </div>
                         {isUserMenuOpen && (
                             <div className={styles.dropdownMenu}>
-                                <Link href="/profile" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Profile</Link>
+                                <Link href="/profile" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>{t('profile')}</Link>
                                 {userRole === 'ADMIN' && (
-                                    <Link href="/admin-panel" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>Admin Panel</Link>
+                                    <Link href="/admin-panel" className={styles.dropdownItem} style={{ textDecoration: 'none' }} onClick={() => setIsUserMenuOpen(false)}>{t('adminPanel')}</Link>
                                 )}
-                                <button className={styles.dropdownItem} onClick={handleLogout}>Log out</button>
+                                <button className={styles.dropdownItem} onClick={handleLogout}>{t('logout')}</button>
                             </div>
                         )}
                     </div>

@@ -1,9 +1,11 @@
 "use client";
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import styles from '../login/login.module.css';
 
 function ResetPasswordContent() {
+  const t = useTranslations('ResetPassword');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,13 +22,13 @@ function ResetPasswordContent() {
     
     if (!token) {
       setStatus('error');
-      setMessage('Invalid reset link. No token provided.');
+      setMessage(t('errorNoToken'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setStatus('error');
-      setMessage('Passwords do not match.');
+      setMessage(t('errorPasswordsMismatch'));
       return;
     }
 
@@ -45,7 +47,7 @@ function ResetPasswordContent() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('Your password has been successfully reset.');
+        setMessage(t('successMessage'));
       } else {
         const errorText = await res.text();
         let errorMessage = errorText;
@@ -60,11 +62,11 @@ function ResetPasswordContent() {
           // It's plain text
         }
         setStatus('error');
-        setMessage(errorMessage || 'Failed to reset password. The link may be invalid or expired.');
+        setMessage(errorMessage || t('errorResetFailed'));
       }
     } catch {
       setStatus('error');
-      setMessage('Network error. Please try again later.');
+      setMessage(t('errorNetwork'));
     }
   };
 
@@ -80,25 +82,25 @@ function ResetPasswordContent() {
           <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
         </div>
         <div className={styles.loginContainer}>
-          <h2>Create New Password</h2>
+          <h2>{t('title')}</h2>
           {status === 'success' ? (
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <p style={{ color: 'green', marginBottom: '20px' }}>{message}</p>
               <button className={styles.submitButton} onClick={() => router.push('/login')}>
-                Go to Login
+                {t('goToLogin')}
               </button>
             </div>
           ) : (
             <form onSubmit={handleReset}>
               <p className={styles.description}>
-                Please enter your new password below.
+                {t('description')}
               </p>
               {status === 'error' && <p style={{ color: 'red', fontSize: '14px', marginBottom: '10px' }}>{message}</p>}
               
               <div className={styles.passwordArea}>
                 <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="New Password" 
+                  type={showPassword ? "text" : "password"}
+                  placeholder={t('newPasswordPlaceholder')}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required 
@@ -115,8 +117,8 @@ function ResetPasswordContent() {
 
               <div className={styles.passwordArea}>
                 <input 
-                  type={showConfirmPassword ? "text" : "password"} 
-                  placeholder="Confirm New Password" 
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder={t('confirmPasswordPlaceholder')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required 
@@ -132,7 +134,7 @@ function ResetPasswordContent() {
               </div>
 
               <button className={styles.submitButton} type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? 'Resetting...' : 'Reset Password'}
+                {status === 'loading' ? t('submitting') : t('submit')}
               </button>
             </form>
           )}
@@ -142,9 +144,14 @@ function ResetPasswordContent() {
   );
 }
 
+function ResetPasswordFallback() {
+  const t = useTranslations('ResetPassword');
+  return <div>{t('loading')}</div>;
+}
+
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<ResetPasswordFallback />}>
       <ResetPasswordContent />
     </Suspense>
   );

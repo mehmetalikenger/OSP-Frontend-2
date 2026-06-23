@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -13,6 +14,7 @@ type Chassis = {
 }
 
 export default function EditChassisPage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Chassis");
     const [model, setModel] = useState("");
 
@@ -55,11 +57,11 @@ export default function EditChassisPage() {
 
     const handleEditChassis = async () => {
         if (selectedItemToEdit === "Select Chassis") {
-            showToast("Please select a chassis to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.chassis.low") }), "error");
             return;
         }
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -75,41 +77,41 @@ export default function EditChassisPage() {
             });
 
             if (res.ok) {
-                showToast("Chassis updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.chassis.cap") }), "success");
                 setSelectedItemToEdit("Select Chassis");
                 fetchChassis();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit chassis.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.chassis.low") }), "error");
                 } catch {
-                    showToast("Failed to edit chassis.", "error");
+                    showToast(t("failedEdit", { name: t("names.chassis.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const chassisOptions = ["Select Chassis", ...chassisList.map(c => c.model)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Chassis") { showToast("Please select a chassis to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select Chassis") { showToast(t("selectToDelete", { name: t("names.chassis.low") }), "error"); return; }
         const item = chassisList.find(c => c.model === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete chassis", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.chassis.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/chassis/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("Chassis deleted.", "success");
+                showToast(t("deleted", { name: t("names.chassis.cap") }), "success");
                 setSelectedItemToEdit("Select Chassis");
                 fetchChassis();
             } else {
-                showToast("Failed to delete chassis.", "error");
+                showToast(t("failedDelete", { name: t("names.chassis.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -123,7 +125,7 @@ export default function EditChassisPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Chassis
+                        {t("names.chassis.cap")}
                     </span>
                 </div>
 
@@ -134,29 +136,30 @@ export default function EditChassisPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Chassis</label>
-                                        <Combobox 
+                                        <label>{t("names.chassis.cap")}</label>
+                                        <Combobox
                                             options={chassisOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
+                                            getLabel={(v) => v === "Select Chassis" ? t("selectName", { name: t("names.chassis.cap") }) : v}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <label>{t("model")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditChassis}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditChassis}>{t("save")}</button>
                             </div>
                         </div>
                     </div>

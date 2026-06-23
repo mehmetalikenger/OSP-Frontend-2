@@ -6,6 +6,7 @@ import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
+import { useTranslations } from "next-intl";
 
 type FourWayReversingValve = {
     id: number;
@@ -19,6 +20,7 @@ type FourWayReversingValveSpecs = {
 }
 
 export default function EditFourWayReversingValvePage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select 4-Way Reversing Valve");
     const [model, setModel] = useState("");
 
@@ -91,11 +93,11 @@ export default function EditFourWayReversingValvePage() {
 
     const handleEditValve = async () => {
         if (selectedItemToEdit === "Select 4-Way Reversing Valve") {
-            showToast("Please select a valve to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.fourWayValve.low") }), "error");
             return;
         }
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -111,31 +113,31 @@ export default function EditFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.fourWayValve.cap") }), "success");
                 setSelectedItemToEdit("Select 4-Way Reversing Valve");
                 fetchValves();
                 fetchValveSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit valve.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.fourWayValve.low") }), "error");
                 } catch {
-                    showToast("Failed to edit valve.", "error");
+                    showToast(t("failedEdit", { name: t("names.fourWayValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleEditValveSpecs = async () => {
         if (fourWayReversingValve === "Select 4-Way Reversing Valve") {
-            showToast("Please select valve specs.", "error");
+            showToast(t("selectSpecs", { name: t("names.fourWayValve.cap") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
 
@@ -151,20 +153,20 @@ export default function EditFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve Specs updated successfully.", "success");
+                showToast(t("specsUpdatedSuccess", { name: t("names.fourWayValve.cap") }), "success");
                 setFourWayReversingValve("Select 4-Way Reversing Valve");
                 fetchValveSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit valve specs.", "error");
+                    showToast(data.message || t("failedEditSpecs", { name: t("names.fourWayValve.low") }), "error");
                 } catch {
-                    showToast("Failed to edit valve specs.", "error");
+                    showToast(t("failedEditSpecs", { name: t("names.fourWayValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -172,22 +174,22 @@ export default function EditFourWayReversingValvePage() {
     const specsOptions = ["Select 4-Way Reversing Valve", ...valveSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select 4-Way Reversing Valve") { showToast("Please select a valve to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select 4-Way Reversing Valve") { showToast(t("selectToDelete", { name: t("names.fourWayValve.low") }), "error"); return; }
         const item = valvesList.find(v => v.model === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete 4-way reversing valve", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.fourWayValve.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/fourWayReversingValve/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("4-Way reversing valve deleted.", "success");
+                showToast(t("deleted", { name: t("names.fourWayValve.cap") }), "success");
                 setSelectedItemToEdit("Select 4-Way Reversing Valve");
                 fetchValves();
                 fetchValveSpecs();
             } else {
-                showToast("Failed to delete valve.", "error");
+                showToast(t("failedDelete", { name: t("names.fourWayValve.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -201,7 +203,7 @@ export default function EditFourWayReversingValvePage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        4-Way Reversing Valve
+                        {t("names.fourWayValve.cap")}
                     </span>
                 </div>
 
@@ -212,56 +214,58 @@ export default function EditFourWayReversingValvePage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>4-Way Reversing Valve</label>
-                                        <Combobox 
+                                        <label>{t("names.fourWayValve.cap")}</label>
+                                        <Combobox
                                             options={valveOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
+                                            getLabel={(v) => v === "Select 4-Way Reversing Valve" ? t("selectName", { name: t("names.fourWayValve.cap") }) : v}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <label>{t("model")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditValve}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditValve}>{t("save")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>4-Way Reversing Valve Specs</label>
-                                        <Combobox 
+                                        <label>{t("specsSuffix", { name: t("names.fourWayValve.cap") })}</label>
+                                        <Combobox
                                             options={specsOptions}
                                             value={fourWayReversingValve}
                                             onChange={setFourWayReversingValve}
+                                            getLabel={(v) => v === "Select 4-Way Reversing Valve" ? t("selectName", { name: t("names.fourWayValve.cap") }) : v}
                                             className={`${styles.comboBox} ${fourWayReversingValve.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleEditValveSpecs}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditValveSpecs}>{t("save")}</button>
                             </div>
                         </div>
                     </div>

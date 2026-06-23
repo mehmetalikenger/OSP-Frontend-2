@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import styles from "./accountSettings.module.css";
 import sharedStyles from "../sharedProfile.module.css";
 import { Country, State } from "country-state-city";
@@ -9,6 +10,7 @@ import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
 import { fetchWithAuth } from "../../../../lib/api";
 
 export default function AccountSettingsPage() {
+    const t = useTranslations("AccountSettings");
     const [userId, setUserId] = useState<string | null>(null);
 
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -100,23 +102,23 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                showToast("User info saved", "success");
+                showToast(t("userInfoSaved"), "success");
                 setInfoChanged(false);
             } else {
                 try {
                     const errorText = await res.text();
                     const errorJson = JSON.parse(errorText);
                     if (errorJson.errors && errorJson.errors.length > 0) {
-                        showToast(errorJson.errors[0].defaultMessage || "Failed to save info", "error");
+                        showToast(errorJson.errors[0].defaultMessage || t("failedSaveInfo"), "error");
                     } else {
-                        showToast(errorJson.message || errorJson.error || "Failed to save info", "error");
+                        showToast(errorJson.message || errorJson.error || t("failedSaveInfo"), "error");
                     }
                 } catch {
-                    showToast("Failed to save info", "error");
+                    showToast(t("failedSaveInfo"), "error");
                 }
             }
         } catch {
-            showToast("Network error", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -129,23 +131,23 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify({ id: userId, address, country: countryIsoCode, city: cityName })
             });
             if (res.ok) {
-                showToast("Address saved", "success");
+                showToast(t("addressSaved"), "success");
                 setAddressChanged(false);
             } else {
                 try {
                     const errorText = await res.text();
                     const errorJson = JSON.parse(errorText);
                     if (errorJson.errors && errorJson.errors.length > 0) {
-                        showToast(errorJson.errors[0].defaultMessage || "Failed to save address", "error");
+                        showToast(errorJson.errors[0].defaultMessage || t("failedSaveAddress"), "error");
                     } else {
-                        showToast(errorJson.message || errorJson.error || "Failed to save address", "error");
+                        showToast(errorJson.message || errorJson.error || t("failedSaveAddress"), "error");
                     }
                 } catch {
-                    showToast("Failed to save address", "error");
+                    showToast(t("failedSaveAddress"), "error");
                 }
             }
         } catch {
-            showToast("Network error", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -165,7 +167,7 @@ export default function AccountSettingsPage() {
                 body: JSON.stringify({ id: userId, currentPassword, password })
             });
             if (res.ok) {
-                showToast("Password updated", "success");
+                showToast(t("passwordUpdated"), "success");
                 setSecurityChanged(false);
                 setCurrentPassword("");
                 setPassword("");
@@ -189,11 +191,11 @@ export default function AccountSettingsPage() {
                 } else if (errorMessage === "New password cannot be the same as the current password" || errorMessage.includes("Password should be minimum")) {
                     setNewPasswordErrorMessage(errorMessage);
                 } else {
-                    showToast(errorMessage || "Failed to update password", "error");
+                    showToast(errorMessage || t("failedUpdatePassword"), "error");
                 }
             }
         } catch {
-            showToast("Network error", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -207,7 +209,7 @@ export default function AccountSettingsPage() {
             <div className={sharedStyles.header}>
                 <div className={sharedStyles.headerContent}>
                     <div className={sharedStyles.headerBullet}></div>
-                    <h1>Account Settings</h1>
+                    <h1>{t("title")}</h1>
                 </div>
                 <div className={sharedStyles.headerLine}></div>
             </div>
@@ -217,21 +219,21 @@ export default function AccountSettingsPage() {
                 </div>
                 <div className={styles.containerFields}>
                     <div className={styles.field}>
-                        <label htmlFor="username">Name</label>
+                        <label htmlFor="username">{t("name")}</label>
                         <input type="text" id="username" value={username} onChange={(e) => { setUsername(e.target.value); setInfoChanged(true); }} />
                     </div>
                     {userRole === 'ADMIN' && (
                         <div className={styles.field}>
-                            <label htmlFor="surname">Surname</label>
+                            <label htmlFor="surname">{t("surname")}</label>
                             <input type="text" id="surname" value={surname} onChange={(e) => { setSurname(e.target.value); setInfoChanged(true); }} />
                         </div>
                     )}
                     <div className={styles.field}>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">{t("email")}</label>
                         <input type="email" id="email" value={email} onChange={(e) => { setEmail(e.target.value); setInfoChanged(true); }} />
                     </div>
                     <div className={styles.field}>
-                        <label htmlFor="phone">Phone</label>
+                        <label htmlFor="phone">{t("phone")}</label>
                         <PhoneInput
                             country={'us'}
                             value={phone}
@@ -240,7 +242,7 @@ export default function AccountSettingsPage() {
                         />
                     </div>
                 </div>
-                {infoChanged && <button className={styles.saveButton} onClick={handleSaveInfo}>Save</button>}
+                {infoChanged && <button className={styles.saveButton} onClick={handleSaveInfo}>{t("save")}</button>}
             </div>
             <div className={`${styles.adressContainer} ${styles.container}`}>
                 <div className={styles.containerIcon}>
@@ -248,13 +250,13 @@ export default function AccountSettingsPage() {
                 </div>
                 <div className={styles.containerFields}>
                     <div className={styles.field}>
-                        <label htmlFor="adress">Adress</label>
+                        <label htmlFor="adress">{t("address")}</label>
                         <textarea className={styles.adressInput} id="adress" value={address} style={{ resize: 'none' }} onChange={(e) => { setAddress(e.target.value); setAddressChanged(true); }}></textarea>
                     </div>
                     <div className={styles.field}>
-                        <label>Country</label>
-                        <AdminCombobox 
-                            value={countryName || "Select Country"} 
+                        <label>{t("country")}</label>
+                        <AdminCombobox
+                            value={countryName || t("selectCountry")}
                             onChange={(val) => {
                                 const c = countries.find(c => c.name === val);
                                 if (c) {
@@ -268,9 +270,9 @@ export default function AccountSettingsPage() {
                         />
                     </div>
                     <div className={styles.field}>
-                        <label>City</label>
-                        <AdminCombobox 
-                            value={cityName || "Select City"} 
+                        <label>{t("city")}</label>
+                        <AdminCombobox
+                            value={cityName || t("selectCity")}
                             onChange={(val) => {
                                 setCityName(val);
                                 setAddressChanged(true);
@@ -280,7 +282,7 @@ export default function AccountSettingsPage() {
                         />
                     </div>
                 </div>
-                {addressChanged && <button className={styles.saveButton} onClick={handleSaveAddress}>Save</button>}
+                {addressChanged && <button className={styles.saveButton} onClick={handleSaveAddress}>{t("save")}</button>}
             </div>
             <div className={`${styles.securityContainer} ${styles.container}`}>
                 <div className={styles.containerIcon}>
@@ -288,7 +290,7 @@ export default function AccountSettingsPage() {
                 </div>
                 <div className={styles.containerFields}>
                     <div className={styles.field}>
-                        <label htmlFor="currentPassword">Current Password</label>
+                        <label htmlFor="currentPassword">{t("currentPassword")}</label>
                         <div className={styles.passwordArea}>
                             <input 
                                 type={showCurrentPassword ? "text" : "password"} 
@@ -302,10 +304,10 @@ export default function AccountSettingsPage() {
                                 <img className={styles.darkIcon} src="/icons/pass-eye-darkMode.png" alt="Eye" style={{ opacity: showCurrentPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
-                        {currentPasswordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Current password is incorrect.</span>}
+                        {currentPasswordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{t("currentPasswordIncorrect")}</span>}
                     </div>
                     <div className={styles.field}>
-                        <label htmlFor="password">New Password</label>
+                        <label htmlFor="password">{t("newPassword")}</label>
                         <div className={styles.passwordArea}>
                             <input 
                                 type={showPassword ? "text" : "password"} 
@@ -322,7 +324,7 @@ export default function AccountSettingsPage() {
                         {newPasswordErrorMessage && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px', display: 'block' }}>{newPasswordErrorMessage}</span>}
                     </div>
                     <div className={styles.field}>
-                        <label htmlFor="confirmPassword">Confirm Password</label>
+                        <label htmlFor="confirmPassword">{t("confirmPassword")}</label>
                         <div className={styles.passwordArea}>
                             <input 
                                 type={showConfirmPassword ? "text" : "password"} 
@@ -336,25 +338,25 @@ export default function AccountSettingsPage() {
                                 <img className={styles.darkIcon} src="/icons/pass-eye-darkMode.png" alt="Eye" style={{ opacity: showConfirmPassword ? 0.4 : 1, transition: 'opacity 0.2s' }} />
                             </div>
                         </div>
-                        {passwordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>Passwords do not match.</span>}
+                        {passwordError && <span style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{t("passwordsDoNotMatch")}</span>}
                     </div>
                 </div>
-                {securityChanged && <button className={styles.saveButton} onClick={handleSaveSecurity}>Save</button>}
+                {securityChanged && <button className={styles.saveButton} onClick={handleSaveSecurity}>{t("save")}</button>}
             </div>
             {userRole !== 'ADMIN' && (
                 <div className={`${styles.deleteAccountContainer} ${styles.container}`}>
                 <div className={styles.containerFields}>
-                    <span className={styles.deleteAccountTitle}>Delete Account</span>
+                    <span className={styles.deleteAccountTitle}>{t("deleteAccount")}</span>
                     <div className={styles.line}></div>
 
                     {!showDeleteWarning ? (
-                        <button className={styles.deleteButton} onClick={() => setShowDeleteWarning(true)}>Delete Account</button>
+                        <button className={styles.deleteButton} onClick={() => setShowDeleteWarning(true)}>{t("deleteAccount")}</button>
                     ) : (
                         <div className={styles.deleteWarning} ref={deleteWarningRef}>
-                            <p>Warning: This action cannot be undone. Please type <strong>delete</strong> to confirm.</p>
+                            <p>{t.rich("deleteWarning", { strong: (chunks) => <strong>{chunks}</strong> })}</p>
                             <input
                                 type="text"
-                                placeholder="Type 'delete' here"
+                                placeholder={t("deletePlaceholder")}
                                 value={deleteConfirmationText}
                                 onChange={(e) => setDeleteConfirmationText(e.target.value)}
                             />
@@ -368,9 +370,9 @@ export default function AccountSettingsPage() {
                                             credentials: 'include'
                                         });
                                         if (res.ok) {
-                                            showToast("A confirmation email has been sent. Please check your inbox to finalize account deletion.", "success");
+                                            showToast(t("deletionEmailSent"), "success");
                                         } else {
-                                            showToast("Failed to request account deletion", "error");
+                                            showToast(t("failedRequestDeletion"), "error");
                                         }
                                     } catch (e) {
                                         console.error(e);
@@ -380,7 +382,7 @@ export default function AccountSettingsPage() {
                                     setDeleteConfirmationText("");
                                 }}
                             >
-                                Confirm Delete
+                                {t("confirmDelete")}
                             </button>
                             <button
                                 className={styles.cancelButton}
@@ -389,7 +391,7 @@ export default function AccountSettingsPage() {
                                     setDeleteConfirmationText("");
                                 }}
                             >
-                                Cancel
+                                {t("cancel")}
                             </button>
                         </div>
                     )}

@@ -1,9 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import { serverFetch } from "@/lib/serverApi";
 import UnitCatalogPage, { UnitPage } from "../../UnitCatalogPage";
 
 // Server component: fetch the unit list up front (forwarding the auth cookie) so the
 // cards are in the initial HTML. Falls back to null -> client fetch on error.
 export default async function AirCooledChillersPage() {
+    const t = await getTranslations("Catalog");
     const apiPath = "/units/chillers?type=AW";
 
     let initialData: UnitPage | null = null;
@@ -16,10 +18,10 @@ export default async function AirCooledChillersPage() {
 
     return (
         <UnitCatalogPage
-            title="Air Cooled Chillers"
+            title={t("airCooledChillers")}
             apiPath={apiPath}
             calcRoute="/calculation/air-cooled-chiller"
-            altText="Air Cooled Chiller"
+            altText={t("airCooledChillers")}
             initialData={initialData}
         />
     );

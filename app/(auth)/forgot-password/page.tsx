@@ -1,8 +1,10 @@
 "use client";
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import styles from '../login/login.module.css';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('ForgotPassword');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -21,7 +23,7 @@ export default function ForgotPasswordPage() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('A password reset link has been sent to your email.');
+        setMessage(t('successMessage'));
       } else {
         const errorText = await res.text();
         let errorMessage = errorText;
@@ -32,11 +34,11 @@ export default function ForgotPasswordPage() {
           // It's plain text
         }
         setStatus('error');
-        setMessage(errorMessage || 'Failed to send reset link. Please check the email and try again.');
+        setMessage(errorMessage || t('errorSendFailed'));
       }
     } catch {
       setStatus('error');
-      setMessage('Network error. Please try again later.');
+      setMessage(t('errorNetwork'));
     }
   };
 
@@ -52,29 +54,29 @@ export default function ForgotPasswordPage() {
           <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
         </div>
         <div className={styles.loginContainer}>
-          <h2>Reset Password</h2>
+          <h2>{t('title')}</h2>
           {status === 'success' ? (
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <p style={{ color: 'green', marginBottom: '20px' }}>{message}</p>
               <button className={styles.submitButton} onClick={() => window.location.href = '/login'}>
-                Back to Login
+                {t('backToLogin')}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <p className={styles.description}>
-                Enter your email address and we will send you a link to reset your password.
+                {t('description')}
               </p>
               {status === 'error' && <p style={{ color: 'red', fontSize: '14px', marginBottom: '10px' }}>{message}</p>}
-              <input 
-                type="email" 
-                placeholder="Email" 
+              <input
+                type="email"
+                placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required 
+                required
               />
               <button className={styles.submitButton} type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? 'Sending...' : 'Send Reset Link'}
+                {status === 'loading' ? t('submitting') : t('submit')}
               </button>
               <div style={{ textAlign: 'center' }}>
                 <span
@@ -82,7 +84,7 @@ export default function ForgotPasswordPage() {
                   onClick={() => window.location.href = '/login'}
                   style={{ cursor: 'pointer' }}
                 >
-                  Back to Log in
+                  {t('backToLoginLink')}
                 </span>
               </div>
             </form>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import BookmarkToggle from "@/components/BookmarkToggle";
@@ -59,6 +60,7 @@ interface Props {
 }
 
 export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, initialData }: Props) {
+    const t = useTranslations("Catalog");
     // Seeded from the server render so the first page is in the initial HTML.
     const seed = normalizePage(initialData);
     const [units, setUnits] = useState<UnitCard[]>(seed.content);
@@ -120,8 +122,8 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
 
     const cardSpecs = (unit: UnitCard) => {
         const items: { label: string; value: string }[] = [];
-        if (unit.capacityRange) items.push({ label: "Capacity", value: unit.capacityRange });
-        if (unit.refrigerant) items.push({ label: "Refrigerant", value: unit.refrigerant });
+        if (unit.capacityRange) items.push({ label: t("capacity"), value: unit.capacityRange });
+        if (unit.refrigerant) items.push({ label: t("refrigerant"), value: unit.refrigerant });
         return items;
     };
 
@@ -156,7 +158,7 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                 </div>
             </div>
             <div className={styles.productBottom}>
-                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{"View"}</button>
+                <button className={styles.viewBtn} onClick={() => handleView(unit.id)}>{t("view")}</button>
                 <BookmarkToggle unitId={unit.id} initialSaved={unit.saved} onSavedChange={(s) => handleBookmarkChange(unit.id, s)} />
             </div>
         </div>
@@ -188,13 +190,13 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{t("calculate")}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>{"Technical Specifications"}</h3>
+                            <h3>{t("technicalSpecs")}</h3>
                             <ul>
                                 {d.specs.map((s, i) => (
                                     <li key={`${s.label}-${i}`}>
@@ -233,13 +235,13 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             )) : null}
                         </div>
                         <div className={styles.modalActions}>
-                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{"Calculate"}</button>
+                            <button className={styles.calcBtn} onClick={() => router.push(`${calcRoute}?id=${d.id}`)}>{t("calculate")}</button>
                             <BookmarkToggle unitId={d.id} initialSaved={d.saved} onSavedChange={(s) => handleBookmarkChange(d.id, s)} />
                         </div>
                     </div>
                     {d.specs.length > 0 && (
                         <div className={styles.unitSpecs}>
-                            <h3>{"Technical Specifications"}</h3>
+                            <h3>{t("technicalSpecs")}</h3>
                             <ul>
                                 {d.specs.map((s, i) => (
                                     <li key={`${s.label}-${i}`}>
@@ -275,7 +277,7 @@ export default function UnitCatalogPage({ title, apiPath, calcRoute, altText, in
                             onClick={() => fetchPage(page + 1, false)}
                             disabled={loadingMore}
                         >
-                            {loadingMore ? "Loading…" : "Load more"}
+                            {loadingMore ? t("loading") : t("loadMore")}
                         </button>
                     </div>
                 )}

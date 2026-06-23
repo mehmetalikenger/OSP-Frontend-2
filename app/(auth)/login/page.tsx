@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './login.module.css';
 
 export default function LoginPage() {
+  const t = useTranslations('Login');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,18 +49,18 @@ export default function LoginPage() {
         try {
             const errorData = await res.json();
             if (errorData.message && errorData.message.includes("deleted")) {
-                setError("This account is deleted.");
+                setError(t('errorAccountDeleted'));
             } else if (errorData.error && errorData.error.includes("deleted")) {
-                setError("This account is deleted.");
+                setError(t('errorAccountDeleted'));
             } else {
-                setError('Login failed. Please check your credentials.');
+                setError(t('errorInvalidCredentials'));
             }
         } catch {
-            setError('Login failed. Please check your credentials.');
+            setError(t('errorInvalidCredentials'));
         }
       }
     } catch {
-      setError('Network error. Please try again later.');
+      setError(t('errorNetwork'));
     } finally {
       setLoading(false);
     }
@@ -68,10 +70,10 @@ export default function LoginPage() {
     return (
       <div className={`${styles.container} ${styles.deletedWrapper}`}>
         <div className={styles.deletedBox}>
-          <h2>Deletion Process Started</h2>
-          <p>Your account deletion process has started. You can reactivate your account by logging in within 30 days.</p>
+          <h2>{t('deletionStartedTitle')}</h2>
+          <p>{t('deletionStartedBody')}</p>
           <button onClick={() => window.location.href = '/login'}>
-             Back to Login
+             {t('backToLogin')}
           </button>
         </div>
       </div>
@@ -91,20 +93,20 @@ export default function LoginPage() {
         </div>
         <div className={styles.loginContainer}>
             <>
-              <h2>Log in</h2>
+              <h2>{t('title')}</h2>
               <form onSubmit={handleLogin}>
                 {error && <p style={{ color: 'red', fontSize: '14px', marginBottom: '10px' }}>{error}</p>}
-                <input 
-                  type="email" 
-                  placeholder="Email" 
+                <input
+                  type="email"
+                  placeholder={t('emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required 
                 />
                 <div className={styles.passwordArea}>
                   <input 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="Password" 
+                    type={showPassword ? "text" : "password"}
+                    placeholder={t('passwordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required 
@@ -125,18 +127,18 @@ export default function LoginPage() {
                       onChange={(e) => setRememberMe(e.target.checked)} 
                       style={{ margin: 0, cursor: 'pointer' }}
                     />
-                    Remember me
+                    {t('rememberMe')}
                   </label>
                   <span
                     className={styles.forgotPassword}
                     onClick={() => router.push('/forgot-password')}
                     style={{ cursor: 'pointer', margin: 0 }}
                   >
-                    Forgot password?
+                    {t('forgotPassword')}
                   </span>
                 </div>
                 <button className={styles.submitButton} type="submit" disabled={loading}>
-                  {loading ? 'Logging in...' : 'Log in'}
+                  {loading ? t('submitting') : t('submit')}
                 </button>
               </form>
             </>

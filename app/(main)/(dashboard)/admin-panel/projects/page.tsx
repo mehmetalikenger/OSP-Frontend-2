@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import styles from "./projects.module.css";
 import AdminCombobox from "../AdminCombobox";
 import { fetchWithAuth } from "@/lib/api";
@@ -21,22 +22,32 @@ interface AdminProjectRow {
     documentUrl: string | null;
 }
 
-const categoryLabel = (c: string | null) =>
-    c === "CHILLER" ? "Chiller" : c === "HEAT_PUMP" ? "Heat Pump" : "";
+// Returns a stable, locale-independent key (translated at display time). Using a
+// key here keeps the filter options and the row comparisons consistent in any
+// language, since both sides go through this same mapping.
+const categoryKey = (c: string | null) =>
+    c === "CHILLER" ? "chiller" : c === "HEAT_PUMP" ? "heatPump" : "";
 
-// AW/WW means different things per category, so label by both.
-const typeLabel = (cat: string | null, t: string | null) => {
-    if (!t) return "";
-    if (cat === "CHILLER") return t === "AW" ? "Air Cooled" : "Water Cooled";
-    if (cat === "HEAT_PUMP") return t === "AW" ? "Air to Water" : "Water to Water";
-    return t;
+// AW/WW means different things per category, so key by both.
+const typeKey = (cat: string | null, type: string | null) => {
+    if (!type) return "";
+    if (cat === "CHILLER") return type === "AW" ? "airCooled" : "waterCooled";
+    if (cat === "HEAT_PUMP") return type === "AW" ? "airToWater" : "waterToWater";
+    return type;
 };
+
+const TRANSLATABLE_KEYS = ["chiller", "heatPump", "airCooled", "waterCooled", "airToWater", "waterToWater"];
 
 // Owner username plus the project's company, shown together in the Username column.
 const ownerLabel = (row: AdminProjectRow) =>
     [row.username, row.company].filter(Boolean).join(" / ") || "-";
 
 export default function ProjectsPage() {
+    const t = useTranslations("AdminProjects");
+    // Translate a key ("All" sentinel, category/type keys); pass other values
+    // (countries, model names from the backend) through unchanged.
+    const labelFor = (v: string) =>
+        v === "All" ? t("all") : TRANSLATABLE_KEYS.includes(v) ? t(v) : v;
     const [rows, setRows] = useState<AdminProjectRow[]>([]);
 
     // Filter States
@@ -59,11 +70,11 @@ export default function ProjectsPage() {
         [rows],
     );
     const categoriesList = useMemo(
-        () => ["All", ...Array.from(new Set(rows.map(r => categoryLabel(r.category)).filter(Boolean)))],
+        () => ["All", ...Array.from(new Set(rows.map(r => categoryKey(r.category)).filter(Boolean)))],
         [rows],
     );
     const typesList = useMemo(
-        () => ["All", ...Array.from(new Set(rows.map(r => typeLabel(r.category, r.type)).filter(Boolean)))],
+        () => ["All", ...Array.from(new Set(rows.map(r => typeKey(r.category, r.type)).filter(Boolean)))],
         [rows],
     );
     const modelsList = useMemo(
@@ -75,8 +86,8 @@ export default function ProjectsPage() {
         return rows.filter(row => {
             if (usernameSearch.trim() !== "" && !ownerLabel(row).toLowerCase().includes(usernameSearch.toLowerCase())) return false;
             if (countryFilter !== "All" && row.country !== countryFilter) return false;
-            if (categoryFilter !== "All" && categoryLabel(row.category) !== categoryFilter) return false;
-            if (typeFilter !== "All" && typeLabel(row.category, row.type) !== typeFilter) return false;
+            if (categoryFilter !== "All" && categoryKey(row.category) !== categoryFilter) return false;
+            if (typeFilter !== "All" && typeKey(row.category, row.type) !== typeFilter) return false;
             if (modelFilter !== "All" && row.model !== modelFilter) return false;
             return true;
         });
@@ -87,9 +98,9 @@ export default function ProjectsPage() {
             <div className={styles.card}>
                 {/* Header (Title & Total Count) */}
                 <div className={styles.pageHeader}>
-                    <h2 className={styles.pageTitle}>{"Projects"}</h2>
+                    <h2 className={styles.pageTitle}>{t("title")}</h2>
                     <p className={styles.totalCount}>
-                        {"Total Projects"} {filteredProjects.length}
+                        {t("totalProjects")} {filteredProjects.length}
                     </p>
                 </div>
 
@@ -97,47 +108,51 @@ export default function ProjectsPage() {
                     {/* Left Panel: Filters */}
                     <div className={styles.filtersContainer}>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>{"Category"}</span>
+                            <span className={styles.filterLabel}>{t("category")}</span>
                             <AdminCombobox
                                 value={categoryFilter}
                                 onChange={(val) => setCategoryFilter(val)}
                                 options={categoriesList}
                                 containerClassName={styles.filterCombobox}
+                                getLabel={labelFor}
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>{"Type"}</span>
+                            <span className={styles.filterLabel}>{t("type")}</span>
                             <AdminCombobox
                                 value={typeFilter}
                                 onChange={(val) => setTypeFilter(val)}
                                 options={typesList}
                                 containerClassName={styles.filterCombobox}
+                                getLabel={labelFor}
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>{"Model"}</span>
+                            <span className={styles.filterLabel}>{t("model")}</span>
                             <AdminCombobox
                                 value={modelFilter}
                                 onChange={(val) => setModelFilter(val)}
                                 options={modelsList}
                                 containerClassName={styles.filterCombobox}
+                                getLabel={labelFor}
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>{"Country"}</span>
+                            <span className={styles.filterLabel}>{t("country")}</span>
                             <AdminCombobox
                                 value={countryFilter}
                                 onChange={(val) => setCountryFilter(val)}
                                 options={countriesList}
                                 containerClassName={styles.filterCombobox}
+                                getLabel={labelFor}
                             />
                         </div>
                         <div className={styles.filterItem}>
-                            <span className={styles.filterLabel}>{"Username"}</span>
+                            <span className={styles.filterLabel}>{t("username")}</span>
                             <input
                                 type="text"
                                 className={styles.textInput}
-                                placeholder={"Search username..."}
+                                placeholder={t("searchUsername")}
                                 value={usernameSearch}
                                 onChange={(e) => setUsernameSearch(e.target.value)}
                             />
@@ -149,13 +164,13 @@ export default function ProjectsPage() {
                         <table className={styles.dataTable}>
                             <thead>
                                 <tr>
-                                    <th>{"Project Name"}</th>
-                                    <th>{"Username"}</th>
-                                    <th>{"Country"}</th>
-                                    <th>{"Category"}</th>
-                                    <th>{"Type"}</th>
-                                    <th>{"Model"}</th>
-                                    <th>{"Document"}</th>
+                                    <th>{t("colProjectName")}</th>
+                                    <th>{t("username")}</th>
+                                    <th>{t("country")}</th>
+                                    <th>{t("category")}</th>
+                                    <th>{t("type")}</th>
+                                    <th>{t("model")}</th>
+                                    <th>{t("colDocument")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -165,8 +180,8 @@ export default function ProjectsPage() {
                                             <td>{project.projectName}</td>
                                             <td>{ownerLabel(project)}</td>
                                             <td>{project.country || "-"}</td>
-                                            <td>{categoryLabel(project.category) || "-"}</td>
-                                            <td>{typeLabel(project.category, project.type) || "-"}</td>
+                                            <td>{labelFor(categoryKey(project.category)) || "-"}</td>
+                                            <td>{labelFor(typeKey(project.category, project.type)) || "-"}</td>
                                             <td>{project.model || "-"}</td>
                                             <td>
                                                 {project.documentUrl ? (
@@ -175,7 +190,7 @@ export default function ProjectsPage() {
                                                         className={styles.documentLink}
                                                         onClick={() => window.open(project.documentUrl!, "_blank", "noopener,noreferrer")}
                                                     >
-                                                        {"Open"}
+                                                        {t("open")}
                                                     </button>
                                                 ) : (
                                                     "-"
@@ -186,7 +201,7 @@ export default function ProjectsPage() {
                                 ) : (
                                     <tr>
                                         <td colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
-                                            {"No projects match the selected filters."}
+                                            {t("noProjects")}
                                         </td>
                                     </tr>
                                 )}

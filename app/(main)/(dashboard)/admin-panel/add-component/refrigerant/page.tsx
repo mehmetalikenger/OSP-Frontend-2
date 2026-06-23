@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import { fetchWithAuth } from "../../../../../../lib/api";
 
 export default function AddRefrigerantPage() {
+    const t = useTranslations("AdminComp");
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
     const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
@@ -17,7 +19,7 @@ export default function AddRefrigerantPage() {
 
     const handleAddRefrigerant = async () => {
         if (!name || !code) {
-            showToast("Please enter name and code.", "error");
+            showToast(t("pleaseEnterNameCode"), "error");
             return;
         }
 
@@ -30,20 +32,20 @@ export default function AddRefrigerantPage() {
             });
 
             if (res.ok) {
-                showToast("Refrigerant added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.refrigerant.cap") }), "success");
                 setName("");
                 setCode("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add refrigerant.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.refrigerant.low") }), "error");
                 } catch {
-                    showToast("Failed to add refrigerant.", "error");
+                    showToast(t("failedAdd", { name: t("names.refrigerant.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -57,7 +59,7 @@ export default function AddRefrigerantPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Refrigerant
+                        {t("names.refrigerant.cap")}
                     </span>
                 </div>
 
@@ -68,28 +70,28 @@ export default function AddRefrigerantPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Name</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter name" 
+                                        <label>{t("fieldName")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterName")}
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Code</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter code" 
+                                        <label>{t("code")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCode")}
                                             value={code}
                                             onChange={(e) => setCode(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddRefrigerant}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddRefrigerant}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

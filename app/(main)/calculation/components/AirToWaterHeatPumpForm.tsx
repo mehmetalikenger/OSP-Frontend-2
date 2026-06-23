@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
 import AdminCombobox from "../../(dashboard)/admin-panel/AdminCombobox";
@@ -23,17 +24,26 @@ interface Props {
 }
 
 export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefaults }: Props) {
+    const t = useTranslations("Calc");
     const [isModalsOpen, setIsModalsOpen] = useState(false);
     const [glycolType, setGlycolType] = useState("");
     const [glycolRatio, setGlycolRatio] = useState("");
 
+    const glycolLabel = (v: string): string => (({
+        "None": t("none"),
+        "Ethylene Glycol": t("ethyleneGlycol"),
+        "Propylene Glycol": t("propyleneGlycol"),
+        "Select Ratio": t("selectRatio"),
+    } as Record<string, string>)[v] ?? v);
+
     return (
         <div className={styles.sectionContent}>
             <div className={styles.input}>
-                <label>Glycol Mixture</label>
+                <label>{t("glycolMixture")}</label>
                 <AdminCombobox
                     value={glycolType || "None"}
                     options={GLYCOL_TYPES}
+                    getLabel={glycolLabel}
                     onChange={(v) => {
                         const val = v === "None" ? "" : v;
                         setGlycolType(val);
@@ -42,23 +52,24 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
                 />
             </div>
             <div className={styles.input}>
-                <label>Mixture Ratio (%)</label>
+                <label>{t("mixtureRatio")}</label>
                 <AdminCombobox
                     value={glycolRatio || "Select Ratio"}
                     options={GLYCOL_RATIOS}
                     disabled={!glycolType}
+                    getLabel={glycolLabel}
                     onChange={(v) => setGlycolRatio(v)}
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="distanceForSound">Distance For Sound Pressure Level Calculation (m)</label>
+                <label htmlFor="distanceForSound">{t("distanceForSound")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="distanceForSound" min="0" />
             </div>
             <div className={`${styles.sectionHeader} ${styles.coolingSectionHeader}`}>
-                <h3>Cooling</h3>
+                <h3>{t("cooling")}</h3>
             </div>
             <div className={styles.input}>
-                <label htmlFor="coolingDryBulbAmbient">Dry Bulb Ambient Temperature (°C)</label>
+                <label htmlFor="coolingDryBulbAmbient">{t("dryBulbAmbient")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingDryBulbAmbient"
@@ -67,7 +78,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="coolingWaterInlet">Water Inlet Temperature (°C)</label>
+                <label htmlFor="coolingWaterInlet">{t("waterInletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="coolingWaterInlet"
@@ -76,10 +87,10 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
                 />
             </div>
             <div className={`${styles.sectionHeader} ${styles.heatingSectionHeader}`}>
-                <h3>Heating</h3>
+                <h3>{t("heating")}</h3>
             </div>
             <div className={styles.input}>
-                <label htmlFor="heatingDryBulbAmbient">Dry Bulb Ambient Temperature (°C)</label>
+                <label htmlFor="heatingDryBulbAmbient">{t("dryBulbAmbient")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingDryBulbAmbient"
@@ -88,11 +99,11 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="wetBulbAmbientTemperature">Wet Bulb Ambient Temperature (°C)</label>
+                <label htmlFor="wetBulbAmbientTemperature">{t("wetBulbAmbient")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="wetBulbAmbientTemperature" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="heatingWaterInlet">Water Inlet Temperature (°C)</label>
+                <label htmlFor="heatingWaterInlet">{t("waterInletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingWaterInlet"
@@ -101,7 +112,7 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
                 />
             </div>
             <div className={styles.input}>
-                <label htmlFor="heatingWaterOutlet">Water Outlet Temperature (°C)</label>
+                <label htmlFor="heatingWaterOutlet">{t("waterOutletTemp")}</label>
                 <input
                     type="number" onWheel={(e) => e.currentTarget.blur()}
                     id="heatingWaterOutlet"
@@ -111,23 +122,23 @@ export default function AirToWaterHeatPumpForm({ coolingDefaults, heatingDefault
             </div>
             <div className={styles.divider}></div>
             <div className={styles.input}>
-                <label htmlFor="calculationMethod">Calculation Method</label>
+                <label htmlFor="calculationMethod">{t("calcMethod")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="calculationMethod" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="deltaT">ΔT (°C)</label>
+                <label htmlFor="deltaT">{t("deltaT")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="deltaT" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="foulingFactor">Fouling Factor (m²K/W)</label>
+                <label htmlFor="foulingFactor">{t("foulingFactor")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="foulingFactor" min="0" />
             </div>
             <div className={styles.input}>
-                <label htmlFor="heightAboveSeaLevel">Height Above Sea Level (m)</label>
+                <label htmlFor="heightAboveSeaLevel">{t("heightAboveSea")}</label>
                 <input type="number" onWheel={(e) => e.currentTarget.blur()} id="heightAboveSeaLevel" min="0" />
             </div>
             <button className={styles.calcBtn} onClick={() => setIsModalsOpen(true)}>
-                Calculate
+                {t("calculate")}
             </button>
 
             <CalculationModals

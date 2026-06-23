@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -14,6 +15,7 @@ type Refrigerant = {
 }
 
 export default function EditRefrigerantPage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Refrigerant");
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
@@ -59,11 +61,11 @@ export default function EditRefrigerantPage() {
 
     const handleEditRefrigerant = async () => {
         if (selectedItemToEdit === "Select Refrigerant") {
-            showToast("Please select a refrigerant to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.refrigerant.low") }), "error");
             return;
         }
         if (!name || !code) {
-            showToast("Please enter name and code.", "error");
+            showToast(t("pleaseEnterNameCode"), "error");
             return;
         }
 
@@ -79,41 +81,41 @@ export default function EditRefrigerantPage() {
             });
 
             if (res.ok) {
-                showToast("Refrigerant updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.refrigerant.cap") }), "success");
                 setSelectedItemToEdit("Select Refrigerant");
                 fetchRefrigerants();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit refrigerant.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.refrigerant.low") }), "error");
                 } catch {
-                    showToast("Failed to edit refrigerant.", "error");
+                    showToast(t("failedEdit", { name: t("names.refrigerant.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const refrigerantOptions = ["Select Refrigerant", ...refrigerantsList.map(r => r.code)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Refrigerant") { showToast("Please select a refrigerant to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select Refrigerant") { showToast(t("selectToDelete", { name: t("names.refrigerant.low") }), "error"); return; }
         const item = refrigerantsList.find(r => r.code === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete refrigerant", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.refrigerant.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/refrigerant/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("Refrigerant deleted.", "success");
+                showToast(t("deleted", { name: t("names.refrigerant.cap") }), "success");
                 setSelectedItemToEdit("Select Refrigerant");
                 fetchRefrigerants();
             } else {
-                showToast("Failed to delete refrigerant.", "error");
+                showToast(t("failedDelete", { name: t("names.refrigerant.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -127,7 +129,7 @@ export default function EditRefrigerantPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Refrigerant
+                        {t("names.refrigerant.cap")}
                     </span>
                 </div>
 
@@ -138,39 +140,40 @@ export default function EditRefrigerantPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Refrigerant</label>
-                                        <Combobox 
+                                        <label>{t("names.refrigerant.cap")}</label>
+                                        <Combobox
                                             options={refrigerantOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
+                                            getLabel={(v) => v === "Select Refrigerant" ? t("selectName", { name: t("names.refrigerant.cap") }) : v}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Name</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter name" 
+                                        <label>{t("fieldName")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterName")}
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Code</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter code" 
+                                        <label>{t("code")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCode")}
                                             value={code}
                                             onChange={(e) => setCode(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditRefrigerant}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditRefrigerant}>{t("save")}</button>
                             </div>
                         </div>
                     </div>

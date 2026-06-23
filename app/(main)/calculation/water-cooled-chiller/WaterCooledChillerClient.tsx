@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import ProductAccordion from "../components/ProductAccordion";
 import WaterCooledChillerForm from "../components/WaterCooledChillerForm";
@@ -27,6 +28,7 @@ export default function WaterCooledChillerClient({
     id: string | null;
     initialData: UnitCalcData | null;
 }) {
+    const t = useTranslations("Calc");
     const [calcData, setCalcData] = useState<UnitCalcData | null>(initialData);
 
     // Fallback: only fetch on the client if the server didn't provide the data.
@@ -41,7 +43,7 @@ export default function WaterCooledChillerClient({
 
     return (
         <ProductAccordion
-            title="Water Cooled Chiller"
+            title={t("waterCooledChiller")}
             unitName={calcData?.name || undefined}
             modelName={calcData?.model || undefined}
             images={calcData?.images}

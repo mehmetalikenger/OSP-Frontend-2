@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import styles from "../calculation.module.css";
 import { Country, State } from "country-state-city";
@@ -34,6 +35,7 @@ interface ProjectItem {
 }
 
 export default function CalculationModals({ isOpen, onClose, initialStep = 'result', calc }: CalculationModalsProps) {
+    const t = useTranslations("Calc");
     const [step, setStep] = useState<'result' | 'projects' | 'create'>(initialStep);
 
     const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -202,7 +204,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
             // Confirm the add and disable the Add button until the selection changes again.
             setAdded(true);
         } catch {
-            setError("Could not add to the selected project(s). Please try again.");
+            setError(t("errAddFailed"));
         } finally {
             setBusy(false);
         }
@@ -213,7 +215,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
     // press Add to commit the result, just like any other project.
     const handleCreate = async () => {
         if (!projectName.trim()) {
-            setError("Please enter a project name.");
+            setError(t("errEnterProjectName"));
             return;
         }
         setBusy(true);
@@ -239,7 +241,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
             await loadProjects();
             setStep("projects");
         } catch {
-            setError("Could not create the project. Please try again.");
+            setError(t("errCreateFailed"));
         } finally {
             setBusy(false);
         }
@@ -263,16 +265,16 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                             <h3>calculation_results.pdf</h3>
                         </div>
                         <div className={styles.resultActions}>
-                            <button className={styles.btnPrimary} onClick={() => setStep('projects')}>Add to project</button>
+                            <button className={styles.btnPrimary} onClick={() => setStep('projects')}>{t("addToProject")}</button>
                         </div>
                     </div>
                 )}
 
                 {step === 'projects' && (
                     <div className={styles.projectsModalContent}>
-                        <h2>Projects</h2>
+                        <h2>{t("projects")}</h2>
                         <div className={styles.projectsList}>
-                            {projects.length === 0 && <p>No projects yet. Create one below.</p>}
+                            {projects.length === 0 && <p>{t("noProjectsCreate")}</p>}
                             {projects.map(project => {
                                 const selected = selectedIds.includes(project.id);
                                 return (
@@ -291,36 +293,37 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                             })}
                         </div>
                         {error && <p className={styles.calcError}>{error}</p>}
-                        {added && !error && <p className={styles.calcSuccess}>Added to project.</p>}
+                        {added && !error && <p className={styles.calcSuccess}>{t("addedToProject")}</p>}
                         <div className={styles.modalFooter}>
                             <button
                                 className={styles.btnPrimary}
                                 onClick={addToSelected}
                                 disabled={busy || added || selectedIds.length === 0}
                             >
-                                {busy ? "Adding…" : "Add"}
+                                {busy ? t("adding") : t("add")}
                             </button>
-                            <button className={styles.btnSecondary} onClick={() => setStep('create')} disabled={busy}>Create Project</button>
+                            <button className={styles.btnSecondary} onClick={() => setStep('create')} disabled={busy}>{t("createProject")}</button>
                         </div>
                     </div>
                 )}
 
                 {step === 'create' && (
                     <div className={styles.createModalContent}>
-                        <h2>Create Project</h2>
+                        <h2>{t("createProject")}</h2>
                         <div className={styles.projectForm}>
                             <div className={styles.formRow}>
-                                <label>Project Name</label>
+                                <label>{t("projectName")}</label>
                                 <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
                             </div>
                             <div className={styles.formRow}>
-                                <label>Address</label>
+                                <label>{t("address")}</label>
                                 <textarea value={address} onChange={(e) => setAddress(e.target.value)} />
                             </div>
                             <div className={styles.formRow}>
-                                <label>Country</label>
+                                <label>{t("country")}</label>
                                 <AdminCombobox
                                     value={countryName || "Select Country"}
+                                    getLabel={(v) => v === "Select Country" ? t("selectCountry") : v}
                                     onChange={(val: string) => {
                                         const c = countries.find(c => c.name === val);
                                         if (c) {
@@ -333,16 +336,17 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                                 />
                             </div>
                             <div className={styles.formRow}>
-                                <label>City</label>
+                                <label>{t("city")}</label>
                                 <AdminCombobox
                                     value={city || "Select City"}
+                                    getLabel={(v) => v === "Select City" ? t("selectCity") : v}
                                     onChange={(val: string) => setCity(val)}
                                     options={cities ? cities.slice().sort((a, b) => a.name.localeCompare(b.name)).map(c => c.name) : []}
                                     disabled={!countryIsoCode}
                                 />
                             </div>
                             <div className={styles.formRow}>
-                                <label>Phone</label>
+                                <label>{t("phone")}</label>
                                 <PhoneInput
                                     country={'us'}
                                     value={phone}
@@ -352,9 +356,9 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                             </div>
                             {error && <p className={styles.calcError}>{error}</p>}
                             <div className={styles.formActions}>
-                                <button className={styles.btnSecondary} onClick={() => setStep('projects')} disabled={busy}>Cancel</button>
+                                <button className={styles.btnSecondary} onClick={() => setStep('projects')} disabled={busy}>{t("cancel")}</button>
                                 <button className={styles.btnPrimary} onClick={handleCreate} disabled={busy}>
-                                    {busy ? "Saving…" : "Save"}
+                                    {busy ? t("saving") : t("save")}
                                 </button>
                             </div>
                         </div>

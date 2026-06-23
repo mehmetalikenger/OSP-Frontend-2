@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useTranslations } from "next-intl";
 
 type Compressor = {
     id: number;
@@ -14,6 +15,7 @@ type Compressor = {
 }
 
 export default function AddCompressorPage() {
+    const t = useTranslations("AdminComp");
     const [brand, setBrand] = useState("Select Brand");
     const [type, setType] = useState("Select Type");
     const [model, setModel] = useState("");
@@ -52,7 +54,7 @@ export default function AddCompressorPage() {
 
     const handleAddCompressor = async () => {
         if (brand === "Select Brand" || type === "Select Type" || !model) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
 
@@ -65,7 +67,7 @@ export default function AddCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.compressor.cap") }), "success");
                 setBrand("Select Brand");
                 setType("Select Type");
                 setModel("");
@@ -73,30 +75,30 @@ export default function AddCompressorPage() {
                 setLra("");
                 fetchCompressors();
             } else if (res.status === 409) {
-                showToast("This compressor already exists.", "error");
+                showToast(t("alreadyExists", { name: t("names.compressor.low") }), "error");
             } else {
                 const data = await res.json().catch(() => null);
-                showToast(data?.message || "Failed to add compressor.", "error");
+                showToast(data?.message || t("failedAdd", { name: t("names.compressor.low") }), "error");
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleAddCompressorSpecs = async () => {
         if (compressor === "Select Compressor" || !capacity || !powerInput) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
         if (qCoeffs.some(v => v === "") || pCoeffs.some(v => v === "")) {
-            showToast("Please fill all coefficient fields.", "error");
+            showToast(t("fillCoefficients"), "error");
             return;
         }
 
         const selectedComp = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === compressor);
         if (!selectedComp) {
-            showToast("Invalid compressor selected.", "error");
+            showToast(t("invalidSelected", { name: t("names.compressor.low") }), "error");
             return;
         }
 
@@ -118,18 +120,18 @@ export default function AddCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor Specs added successfully.", "success");
+                showToast(t("specsAddedSuccess", { name: t("names.compressor.cap") }), "success");
                 setCompressor("Select Compressor");
                 setCapacity("");
                 setPowerInput("");
                 setQCoeffs(Array(10).fill(""));
                 setPCoeffs(Array(10).fill(""));
             } else {
-                showToast("Failed to add compressor specs.", "error");
+                showToast(t("failedAddSpecs", { name: t("names.compressor.low") }), "error");
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -145,7 +147,7 @@ export default function AddCompressorPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Compressor
+                        {t("names.compressor.cap")}
                     </span>
                 </div>
 
@@ -156,89 +158,92 @@ export default function AddCompressorPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>Brand</label>
+                                    <label>{t("brand")}</label>
                                     <Combobox
                                         options={["Select Brand", "Frascold", "Copelant"]}
                                         value={brand}
                                         onChange={setBrand}
+                                        getLabel={(v) => v === "Select Brand" ? t("selectName", { name: t("brand") }) : v}
                                         className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Type</label>
+                                    <label>{t("type")}</label>
                                     <Combobox
                                         options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
                                         value={type}
                                         onChange={setType}
+                                        getLabel={(v) => v === "Select Type" ? t("selectName", { name: t("type") }) : v}
                                         className={`${styles.comboBox} ${type.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Model</label>
+                                    <label>{t("model")}</label>
                                     <input
                                         type="text"
                                         className={styles.inputElement}
-                                        placeholder="Enter model"
+                                        placeholder={t("enterModel")}
                                         value={model}
                                         onChange={(e) => setModel(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>MOC (A)</label>
+                                    <label>{t("mocA")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter MOC"
+                                        placeholder={t("enterMoc")}
                                         value={moc}
                                         onChange={(e) => setMoc(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>LRA (A)</label>
+                                    <label>{t("lraA")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter LRA"
+                                        placeholder={t("enterLra")}
                                         value={lra}
                                         onChange={(e) => setLra(e.target.value)}
                                     />
                                 </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCompressor}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddCompressor}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
 
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>Compressor</label>
+                                    <label>{t("names.compressor.cap")}</label>
                                     <Combobox
                                         options={compressorOptions}
                                         value={compressor}
                                         onChange={setCompressor}
+                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
                                         className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Capacity</label>
+                                    <label>{t("capacity")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter capacity"
+                                        placeholder={t("enterCapacity")}
                                         value={capacity}
                                         onChange={(e) => setCapacity(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Power Input</label>
+                                    <label>{t("powerInput")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter power input"
+                                        placeholder={t("enterPowerInput")}
                                         value={powerInput}
                                         onChange={(e) => setPowerInput(e.target.value)}
                                     />
@@ -248,7 +253,7 @@ export default function AddCompressorPage() {
                             <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
 
                             <fieldset className={styles.coeffGroup}>
-                                <legend>Capacity Coefficients (Q)</legend>
+                                <legend>{t("capacityCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
                                     {qCoeffs.map((val, i) => (
                                         <div className={styles.formField} key={`q${i}`}>
@@ -270,7 +275,7 @@ export default function AddCompressorPage() {
                             </fieldset>
 
                             <fieldset className={styles.coeffGroup}>
-                                <legend>Power Input Coefficients (P)</legend>
+                                <legend>{t("powerCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
                                     {pCoeffs.map((val, i) => (
                                         <div className={styles.formField} key={`p${i}`}>
@@ -292,7 +297,7 @@ export default function AddCompressorPage() {
                             </fieldset>
 
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCompressorSpecs}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddCompressorSpecs}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

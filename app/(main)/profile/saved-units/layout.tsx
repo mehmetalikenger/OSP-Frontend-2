@@ -2,8 +2,17 @@
 
 import { useState, createContext } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import sharedStyles from "../sharedProfile.module.css";
 import Combobox from "./Combobox";
+
+// Maps the internal option keys (kept stable for the page logic) to message keys.
+const OPTION_LABEL_KEYS: Record<string, string> = {
+    "Air to Water": "airToWater",
+    "Water to Water": "waterToWater",
+    "Air Cooled": "airCooled",
+    "Water Cooled": "waterCooled",
+};
 
 export const SavedUnitsContext = createContext<{
     selectedType: string;
@@ -14,16 +23,22 @@ export const SavedUnitsContext = createContext<{
 });
 
 export default function SavedUnitsLayout({ children }: { children: React.ReactNode }) {
+    const t = useTranslations("SavedUnits");
     const pathname = usePathname();
     const [selectedType, setSelectedType] = useState("");
 
-    let title = "Saved Units";
+    // Display-only translation for the combobox; the option values stay in English
+    // because the chillers/heat-pumps pages branch on them (e.g. === "Air Cooled").
+    const optionLabel = (value: string) =>
+        OPTION_LABEL_KEYS[value] ? t(OPTION_LABEL_KEYS[value]) : value;
+
+    let title = t("titleSavedUnits");
     let comboboxOptions = ["Air to Water", "Water to Water"];
     if (pathname.includes("/chillers")) {
-        title = "Chillers";
+        title = t("titleChillers");
         comboboxOptions = ["Air Cooled", "Water Cooled"];
     } else if (pathname.includes("/heat-pumps")) {
-        title = "Heat Pumps";
+        title = t("titleHeatPumps");
         comboboxOptions = ["Air to Water", "Water to Water"];
     }
 
@@ -42,6 +57,7 @@ export default function SavedUnitsLayout({ children }: { children: React.ReactNo
                             value={effectiveSelectedType}
                             onChange={setSelectedType}
                             options={comboboxOptions}
+                            getLabel={optionLabel}
                         />
                     </div>
                     <div className={sharedStyles.headerLine}></div>

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import styles from "../addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
@@ -26,6 +27,18 @@ const compressorLabel = (s: CompressorSpecs) => `${[s.brand, s.model, s.type].fi
 const heatPumpLabel = (h: HeatPump) => `${h.model} (${h.type})`;
 
 export default function AddHeatPumpModPage() {
+    const t = useTranslations("AdminUnit");
+    const display = (v: string): string => (({
+        "Select Heat Pump": t("selectHeatPump"),
+        "Select Compressor": t("selectCompressor"),
+        "Select Evaporator": t("selectEvaporator"),
+        "Select Condenser": t("selectCondenser"),
+        "Select Expansion Valve": t("selectExpansionValve"),
+        "Select Reversing Valve": t("selectReversingValve"),
+        "Cooling": t("cooling"),
+        "Heating": t("heating"),
+        "No modes left": t("noModesLeft"),
+    } as Record<string, string>)[v] ?? v);
     const [activeTab, setActiveTab] = useState("model");
 
     const [heatPumps, setHeatPumps] = useState<HeatPump[]>([]);
@@ -126,17 +139,17 @@ export default function AddHeatPumpModPage() {
 
     const handleSubmit = async () => {
         if (selectedHeatPumpId === null) {
-            showToast("Please select a heat pump.", "error");
+            showToast(t("pleaseSelectHeatPump"), "error");
             setActiveTab("model");
             return;
         }
         if (availableMods.length === 0) {
-            showToast("This heat pump already has both modes.", "error");
+            showToast(t("bothModesExist"), "error");
             return;
         }
         if (compressorSpecsId === null || evaporatorSpecsId === null || condenserSpecsId === null ||
             expansionValveSpecsId === null) {
-            showToast("Please select compressor, evaporator, condenser and expansion valve.", "error");
+            showToast(t("selectComponentsMod"), "error");
             setActiveTab("model");
             return;
         }
@@ -174,13 +187,13 @@ export default function AddHeatPumpModPage() {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                showToast(`${unitMod === "cooling" ? "Cooling" : "Heating"} mode added.`, "success");
+                showToast(t("modeAdded", { mode: unitMod === "cooling" ? t("cooling") : t("heating") }), "success");
                 resetModeFields();
                 setActiveTab("model");
                 await loadHeatPumps(); // refresh so the added mode is no longer offered
                 setSelectedHeatPumpId(null);
             } else {
-                let msg = "Failed to add mode.";
+                let msg = t("failedAddMode");
                 try {
                     const data = await res.json();
                     msg = data.message || data.error || msg;
@@ -189,7 +202,7 @@ export default function AddHeatPumpModPage() {
             }
         } catch (e) {
             console.error(e);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         } finally {
             setSubmitting(false);
         }
@@ -215,9 +228,9 @@ export default function AddHeatPumpModPage() {
             )}
             <div className={styles.sectionContent} ref={topRef} style={{ maxWidth: "1000px", flex: "none" }}>
                 <div className={styles.breadcrumbContainer}>
-                    <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>Mod Details</span>
+                    <span className={`${styles.breadcrumbItem} ${activeTab === 'model' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('model')}>{t("modDetails")}</span>
                     <span className={styles.breadcrumbSeparator}>&gt;</span>
-                    <span className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('calc')}>Calculation Values</span>
+                    <span className={`${styles.breadcrumbItem} ${activeTab === 'calc' ? styles.breadcrumbActive : ''}`} onClick={() => setActiveTab('calc')}>{t("calcValues")}</span>
                 </div>
 
                 <div className={styles.horizontalSeperator}></div>
@@ -226,95 +239,102 @@ export default function AddHeatPumpModPage() {
                     {activeTab === 'model' && (
                         <div className={styles.formGrid}>
                             <div className={styles.formField}>
-                                <label>Heat Pump</label>
+                                <label>{t("heatPump")}</label>
                                 <Combobox
                                     options={heatPumpOptions}
                                     value={selectedHeatPump ? heatPumpLabel(selectedHeatPump) : SELECT.heatPump}
                                     onChange={handleHeatPumpSelect}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${selectedHeatPumpId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>Mod</label>
+                                <label>{t("mod")}</label>
                                 <Combobox
                                     options={availableMods.length ? availableMods : ["No modes left"]}
                                     value={availableMods.length ? (unitMod === "cooling" ? "Cooling" : "Heating") : "No modes left"}
                                     onChange={(val) => setUnitMod(val === "Cooling" ? "cooling" : "heating")}
+                                    getLabel={display}
                                     className={styles.comboBox}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>Capacity (Kw)</label>
+                                <label>{t("capacityKw")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Max Capacity (Kw)</label>
+                                <label>{t("maxCapacityKw")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>EER</label>
+                                <label>{t("eer")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={eer} onChange={(e) => setEer(e.target.value)} disabled={unitMod === 'heating'} />
                             </div>
                             <div className={styles.formField}>
-                                <label>COP</label>
+                                <label>{t("cop")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={cop} onChange={(e) => setCop(e.target.value)} disabled={unitMod === 'cooling'} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Condenser Required Duty (kW)</label>
+                                <label>{t("condenserRequiredDuty")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Quiet Condenser Required Duty (kW)</label>
+                                <label>{t("quietCondenserRequiredDuty")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Compressor</label>
+                                <label>{t("compressor")}</label>
                                 <Combobox
                                     options={[SELECT.compressor, ...compressorList.map(compressorLabel)]}
                                     value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor}
                                     onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>Evaporator</label>
+                                <label>{t("evaporator")}</label>
                                 <Combobox
                                     options={[SELECT.evaporator, ...evaporatorList.map(specLabel)]}
                                     value={evaporatorValue ? specLabel(evaporatorValue) : SELECT.evaporator}
                                     onChange={(label) => setEvaporatorSpecsId(evaporatorList.find((s) => specLabel(s) === label)?.id ?? null)}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${evaporatorSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>Condenser</label>
+                                <label>{t("condenser")}</label>
                                 <Combobox
                                     options={[SELECT.condenser, ...condenserList.map(specLabel)]}
                                     value={condenserValue ? specLabel(condenserValue) : SELECT.condenser}
                                     onChange={(label) => setCondenserSpecsId(condenserList.find((s) => specLabel(s) === label)?.id ?? null)}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${condenserSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>Expansion Valve</label>
+                                <label>{t("expansionValve")}</label>
                                 <Combobox
                                     options={[SELECT.expansionValve, ...expansionValveList.map(specLabel)]}
                                     value={expansionValveValue ? specLabel(expansionValveValue) : SELECT.expansionValve}
                                     onChange={(label) => setExpansionValveSpecsId(expansionValveList.find((s) => specLabel(s) === label)?.id ?? null)}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${expansionValveSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
                             </div>
                             <div className={styles.formField}>
-                                <label>4-way Reversing Valve</label>
+                                <label>{t("reversingValve")}</label>
                                 <Combobox
                                     options={[SELECT.reversingValve, ...reversingValveList.map(specLabel)]}
                                     value={reversingValveValue ? specLabel(reversingValveValue) : SELECT.reversingValve}
                                     onChange={(label) => setReversingValveSpecsId(reversingValveList.find((s) => specLabel(s) === label)?.id ?? null)}
+                                    getLabel={display}
                                     className={`${styles.comboBox} ${reversingValveSpecsId === null ? styles.placeholderText : ''}`}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
@@ -325,23 +345,23 @@ export default function AddHeatPumpModPage() {
                     {activeTab === 'calc' && (
                         <div className={styles.formGrid}>
                             <div className={styles.formField}>
-                                <label>Ambient (°C)</label>
+                                <label>{t("ambient")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={ambient} onChange={(e) => setAmbient(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Evaporator Inlet (°C)</label>
+                                <label>{t("evapInlet")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Evaporator Outlet (°C)</label>
+                                <label>{t("evapOutlet")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Condenser Inlet (°C)</label>
+                                <label>{t("condInlet")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condIn} onChange={(e) => setCondIn(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
                             </div>
                             <div className={styles.formField}>
-                                <label>Condenser Outlet (°C)</label>
+                                <label>{t("condOutlet")}</label>
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={condOut} onChange={(e) => setCondOut(e.target.value)} disabled={unitType === 'air_to_water' && unitMod !== 'heating'} />
                             </div>
                         </div>
@@ -350,16 +370,16 @@ export default function AddHeatPumpModPage() {
                     <div className={styles.stepNavContainer} style={{ marginTop: "25px" }}>
                         <div className={styles.stepNavLeft}>
                             {activeTab !== 'model' && (
-                                <button className={styles.stepBtn} onClick={() => setActiveTab('model')}>Previous</button>
+                                <button className={styles.stepBtn} onClick={() => setActiveTab('model')}>{t("previous")}</button>
                             )}
                             {activeTab !== 'calc' && (
-                                <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab('calc'); scrollToFormTop(); }}>Next</button>
+                                <button className={styles.stepBtn} disabled={activeTab === 'model' && !modelComplete} onClick={() => { setActiveTab('calc'); scrollToFormTop(); }}>{t("next")}</button>
                             )}
                         </div>
                         {activeTab === 'calc' && (
                             <div className={styles.stepNavRight}>
                                 <button className={styles.saveBtn} onClick={handleSubmit} disabled={submitting}>
-                                    {submitting ? "Adding..." : "Add Details"}
+                                    {submitting ? t("adding") : t("addDetails")}
                                 </button>
                             </div>
                         )}

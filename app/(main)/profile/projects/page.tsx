@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import sharedStyles from "../sharedProfile.module.css";
 import styles from "./projects.module.css";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -42,6 +43,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+    const t = useTranslations("Projects");
     const [projects, setProjects] = useState<Project[]>([]);
     const [openId, setOpenId] = useState<number | null>(null);
 
@@ -150,10 +152,10 @@ export default function ProjectsPage() {
             const updated: Project = await res.json();
             setProjects(prev => prev.map(p => (p.id === updated.id ? updated : p)));
             setIsDirty(false);
-            showToast("Changes are saved");
+            showToast(t("changesSaved"));
             return true;
         } catch {
-            showToast("Could not save changes", true);
+            showToast(t("couldNotSave"), true);
             return false;
         } finally {
             setSaving(false);
@@ -186,7 +188,7 @@ export default function ProjectsPage() {
             const updated: Project = await res.json();
             setProjects(prev => prev.map(p => (p.id === updated.id ? updated : p)));
         } catch {
-            showToast("Could not remove the unit", true);
+            showToast(t("couldNotRemoveUnit"), true);
         }
     };
 
@@ -232,9 +234,9 @@ export default function ProjectsPage() {
             setProjects(prev => prev.filter(pr => pr.id !== p.id));
             setIsDeleteModalOpen(false);
             setOpenId(null);
-            showToast("Project deleted");
+            showToast(t("projectDeleted"));
         } catch {
-            showToast("Could not delete the project", true);
+            showToast(t("couldNotDeleteProject"), true);
         } finally {
             setDeleting(false);
         }
@@ -268,7 +270,7 @@ export default function ProjectsPage() {
 
     const handleCreate = async () => {
         if (!cName.trim()) {
-            setCreateError("Please enter a project name.");
+            setCreateError(t("enterProjectName"));
             return;
         }
         setCreateBusy(true);
@@ -283,9 +285,9 @@ export default function ProjectsPage() {
             if (!res.ok) throw new Error();
             setIsCreateModalOpen(false);
             await loadProjects();
-            showToast("Project created");
+            showToast(t("projectCreated"));
         } catch {
-            setCreateError("Could not create the project. Please try again.");
+            setCreateError(t("couldNotCreate"));
         } finally {
             setCreateBusy(false);
         }
@@ -294,11 +296,11 @@ export default function ProjectsPage() {
     const renderDates = (p: Project) => (
         <div className={styles.dates}>
             <div className={styles.date}>
-                <span className={styles.dateTitle}>Creation Date:</span>
+                <span className={styles.dateTitle}>{t("creationDate")}</span>
                 <span className={styles.dateValue}>{p.createdAt || "-"}</span>
             </div>
             <div className={styles.date}>
-                <span className={styles.dateTitle}>Update Date:</span>
+                <span className={styles.dateTitle}>{t("updateDate")}</span>
                 <span className={styles.dateValue}>{p.updatedAt || "-"}</span>
             </div>
         </div>
@@ -313,7 +315,7 @@ export default function ProjectsPage() {
         );
         const nameBlock = (
             <div className={styles.unitName}>
-                <p>{detail.unitName || detail.unitModel || "Unit"}</p>
+                <p>{detail.unitName || detail.unitModel || t("unit")}</p>
                 {detail.unitName && detail.unitModel && (
                     <span className={styles.modelName}>{detail.unitModel}</span>
                 )}
@@ -329,7 +331,7 @@ export default function ProjectsPage() {
                     <img src="/icons/projectDocument.png" alt="Project document icon" className={styles.lightIcon} />
                     <img src="/icons/projectDocument-darkMode.png" alt="Project document icon" className={styles.darkIcon} />
                 </div>
-                <p>Project_Document</p>
+                <p>{t("projectDocument")}</p>
             </div>
         );
         const imageBlock = (
@@ -375,20 +377,20 @@ export default function ProjectsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className={sharedStyles.headerContent}>
                         <div className={sharedStyles.headerBullet}></div>
-                        <h1>Projects</h1>
+                        <h1>{t("title")}</h1>
                     </div>
                     <button
                         className={styles.createProjectBtn}
                         onClick={openCreateModal}
                     >
-                        Create Project
+                        {t("createProject")}
                     </button>
                 </div>
                 <div className={sharedStyles.headerLine}></div>
             </div>
             <div className={styles.projectsContainer}>
                 {projects.length === 0 && (
-                    <p style={{ marginTop: "30px", color: "#888" }}>No projects yet. Create one to get started.</p>
+                    <p style={{ marginTop: "30px", color: "#888" }}>{t("noProjects")}</p>
                 )}
                 {projects.map(project =>
                     openId === project.id && openProjectObj ? (
@@ -425,14 +427,14 @@ export default function ProjectsPage() {
                                         {renderDates(openProjectObj)}
                                         <div className={styles.settingsWrap}>
                                             <button className={styles.settingsBtn} onClick={() => setSettingsMenuOpen(o => !o)}>
-                                                Project Settings
+                                                {t("projectSettings")}
                                             </button>
                                             {settingsMenuOpen && (
                                                 <>
                                                     <div className={styles.menuBackdrop} onClick={() => setSettingsMenuOpen(false)} />
                                                     <div className={styles.settingsMenu}>
-                                                        <button onClick={openEditModal}>Address &amp; Phone</button>
-                                                        <button className={styles.deleteOption} onClick={openDeleteModal}>Delete Project</button>
+                                                        <button onClick={openEditModal}>{t("addressPhone")}</button>
+                                                        <button className={styles.deleteOption} onClick={openDeleteModal}>{t("deleteProject")}</button>
                                                     </div>
                                                 </>
                                             )}
@@ -443,7 +445,7 @@ export default function ProjectsPage() {
                                 <div className={styles.projectBody}>
                                     <div className={styles.unitContainer}>
                                         {openProjectObj.details.length === 0 ? (
-                                            <p style={{ color: "#888" }}>No units added to this project yet.</p>
+                                            <p style={{ color: "#888" }}>{t("noUnits")}</p>
                                         ) : (
                                             <>
                                                 <div className={styles.unitsMobile}>
@@ -482,20 +484,20 @@ export default function ProjectsPage() {
                             <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
                         </div>
                         <div className={styles.createModalContent}>
-                            <h2>Create Project</h2>
+                            <h2>{t("createProject")}</h2>
                             <div className={styles.projectForm}>
                                 <div className={styles.formRow}>
-                                    <label>Project Name</label>
+                                    <label>{t("projectName")}</label>
                                     <input type="text" value={cName} onChange={(e) => setCName(e.target.value)} />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>Address</label>
+                                    <label>{t("address")}</label>
                                     <textarea value={cAddress} onChange={(e) => setCAddress(e.target.value)} />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>Country</label>
+                                    <label>{t("country")}</label>
                                     <AdminCombobox
-                                        value={cCountryName || "Select Country"}
+                                        value={cCountryName || t("selectCountry")}
                                         onChange={(val: string) => {
                                             const c = countries.find(c => c.name === val);
                                             if (c) {
@@ -508,16 +510,16 @@ export default function ProjectsPage() {
                                     />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>City</label>
+                                    <label>{t("city")}</label>
                                     <AdminCombobox
-                                        value={cCity || "Select City"}
+                                        value={cCity || t("selectCity")}
                                         onChange={(val: string) => setCCity(val)}
                                         options={cCities ? cCities.slice().sort((a, b) => a.name.localeCompare(b.name)).map(c => c.name) : []}
                                         disabled={!cCountryIso}
                                     />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>Phone</label>
+                                    <label>{t("phone")}</label>
                                     <PhoneInput
                                         country={'us'}
                                         value={cPhone}
@@ -527,9 +529,9 @@ export default function ProjectsPage() {
                                 </div>
                                 {createError && <p style={{ color: "#d7292e", fontSize: "0.85rem" }}>{createError}</p>}
                                 <div className={styles.formActions}>
-                                    <button className={styles.btnSecondary} onClick={() => setIsCreateModalOpen(false)} disabled={createBusy}>Cancel</button>
+                                    <button className={styles.btnSecondary} onClick={() => setIsCreateModalOpen(false)} disabled={createBusy}>{t("cancel")}</button>
                                     <button className={styles.btnPrimary} onClick={handleCreate} disabled={createBusy}>
-                                        {createBusy ? "Saving…" : "Save"}
+                                        {createBusy ? t("saving") : t("save")}
                                     </button>
                                 </div>
                             </div>
@@ -546,16 +548,16 @@ export default function ProjectsPage() {
                             <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
                         </div>
                         <div className={styles.createModalContent}>
-                            <h2>Address &amp; Phone</h2>
+                            <h2>{t("addressPhone")}</h2>
                             <div className={styles.projectForm}>
                                 <div className={styles.formRow}>
-                                    <label>Address</label>
+                                    <label>{t("address")}</label>
                                     <textarea value={address} onChange={(e) => handleContactChange(setAddress, e.target.value)} />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>Country</label>
+                                    <label>{t("country")}</label>
                                     <AdminCombobox
-                                        value={country || "Select Country"}
+                                        value={country || t("selectCountry")}
                                         onChange={(val: string) => {
                                             const c = countries.find(c => c.name === val);
                                             if (c) {
@@ -569,16 +571,16 @@ export default function ProjectsPage() {
                                     />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>City</label>
+                                    <label>{t("city")}</label>
                                     <AdminCombobox
-                                        value={city || "Select City"}
+                                        value={city || t("selectCity")}
                                         onChange={(val: string) => { setCity(val); setIsDirty(true); }}
                                         options={editCities ? editCities.slice().sort((a, b) => a.name.localeCompare(b.name)).map(c => c.name) : []}
                                         disabled={!countryIso}
                                     />
                                 </div>
                                 <div className={styles.formRow}>
-                                    <label>Phone</label>
+                                    <label>{t("phone")}</label>
                                     <PhoneInput
                                         country={'us'}
                                         value={phone}
@@ -587,9 +589,9 @@ export default function ProjectsPage() {
                                     />
                                 </div>
                                 <div className={styles.formActions}>
-                                    <button className={styles.btnSecondary} onClick={() => setIsEditModalOpen(false)} disabled={saving}>Cancel</button>
+                                    <button className={styles.btnSecondary} onClick={() => setIsEditModalOpen(false)} disabled={saving}>{t("cancel")}</button>
                                     <button className={styles.btnPrimary} onClick={saveEdit} disabled={saving || !isDirty}>
-                                        {saving ? "Saving…" : "Save"}
+                                        {saving ? t("saving") : t("save")}
                                     </button>
                                 </div>
                             </div>
@@ -606,24 +608,24 @@ export default function ProjectsPage() {
                             <img src="/icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
                         </div>
                         <div className={styles.createModalContent}>
-                            <h2>Delete Project</h2>
+                            <h2>{t("deleteProject")}</h2>
                             <div className={styles.deleteWarning}>
-                                <p>Warning: This action cannot be undone. Type the project name <strong>{openProjectObj.name}</strong> to confirm.</p>
+                                <p>{t.rich("deleteWarning", { name: openProjectObj.name, strong: (chunks) => <strong>{chunks}</strong> })}</p>
                                 <input
                                     type="text"
-                                    placeholder="Project name"
+                                    placeholder={t("deletePlaceholder")}
                                     value={deleteConfirmText}
                                     onChange={(e) => setDeleteConfirmText(e.target.value)}
                                 />
                             </div>
                             <div className={styles.formActions}>
-                                <button className={styles.btnSecondary} onClick={() => setIsDeleteModalOpen(false)} disabled={deleting}>Cancel</button>
+                                <button className={styles.btnSecondary} onClick={() => setIsDeleteModalOpen(false)} disabled={deleting}>{t("cancel")}</button>
                                 <button
                                     className={styles.deleteConfirmBtn}
                                     onClick={deleteProject}
                                     disabled={deleting || deleteConfirmText.trim() !== openProjectObj.name}
                                 >
-                                    {deleting ? "Deleting…" : "Delete"}
+                                    {deleting ? t("deleting") : t("delete")}
                                 </button>
                             </div>
                         </div>

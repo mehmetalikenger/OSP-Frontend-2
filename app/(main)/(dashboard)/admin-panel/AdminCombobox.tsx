@@ -10,9 +10,13 @@ interface ComboboxProps {
     className?: string;
     containerClassName?: string;
     disabled?: boolean;
+    // Optional display formatter: keeps option values as stable keys (e.g. the
+    // "All" filter sentinel) while showing a translated label.
+    getLabel?: (value: string) => string;
 }
 
-export default function AdminCombobox({ value, onChange, options, className, containerClassName, disabled }: ComboboxProps) {
+export default function AdminCombobox({ value, onChange, options, className, containerClassName, disabled, getLabel }: ComboboxProps) {
+    const label = (v: string) => (getLabel ? getLabel(v) : v);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
@@ -64,7 +68,7 @@ export default function AdminCombobox({ value, onChange, options, className, con
             <div className={styles.inputWrapper} onClick={() => !disabled && setIsOpen(!isOpen)}>
                 <input
                     type="text"
-                    value={value}
+                    value={label(value)}
                     readOnly
                     disabled={disabled}
                     className={`${styles.comboboxInput} ${className || ""}`}
@@ -91,7 +95,7 @@ export default function AdminCombobox({ value, onChange, options, className, con
                                 option === value ? styles.dropdownItemActive : ""
                             }`}
                         >
-                            {option}
+                            {label(option)}
                         </li>
                     ))}
                 </ul>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import styles from "./adminPanel.module.css"
 import toastStyles from "./toast.module.css"
 import AdminCombobox from "./AdminCombobox";
@@ -15,6 +16,7 @@ type UserProfile = {
 };
 
 export default function AdminPanelPage() {
+  const t = useTranslations("AdminDashboard");
   const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [isAddingUser, setIsAddingUser] = useState(false);
   
@@ -72,7 +74,7 @@ export default function AdminPanelPage() {
         body: JSON.stringify({ email: adminEmail })
       });
       if (res.ok) {
-        showToast("Admin added successfully.", "success");
+        showToast(t("adminAdded"), "success");
         setAdminEmail("");
         setIsAddingAdmin(false);
         fetchAdmins();
@@ -85,7 +87,7 @@ export default function AdminPanelPage() {
             } else if (errorData.error) {
                 showToast(errorData.error, "error");
             } else {
-                showToast("Failed to add admin.", "error");
+                showToast(t("failedAddAdmin"), "error");
             }
         } catch {
             showToast("Failed to add admin.", "error");
@@ -93,7 +95,7 @@ export default function AdminPanelPage() {
       }
     } catch (error) {
       console.error(error);
-      showToast("Network error.", "error");
+      showToast(t("networkError"), "error");
     }
   };
 
@@ -107,7 +109,7 @@ export default function AdminPanelPage() {
         body: JSON.stringify({ email: userEmail, category: "A" })
       });
       if (res.ok) {
-        showToast("User added successfully.", "success");
+        showToast(t("userAdded"), "success");
         setUserEmail("");
         setIsAddingUser(false);
         fetchUsers();
@@ -120,7 +122,7 @@ export default function AdminPanelPage() {
             } else if (errorData.error) {
                 showToast(errorData.error, "error");
             } else {
-                showToast("Failed to add user.", "error");
+                showToast(t("failedAddUser"), "error");
             }
         } catch {
             showToast("Failed to add user.", "error");
@@ -128,7 +130,7 @@ export default function AdminPanelPage() {
       }
     } catch (error) {
       console.error(error);
-      showToast("Network error.", "error");
+      showToast(t("networkError"), "error");
     }
   };
 
@@ -146,15 +148,15 @@ export default function AdminPanelPage() {
         credentials: 'include'
       });
       if (res.ok) {
-        showToast(`${userToDelete.type === 'admin' ? 'Admin' : 'User'} removed.`);
+        showToast(userToDelete.type === 'admin' ? t("adminRemoved") : t("userRemoved"));
         if (userToDelete.type === 'admin') fetchAdmins();
         else fetchUsers();
       } else {
-        showToast("Failed to remove.", "error");
+        showToast(t("failedRemove"), "error");
       }
     } catch(e) {
       console.error(e);
-      showToast("Network error.", "error");
+      showToast(t("networkError"), "error");
     } finally {
       setDeleteModalOpen(false);
       setUserToDelete(null);
@@ -170,7 +172,7 @@ export default function AdminPanelPage() {
         body: JSON.stringify({ userId: userId.toString(), category: newCategory })
       });
       if (res.ok) {
-        showToast("Category updated.");
+        showToast(t("categoryUpdated"));
         fetchUsers(); // Refresh to ensure state consistency
       }
     } catch(e) {
@@ -199,13 +201,13 @@ export default function AdminPanelPage() {
                 <img className={styles.lightIcon} src="../../icons/admin.png" alt="Admin icon" />
                 <img className={styles.darkIcon} src="../../icons/admin-darkMode.png" alt="Admin icon" />
               </div>
-              <h2>Admins</h2>
+              <h2>{t("admins")}</h2>
             </div>
             {isAddingAdmin ? (
               <div className={styles.addInputContainer}>
-                <input 
-                  type="email" 
-                  placeholder="Enter admin email..." 
+                <input
+                  type="email"
+                  placeholder={t("enterAdminEmail")}
                   className={styles.addInput}
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
@@ -221,7 +223,7 @@ export default function AdminPanelPage() {
               </div>
             ) : (
               <button className={styles.addBtn} onClick={() => setIsAddingAdmin(true)}>
-                Add New Admin
+                {t("addNewAdmin")}
               </button>
             )}
           </div>
@@ -229,10 +231,10 @@ export default function AdminPanelPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Email</th>
-                  <th>Create Date</th>
-                  <th>Action</th>
+                  <th>{t("colNo")}</th>
+                  <th>{t("colEmail")}</th>
+                  <th>{t("colCreateDate")}</th>
+                  <th>{t("colAction")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -250,7 +252,7 @@ export default function AdminPanelPage() {
                 ))}
                 {admins.length === 0 && (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: "center" }}>No admins found.</td>
+                    <td colSpan={4} style={{ textAlign: "center" }}>{t("noAdmins")}</td>
                   </tr>
                 )}
               </tbody>
@@ -267,13 +269,13 @@ export default function AdminPanelPage() {
                 <img className={styles.lightIcon} src="../../icons/user.png" alt="User icon" />
                 <img className={styles.darkIcon} src="../../icons/user-darkMode.png" alt="User icon" />
               </div>
-              <h2>Users</h2>
+              <h2>{t("users")}</h2>
             </div>
             {isAddingUser ? (
               <div className={styles.addInputContainer}>
-                <input 
-                  type="email" 
-                  placeholder="Enter user email..." 
+                <input
+                  type="email"
+                  placeholder={t("enterUserEmail")}
                   className={styles.addInput}
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
@@ -289,7 +291,7 @@ export default function AdminPanelPage() {
               </div>
             ) : (
               <button className={styles.addBtn} onClick={() => setIsAddingUser(true)}>
-                Add New User
+                {t("addNewUser")}
               </button>
             )}
           </div>
@@ -297,11 +299,11 @@ export default function AdminPanelPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Email</th>
-                  <th>Create Date</th>
-                  <th>Category</th>
-                  <th>Action</th>
+                  <th>{t("colNo")}</th>
+                  <th>{t("colEmail")}</th>
+                  <th>{t("colCreateDate")}</th>
+                  <th>{t("colCategory")}</th>
+                  <th>{t("colAction")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -327,7 +329,7 @@ export default function AdminPanelPage() {
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center" }}>No users found.</td>
+                    <td colSpan={5} style={{ textAlign: "center" }}>{t("noUsers")}</td>
                   </tr>
                 )}
               </tbody>
@@ -339,28 +341,28 @@ export default function AdminPanelPage() {
       {deleteModalOpen && userToDelete && (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
-                <h3>Confirm Deletion</h3>
-                <p>Are you sure you want to delete this {userToDelete.type}?</p>
-                <p>Please type <strong>{userToDelete.email}</strong> to confirm.</p>
-                <input 
-                    type="text" 
-                    value={deleteConfirmationText} 
-                    onChange={(e) => setDeleteConfirmationText(e.target.value)} 
-                    placeholder="Enter email to confirm..."
+                <h3>{t("confirmDeletionTitle")}</h3>
+                <p>{t("confirmDeleteBody", { type: userToDelete.type === 'admin' ? t("typeAdmin") : t("typeUser") })}</p>
+                <p>{t.rich("confirmDeleteEmail", { email: userToDelete.email, strong: (chunks) => <strong>{chunks}</strong> })}</p>
+                <input
+                    type="text"
+                    value={deleteConfirmationText}
+                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                    placeholder={t("enterEmailToConfirm")}
                 />
                 <div className={styles.modalButtons}>
                     <button 
                         className={styles.cancelModalBtn} 
                         onClick={() => setDeleteModalOpen(false)}
                     >
-                        Cancel
+                        {t("cancel")}
                     </button>
-                    <button 
-                        className={styles.confirmModalBtn} 
-                        disabled={deleteConfirmationText !== userToDelete.email} 
+                    <button
+                        className={styles.confirmModalBtn}
+                        disabled={deleteConfirmationText !== userToDelete.email}
                         onClick={confirmDeleteUser}
                     >
-                        Delete
+                        {t("delete")}
                     </button>
                 </div>
             </div>

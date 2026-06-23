@@ -1,9 +1,11 @@
 "use client";
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import styles from '../login/login.module.css';
 
 function ActivateContent() {
+  const t = useTranslations('Activate');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
@@ -17,24 +19,24 @@ function ActivateContent() {
     const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
-      setMessage('Invalid activation link. No token provided.');
+      setMessage(t('errorNoToken'));
       return;
     }
 
     if (password !== confirmPassword) {
       setStatus('error');
-      setMessage('Passwords do not match.');
+      setMessage(t('errorPasswordsMismatch'));
       return;
     }
 
     if (password.length < 8) {
       setStatus('error');
-      setMessage('Password must be at least 8 characters long.');
+      setMessage(t('errorPasswordTooShort'));
       return;
     }
 
     setStatus('loading');
-    setMessage('Activating your account...');
+    setMessage(t('activating'));
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/account/activate`, {
@@ -48,7 +50,7 @@ function ActivateContent() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('Your account has been successfully activated! You can now log in with your new password.');
+        setMessage(t('successMessage'));
       } else {
         const errorText = await res.text();
         let errorMessage = errorText;
@@ -63,11 +65,11 @@ function ActivateContent() {
           // It's plain text
         }
         setStatus('error');
-        setMessage(errorMessage || 'Failed to activate account. The link may have expired or is invalid.');
+        setMessage(errorMessage || t('errorActivateFailed'));
       }
     } catch {
       setStatus('error');
-      setMessage('Network error. Please try again later.');
+      setMessage(t('errorNetwork'));
     }
   };
 
@@ -83,12 +85,12 @@ function ActivateContent() {
           <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
         </div>
         <div className={styles.loginContainer}>
-          <h2>Account Activation</h2>
-          
+          <h2>{t('title')}</h2>
+
           {status !== 'success' ? (
             <form onSubmit={(e) => { e.preventDefault(); handleActivate(); }}>
               <p className={styles.description}>
-                Please set up your password to activate your account.
+                {t('description')}
               </p>
               {status === 'error' && <p style={{ color: 'red', fontSize: '14px', marginBottom: '10px', textAlign: 'center' }}>{message}</p>}
 
@@ -98,7 +100,7 @@ function ActivateContent() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="New Password"
+                  placeholder={t('newPasswordPlaceholder')}
                   required
                   minLength={8}
                 />
@@ -117,7 +119,7 @@ function ActivateContent() {
                   id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm New Password"
+                  placeholder={t('confirmPasswordPlaceholder')}
                   required
                   minLength={8}
                 />
@@ -137,7 +139,7 @@ function ActivateContent() {
                 type="submit"
                 disabled={status === 'loading'}
               >
-                {status === 'loading' ? 'Activating...' : 'Activate Account'}
+                {status === 'loading' ? t('submitting') : t('submit')}
               </button>
             </form>
           ) : (
@@ -145,11 +147,11 @@ function ActivateContent() {
               <p style={{ marginTop: '20px', marginBottom: '20px', textAlign: 'center', color: 'green' }}>
                 {message}
               </p>
-              <button 
-                className={styles.submitButton} 
+              <button
+                className={styles.submitButton}
                 onClick={() => router.push('/login')}
               >
-                Go to Login
+                {t('goToLogin')}
               </button>
             </>
           )}
@@ -162,9 +164,14 @@ function ActivateContent() {
   );
 }
 
+function ActivateFallback() {
+  const t = useTranslations('Activate');
+  return <div>{t('loading')}</div>;
+}
+
 export default function ActivatePage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<ActivateFallback />}>
       <ActivateContent />
     </Suspense>
   );

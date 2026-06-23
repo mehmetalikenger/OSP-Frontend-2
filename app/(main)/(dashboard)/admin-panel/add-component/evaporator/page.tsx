@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useTranslations } from "next-intl";
 
 type Evaporator = {
     id: number;
@@ -19,6 +20,7 @@ const EVAPORATOR_TYPES: Record<string, string> = {
 };
 
 export default function AddEvaporatorPage() {
+    const t = useTranslations("AdminComp");
     const [model, setModel] = useState("");
     const [type, setType] = useState("Plate");
 
@@ -52,7 +54,7 @@ export default function AddEvaporatorPage() {
 
     const handleAddEvaporator = async () => {
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -65,36 +67,36 @@ export default function AddEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.evaporator.cap") }), "success");
                 setModel("");
                 fetchEvaporators(); // Refresh the list
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add evaporator.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.evaporator.low") }), "error");
                 } catch {
-                    showToast("Failed to add evaporator.", "error");
+                    showToast(t("failedAdd", { name: t("names.evaporator.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleAddEvaporatorSpecs = async () => {
         if (evaporator === "Select Evaporator") {
-            showToast("Please select an evaporator.", "error");
+            showToast(t("pleaseSelect", { name: t("names.evaporator.low") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please enter capacity.", "error");
+            showToast(t("pleaseEnterCapacity"), "error");
             return;
         }
 
         const selectedEvap = evaporatorsList.find(e => e.model === evaporator);
         if (!selectedEvap) {
-            showToast("Invalid evaporator selected.", "error");
+            showToast(t("invalidSelected", { name: t("names.evaporator.low") }), "error");
             return;
         }
 
@@ -107,20 +109,20 @@ export default function AddEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator Specs added successfully.", "success");
+                showToast(t("specsAddedSuccess", { name: t("names.evaporator.cap") }), "success");
                 setEvaporator("Select Evaporator");
                 setCapacity("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add evaporator specs.", "error");
+                    showToast(data.message || t("failedAddSpecs", { name: t("names.evaporator.low") }), "error");
                 } catch {
-                    showToast("Failed to add evaporator specs.", "error");
+                    showToast(t("failedAddSpecs", { name: t("names.evaporator.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -136,7 +138,7 @@ export default function AddEvaporatorPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Evaporator
+                        {t("names.evaporator.cap")}
                     </span>
                 </div>
 
@@ -147,17 +149,17 @@ export default function AddEvaporatorPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
+                                        <label>{t("model")}</label>
                                         <input
                                             type="text"
                                             className={styles.inputElement}
-                                            placeholder="Enter model"
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Type</label>
+                                        <label>{t("type")}</label>
                                         <Combobox
                                             options={Object.keys(EVAPORATOR_TYPES)}
                                             value={type}
@@ -168,34 +170,35 @@ export default function AddEvaporatorPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddEvaporator}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddEvaporator}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Evaporator</label>
-                                        <Combobox 
+                                        <label>{t("names.evaporator.cap")}</label>
+                                        <Combobox
                                             options={evaporatorOptions}
                                             value={evaporator}
                                             onChange={setEvaporator}
+                                            getLabel={(v) => v === "Select Evaporator" ? t("selectName", { name: t("names.evaporator.cap") }) : v}
                                             className={`${styles.comboBox} ${evaporator.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddEvaporatorSpecs}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddEvaporatorSpecs}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Oxanium, Open_Sans } from "next/font/google";
 import { cookies } from "next/headers";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 const oxanium = Oxanium({
@@ -26,10 +28,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const isDark = (await cookies()).get("theme")?.value === "dark";
+  const locale = await getLocale();
 
   return (
     <html
-      lang="en"
+      lang={locale}
       className="h-full antialiased"
       suppressHydrationWarning
     >
@@ -38,7 +41,7 @@ export default async function RootLayout({
         style={isDark ? { backgroundColor: "#1b1b1b" } : undefined}
         suppressHydrationWarning
       >
-        {children}
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );

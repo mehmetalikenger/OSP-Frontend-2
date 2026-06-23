@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -20,4 +21,7 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+// Wires up next-intl (reads ./i18n/request.ts to resolve locale + messages).
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(nextConfig);

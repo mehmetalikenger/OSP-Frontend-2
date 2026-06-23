@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import styles from "./analysis.module.css";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -19,11 +20,27 @@ const mockUnits = [
 ];
 
 const pieData = [
-    { name: 'Chillers', value: 3165, color: 'var(--chiller-color)' },
-    { name: 'Heat Pumps', value: 2600, color: 'var(--heatpump-color)' },
+    { key: 'chillers', value: 3165, color: 'var(--chiller-color)' },
+    { key: 'heatpumps', value: 2600, color: 'var(--heatpump-color)' },
 ];
 
 export default function AnalysisPage() {
+    const t = useTranslations("AdminAnalysis");
+    // Category/type values stay in English (the filters compare against them);
+    // only the displayed label is translated.
+    const VALUE_LABELS: Record<string, string> = {
+        "Chiller": "valChiller",
+        "Heat Pump": "valHeatPump",
+        "Air to Water": "valAirToWater",
+        "Water to Water": "valWaterToWater",
+    };
+    const valueLabel = (v: string) => (VALUE_LABELS[v] ? t(VALUE_LABELS[v]) : v);
+    // "All" stays a stable filter sentinel; only its display is translated.
+    const filterLabel = (v: string) => (v === "All" ? t("all") : valueLabel(v));
+    const pieChartData = pieData.map(d => ({
+        ...d,
+        name: t(d.key === 'chillers' ? 'legendChillers' : 'legendHeatPumps'),
+    }));
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [typeFilter, setTypeFilter] = useState("All");
     const [selectedUnit, setSelectedUnit] = useState<any>(null);
@@ -61,12 +78,12 @@ export default function AnalysisPage() {
             <div className={styles.contentGrid}>
                 {/* Pie Chart Section */}
                 <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Unit Distribution Ratio (Views)</h2>
+                    <h2 className={styles.cardTitle}>{t("distributionTitle")}</h2>
                     <div className={styles.chartContainer}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                             <PieChart>
                                 <Pie
-                                    data={pieData}
+                                    data={pieChartData}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={100}
@@ -75,7 +92,7 @@ export default function AnalysisPage() {
                                     labelLine={false}
                                     stroke="var(--chart-border)"
                                 >
-                                    {pieData.map((entry, index) => (
+                                    {pieChartData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
@@ -95,20 +112,22 @@ export default function AnalysisPage() {
 
                 {/* Table Section */}
                 <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Most Viewed Units</h2>
-                    
+                    <h2 className={styles.cardTitle}>{t("mostViewedTitle")}</h2>
+
                     <div className={styles.filters}>
                         <AdminCombobox
                             value={categoryFilter}
                             onChange={(val) => setCategoryFilter(val)}
                             options={categories}
                             containerClassName={styles.filterCombobox}
+                            getLabel={filterLabel}
                         />
                         <AdminCombobox
                             value={typeFilter}
                             onChange={(val) => setTypeFilter(val)}
                             options={types}
                             containerClassName={styles.filterCombobox}
+                            getLabel={filterLabel}
                         />
                     </div>
 
@@ -116,15 +135,15 @@ export default function AnalysisPage() {
                         <table className={styles.dataTable}>
                             <thead>
                                 <tr>
-                                    <th>Model Name</th>
-                                    <th>Category</th>
-                                    <th>Type</th>
-                                    <th 
-                                        onClick={handleSortClick} 
+                                    <th>{t("colModelName")}</th>
+                                    <th>{t("colCategory")}</th>
+                                    <th>{t("colType")}</th>
+                                    <th
+                                        onClick={handleSortClick}
                                         style={{ cursor: 'pointer', userSelect: 'none' }}
-                                        title="Click to sort by views"
+                                        title={t("sortByViews")}
                                     >
-                                        Views {sortOrder === "desc" ? "↓" : "↑"}
+                                        {t("colViews")} {sortOrder === "desc" ? "↓" : "↑"}
                                     </th>
                                 </tr>
                             </thead>
@@ -138,15 +157,15 @@ export default function AnalysisPage() {
                                             >
                                                 {unit.model}
                                             </td>
-                                            <td>{unit.category}</td>
-                                            <td>{unit.type}</td>
+                                            <td>{valueLabel(unit.category)}</td>
+                                            <td>{valueLabel(unit.type)}</td>
                                             <td>{unit.views.toLocaleString()}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
                                         <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>
-                                            No units found for the selected filters.
+                                            {t("noUnitsFiltered")}
                                         </td>
                                     </tr>
                                 )}
@@ -175,10 +194,7 @@ export default function AnalysisPage() {
                                 <img src="/images/products/745729.png" alt="Product thumbnail" />
                             </div>
                             <div className={styles.unitDesc}>
-                                <p>
-                                    This high-efficiency {selectedUnit.category.toLowerCase()} is engineered for robust performance 
-                                    in diverse industrial environments. Offering superior thermal management and reduced operational costs.
-                                </p>
+                                <p>{t("description", { category: selectedUnit.category.toLowerCase() })}</p>
                             </div>
                             <div className={styles.btnIcons}>
                                 <div className={styles.icons}>
@@ -189,23 +205,23 @@ export default function AnalysisPage() {
                                 {/* Note: Calculate and Bookmark buttons are hidden as requested */}
                             </div>
                             <div className={styles.unitSpecs}>
-                                <h3>Technical Specifications</h3>
+                                <h3>{t("technicalSpecs")}</h3>
                                 <ul>
                                     <li>
-                                        <span className={styles.specTitle}>Category:</span>
-                                        <span className={styles.specValue}>{selectedUnit.category}</span>
+                                        <span className={styles.specTitle}>{t("specCategory")}</span>
+                                        <span className={styles.specValue}>{valueLabel(selectedUnit.category)}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Type:</span>
-                                        <span className={styles.specValue}>{selectedUnit.type}</span>
+                                        <span className={styles.specTitle}>{t("specType")}</span>
+                                        <span className={styles.specValue}>{valueLabel(selectedUnit.type)}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Total Views:</span>
+                                        <span className={styles.specTitle}>{t("specTotalViews")}</span>
                                         <span className={styles.specValue}>{selectedUnit.views.toLocaleString()}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Benefits:</span>
-                                        <span className={styles.specValue}>High efficiency, reliable, easy maintenance</span>
+                                        <span className={styles.specTitle}>{t("specBenefits")}</span>
+                                        <span className={styles.specValue}>{t("benefitsValue")}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -224,10 +240,7 @@ export default function AnalysisPage() {
                             </div>
                             <div className={styles.unitInfo}>
                                 <div className={styles.unitDesc}>
-                                    <p>
-                                        This high-efficiency {selectedUnit.category.toLowerCase()} is engineered for robust performance 
-                                        in diverse industrial environments. Offering superior thermal management and reduced operational costs.
-                                    </p>
+                                    <p>{t("description", { category: valueLabel(selectedUnit.category).toLowerCase() })}</p>
                                 </div>
                                 <div className={styles.unitImage}>
                                     <img src="/images/products/745729.png" alt="Product thumbnail" />
@@ -242,23 +255,23 @@ export default function AnalysisPage() {
                                 {/* Note: Calculate and Bookmark buttons are hidden as requested */}
                             </div>
                             <div className={styles.unitSpecs}>
-                                <h3>Technical Specifications</h3>
+                                <h3>{t("technicalSpecs")}</h3>
                                 <ul>
                                     <li>
-                                        <span className={styles.specTitle}>Category:</span>
-                                        <span className={styles.specValue}>{selectedUnit.category}</span>
+                                        <span className={styles.specTitle}>{t("specCategory")}</span>
+                                        <span className={styles.specValue}>{valueLabel(selectedUnit.category)}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Type:</span>
-                                        <span className={styles.specValue}>{selectedUnit.type}</span>
+                                        <span className={styles.specTitle}>{t("specType")}</span>
+                                        <span className={styles.specValue}>{valueLabel(selectedUnit.type)}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Total Views:</span>
+                                        <span className={styles.specTitle}>{t("specTotalViews")}</span>
                                         <span className={styles.specValue}>{selectedUnit.views.toLocaleString()}</span>
                                     </li>
                                     <li>
-                                        <span className={styles.specTitle}>Benefits:</span>
-                                        <span className={styles.specValue}>High efficiency, reliable, easy maintenance</span>
+                                        <span className={styles.specTitle}>{t("specBenefits")}</span>
+                                        <span className={styles.specValue}>{t("benefitsValue")}</span>
                                     </li>
                                 </ul>
                             </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import styles from "../calculation.module.css";
 
 interface CalcAsset {
@@ -35,6 +36,7 @@ export default function ProductAccordion({
     documents = [],
     specs = [],
 }: ProductAccordionProps) {
+    const t = useTranslations("Calc");
     const router = useRouter();
     const [activeSection, setActiveSection] = useState<string | null>(null);
     const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
@@ -145,13 +147,13 @@ export default function ProductAccordion({
                 <div className={styles.modelContainer}>
                     {unitName && (
                         <>
-                            <h2>Name</h2>
+                            <h2>{t("name")}</h2>
                             <p className={styles.modelName}>{unitName}</p>
                         </>
                     )}
                     {modelName && (
                         <>
-                            <h2>Model</h2>
+                            <h2>{t("model")}</h2>
                             <p className={styles.modelName}>{modelName}</p>
                         </>
                     )}
@@ -168,7 +170,7 @@ export default function ProductAccordion({
                                 <img className={styles.lightIcon} src="../../icons/calculation.png" alt="Calculation" />
                                 <img className={styles.darkIcon} src="../../icons/calculation-darkMode.png" alt="Calculation" />
                             </div>
-                            <h2>Calculation</h2>
+                            <h2>{t("calculation")}</h2>
                         </div>
                         <img className={styles.sectionArrow} src={activeSection === 'calculation' ? "../../icons/back-darkMode-2.png" : "../../icons/back.png"} alt="Arrow Icon" />
                     </div>
@@ -185,7 +187,7 @@ export default function ProductAccordion({
                                 <img className={styles.lightIcon} src="../../icons/document.png" alt="Documents" />
                                 <img className={styles.darkIcon} src="../../icons/document-darkMode.png" alt="Documents" />
                             </div>
-                            <h2>Documents</h2>
+                            <h2>{t("documents")}</h2>
                         </div>
                         <img className={styles.sectionArrow} src={activeSection === 'documents' ? "../../icons/back-darkMode-2.png" : "../../icons/back.png"} alt="Arrow Icon" />
                     </div>
@@ -195,11 +197,11 @@ export default function ProductAccordion({
                                 {documents.length > 0 ? documents.map((doc, i) => (
                                     <div className={styles.document} key={i}>
                                         <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                                            {doc.fileName || `Document ${i + 1}`}
+                                            {doc.fileName || t("documentN", { n: i + 1 })}
                                         </a>
                                     </div>
                                 )) : (
-                                    <p style={{ padding: "12px", color: "#888" }}>No documents available.</p>
+                                    <p style={{ padding: "12px", color: "#888" }}>{t("noDocuments")}</p>
                                 )}
                             </div>
                         </div>
@@ -216,7 +218,7 @@ export default function ProductAccordion({
                                 <img className={styles.lightIcon} src="../../icons/image.png" alt="Images" />
                                 <img className={styles.darkIcon} src="../../icons/image-darkMode.png" alt="Images" />
                             </div>
-                            <h2>Images</h2>
+                            <h2>{t("images")}</h2>
                         </div>
                         <img className={styles.sectionArrow} src={activeSection === 'images' ? "../../icons/back-darkMode-2.png" : "../../icons/back.png"} alt="Arrow Icon" />
                     </div>
@@ -232,7 +234,7 @@ export default function ProductAccordion({
                                         <img src={src} alt="product image" style={{ cursor: 'pointer' }} />
                                     </div>
                                 )) : (
-                                    <p style={{ padding: "12px", color: "#888" }}>No images available.</p>
+                                    <p style={{ padding: "12px", color: "#888" }}>{t("noImages")}</p>
                                 )}
                             </div>
                         </div>
@@ -249,7 +251,7 @@ export default function ProductAccordion({
                                 <img className={styles.lightIcon} src="../../icons/drawing.png" alt="Drawings" />
                                 <img className={styles.darkIcon} src="../../icons/drawing-darkMode.png" alt="Drawings" />
                             </div>
-                            <h2>Drawings</h2>
+                            <h2>{t("drawings")}</h2>
                         </div>
                         <img className={styles.sectionArrow} src={activeSection === 'drawings' ? "../../icons/back-darkMode-2.png" : "../../icons/back.png"} alt="Arrow Icon" />
                     </div>
@@ -265,7 +267,7 @@ export default function ProductAccordion({
                                         <img src={src} alt="drawing" style={{ cursor: 'pointer' }} />
                                     </div>
                                 )) : (
-                                    <p style={{ padding: "12px", color: "#888" }}>No drawings available.</p>
+                                    <p style={{ padding: "12px", color: "#888" }}>{t("noDrawings")}</p>
                                 )}
                             </div>
                         </div>
@@ -282,7 +284,7 @@ export default function ProductAccordion({
                                 <img className={styles.lightIcon} src="../../icons/techSpec.png" alt="Tech Specs" />
                                 <img className={styles.darkIcon} src="../../icons/techSpec-darkMode.png" alt="Tech Specs" />
                             </div>
-                            <h2>Tech Specs</h2>
+                            <h2>{t("techSpecs")}</h2>
                         </div>
                         <img className={styles.sectionArrow} src={activeSection === 'techSpecs' ? "../../icons/back-darkMode-2.png" : "../../icons/back.png"} alt="Arrow Icon" />
                     </div>
@@ -299,7 +301,7 @@ export default function ProductAccordion({
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p style={{ padding: "12px", color: "#888" }}>No specifications available.</p>
+                                    <p style={{ padding: "12px", color: "#888" }}>{t("noSpecs")}</p>
                                 )}
                             </div>
                         </div>

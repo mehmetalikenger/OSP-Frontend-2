@@ -6,6 +6,7 @@ import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
+import { useTranslations } from "next-intl";
 
 type Compressor = {
     id: number;
@@ -30,6 +31,7 @@ type CompressorSpecs = {
 }
 
 export default function EditCompressorPage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Compressor");
     const [brand, setBrand] = useState("Select Brand");
     const [type, setType] = useState("Select Type");
@@ -132,11 +134,11 @@ export default function EditCompressorPage() {
 
     const handleEditCompressor = async () => {
         if (selectedItemToEdit === "Select Compressor") {
-            showToast("Please select a compressor to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.compressor.low") }), "error");
             return;
         }
         if (brand === "Select Brand" || type === "Select Type" || !model) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
 
@@ -152,35 +154,35 @@ export default function EditCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.compressor.cap") }), "success");
                 setSelectedItemToEdit("Select Compressor");
                 fetchCompressors();
                 fetchCompressorSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit compressor.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.compressor.low") }), "error");
                 } catch {
-                    showToast("Failed to edit compressor.", "error");
+                    showToast(t("failedEdit", { name: t("names.compressor.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleEditCompressorSpecs = async () => {
         if (compressor === "Select Compressor") {
-            showToast("Please select a compressor specs record.", "error");
+            showToast(t("selectSpecs", { name: t("names.compressor.cap") }), "error");
             return;
         }
         if (!capacity || !powerInput) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
         if (qCoeffs.some(v => v === "") || pCoeffs.some(v => v === "")) {
-            showToast("Please fill all coefficient fields.", "error");
+            showToast(t("fillCoefficients"), "error");
             return;
         }
 
@@ -205,20 +207,20 @@ export default function EditCompressorPage() {
             });
 
             if (res.ok) {
-                showToast("Compressor Specs updated successfully.", "success");
+                showToast(t("specsUpdatedSuccess", { name: t("names.compressor.cap") }), "success");
                 setCompressor("Select Compressor");
                 fetchCompressorSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit compressor specs.", "error");
+                    showToast(data.message || t("failedEditSpecs", { name: t("names.compressor.low") }), "error");
                 } catch {
-                    showToast("Failed to edit compressor specs.", "error");
+                    showToast(t("failedEditSpecs", { name: t("names.compressor.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -226,22 +228,22 @@ export default function EditCompressorPage() {
     const specsOptions = ["Select Compressor", ...compressorSpecsList.map(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}`)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Compressor") { showToast("Please select a compressor to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select Compressor") { showToast(t("selectToDelete", { name: t("names.compressor.low") }), "error"); return; }
         const item = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete compressor", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.compressor.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/compressor/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("Compressor deleted.", "success");
+                showToast(t("deleted", { name: t("names.compressor.cap") }), "success");
                 setSelectedItemToEdit("Select Compressor");
                 fetchCompressors();
                 fetchCompressorSpecs();
             } else {
-                showToast("Failed to delete compressor.", "error");
+                showToast(t("failedDelete", { name: t("names.compressor.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -255,7 +257,7 @@ export default function EditCompressorPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Compressor
+                        {t("names.compressor.cap")}
                     </span>
                 </div>
 
@@ -266,100 +268,104 @@ export default function EditCompressorPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>Compressor</label>
+                                    <label>{t("names.compressor.cap")}</label>
                                     <Combobox
                                         options={compressorOptions}
                                         value={selectedItemToEdit}
                                         onChange={setSelectedItemToEdit}
+                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
                                         className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Brand</label>
+                                    <label>{t("brand")}</label>
                                     <Combobox
                                         options={["Select Brand", "Frascold", "Copelant"]}
                                         value={brand}
                                         onChange={setBrand}
+                                        getLabel={(v) => v === "Select Brand" ? t("selectName", { name: t("brand") }) : v}
                                         className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Type</label>
+                                    <label>{t("type")}</label>
                                     <Combobox
                                         options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
                                         value={type}
                                         onChange={setType}
+                                        getLabel={(v) => v === "Select Type" ? t("selectName", { name: t("type") }) : v}
                                         className={`${styles.comboBox} ${type.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Model</label>
+                                    <label>{t("model")}</label>
                                     <input
                                         type="text"
                                         className={styles.inputElement}
-                                        placeholder="Enter model"
+                                        placeholder={t("enterModel")}
                                         value={model}
                                         onChange={(e) => setModel(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>MOC (A)</label>
+                                    <label>{t("mocA")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter MOC"
+                                        placeholder={t("enterMoc")}
                                         value={moc}
                                         onChange={(e) => setMoc(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>LRA (A)</label>
+                                    <label>{t("lraA")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter LRA"
+                                        placeholder={t("enterLra")}
                                         value={lra}
                                         onChange={(e) => setLra(e.target.value)}
                                     />
                                 </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditCompressor}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditCompressor}>{t("save")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
 
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>Compressor Specs</label>
+                                    <label>{t("specsSuffix", { name: t("names.compressor.cap") })}</label>
                                     <Combobox
                                         options={specsOptions}
                                         value={compressor}
                                         onChange={setCompressor}
+                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
                                         className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Capacity</label>
+                                    <label>{t("capacity")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter capacity"
+                                        placeholder={t("enterCapacity")}
                                         value={capacity}
                                         onChange={(e) => setCapacity(e.target.value)}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>Power Input</label>
+                                    <label>{t("powerInput")}</label>
                                     <input
                                         type="number" onWheel={(e) => e.currentTarget.blur()}
                                         className={styles.inputElement}
-                                        placeholder="Enter power input"
+                                        placeholder={t("enterPowerInput")}
                                         value={powerInput}
                                         onChange={(e) => setPowerInput(e.target.value)}
                                     />
@@ -369,7 +375,7 @@ export default function EditCompressorPage() {
                             <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
 
                             <fieldset className={styles.coeffGroup}>
-                                <legend>Capacity Coefficients (Q)</legend>
+                                <legend>{t("capacityCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
                                     {qCoeffs.map((val, i) => (
                                         <div className={styles.formField} key={`q${i}`}>
@@ -391,7 +397,7 @@ export default function EditCompressorPage() {
                             </fieldset>
 
                             <fieldset className={styles.coeffGroup}>
-                                <legend>Power Input Coefficients (P)</legend>
+                                <legend>{t("powerCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
                                     {pCoeffs.map((val, i) => (
                                         <div className={styles.formField} key={`p${i}`}>
@@ -413,7 +419,7 @@ export default function EditCompressorPage() {
                             </fieldset>
 
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleEditCompressorSpecs}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditCompressorSpecs}>{t("save")}</button>
                             </div>
                         </div>
                     </div>

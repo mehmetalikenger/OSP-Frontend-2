@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import styles from "./adminPanel.module.css";
 import { fetchWithAuth } from "../../../../lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
+    const t = useTranslations("AdminNav");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [adminName, setAdminName] = useState("Admin");
     const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
@@ -183,7 +185,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                 </>
                             )}
                         </div>
-                        <p>Home</p>
+                        <p>{t("home")}</p>
                     </div>
 
                     <div className={styles.divider}></div>
@@ -204,7 +206,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </>
                                 )}
                             </div>
-                            <p style={{ flex: 1 }}>Add Unit</p>
+                            <p style={{ flex: 1 }}>{t("addUnit")}</p>
                             <div className={styles.arrow}>
                                 <img src="/icons/back.png" alt="" className={styles.lightIcon} />
                                 <img src="/icons/back-darkMode.png" alt="" className={styles.darkIcon} />
@@ -218,27 +220,27 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                         className={`${styles.subOption} ${pathname.includes('/add-unit/chiller') ? styles.subOptionActive : ''}`}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/chiller'); }}
                                     >
-                                        <p>Chiller</p>
+                                        <p>{t("chiller")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname.includes('/add-unit/heat-pump') ? styles.subOptionActive : ''}`}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-model'); }}
                                     >
-                                        <p>Heat Pump</p>
+                                        <p>{t("heatPump")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname === '/admin-panel/add-unit/heat-pump-model' ? styles.subOptionActive : ''}`}
                                         style={{ paddingLeft: '40px' }}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-model'); }}
                                     >
-                                        <p>Model</p>
+                                        <p>{t("model")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname === '/admin-panel/add-unit/heat-pump-mod' ? styles.subOptionActive : ''}`}
                                         style={{ paddingLeft: '40px' }}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/add-unit/heat-pump-mod'); }}
                                     >
-                                        <p>Mod</p>
+                                        <p>{t("mod")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -261,7 +263,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </>
                                 )}
                             </div>
-                            <p style={{ flex: 1 }}>Edit Unit</p>
+                            <p style={{ flex: 1 }}>{t("editUnit")}</p>
                             <div className={styles.arrow}>
                                 <img src="/icons/back.png" alt="" className={styles.lightIcon} />
                                 <img src="/icons/back-darkMode.png" alt="" className={styles.darkIcon} />
@@ -275,27 +277,27 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                         className={`${styles.subOption} ${pathname.includes('/edit-unit/chiller') ? styles.subOptionActive : ''}`}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/chiller'); }}
                                     >
-                                        <p>Chiller</p>
+                                        <p>{t("chiller")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname.includes('/edit-unit/heat-pump') ? styles.subOptionActive : ''}`}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-model'); }}
                                     >
-                                        <p>Heat Pump</p>
+                                        <p>{t("heatPump")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname === '/admin-panel/edit-unit/heat-pump-model' ? styles.subOptionActive : ''}`}
                                         style={{ paddingLeft: '40px' }}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-model'); }}
                                     >
-                                        <p>Model</p>
+                                        <p>{t("model")}</p>
                                     </div>
                                     <div 
                                         className={`${styles.subOption} ${pathname === '/admin-panel/edit-unit/heat-pump-mod' ? styles.subOptionActive : ''}`}
                                         style={{ paddingLeft: '40px' }}
                                         onClick={(e) => { e.stopPropagation(); handleOptionClick('/admin-panel/edit-unit/heat-pump-mod'); }}
                                     >
-                                        <p>Mod</p>
+                                        <p>{t("mod")}</p>
                                     </div>
                                 </div>
                             </div>
@@ -320,7 +322,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </>
                                 )}
                             </div>
-                            <p style={{ flex: 1 }}>Add Component</p>
+                            <p style={{ flex: 1 }}>{t("addComponent")}</p>
                             <div className={styles.arrow}>
                                 <img src="/icons/back.png" alt="" className={styles.lightIcon} />
                                 <img src="/icons/back-darkMode.png" alt="" className={styles.darkIcon} />
@@ -336,7 +338,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                             className={`${styles.subOption} ${pathname.includes(`/add-component/${item}`) ? styles.subOptionActive : ''}`}
                                             onClick={(e) => { e.stopPropagation(); handleOptionClick(`/admin-panel/add-component/${item}`); }}
                                         >
-                                            <p>{item.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
+                                            <p>{t(`components.${item}`)}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -360,7 +362,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                     </>
                                 )}
                             </div>
-                            <p style={{ flex: 1 }}>Edit Component</p>
+                            <p style={{ flex: 1 }}>{t("editComponent")}</p>
                             <div className={styles.arrow}>
                                 <img src="/icons/back.png" alt="" className={styles.lightIcon} />
                                 <img src="/icons/back-darkMode.png" alt="" className={styles.darkIcon} />
@@ -376,7 +378,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                             className={`${styles.subOption} ${pathname.includes(`/edit-component/${item}`) ? styles.subOptionActive : ''}`}
                                             onClick={(e) => { e.stopPropagation(); handleOptionClick(`/admin-panel/edit-component/${item}`); }}
                                         >
-                                            <p>{item.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
+                                            <p>{t(`components.${item}`)}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -401,7 +403,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                 </>
                             )}
                         </div>
-                        <p>Analytics</p>
+                        <p>{t("analytics")}</p>
                     </div>
 
                     {/* PROJECTS */}
@@ -419,7 +421,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                                 </>
                             )}
                         </div>
-                        <p>Projects</p>
+                        <p>{t("projects")}</p>
                     </div>
 
                     <div className={`${styles.divider} ${styles.mobileLogout}`} style={{ margin: '20px 0' }}></div>
@@ -435,7 +437,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                             window.location.href = '/login';
                         }}
                     >
-                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>Log out</p>
+                        <p style={{ color: '#d9534f', fontWeight: 'bold' }}>{t("logout")}</p>
                     </div>
                 </div>
             </div>

@@ -1,9 +1,11 @@
 "use client";
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import styles from '../login/login.module.css';
 
 function DeleteAccountContent() {
+  const t = useTranslations('DeleteAccount');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const searchParams = useSearchParams();
@@ -13,7 +15,7 @@ function DeleteAccountContent() {
   const handleDelete = async () => {
     if (!token) {
       setStatus('error');
-      setMessage('Invalid link. No token provided.');
+      setMessage(t('errorNoToken'));
       return;
     }
 
@@ -29,7 +31,7 @@ function DeleteAccountContent() {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('Your account has been successfully deleted. You can reactivate your account by logging in within 30 days.');
+        setMessage(t('successMessage'));
       } else {
         const errorText = await res.text();
         let errorMessage = errorText;
@@ -40,11 +42,11 @@ function DeleteAccountContent() {
           // It's plain text
         }
         setStatus('error');
-        setMessage(errorMessage || 'Failed to delete account. The link may have expired.');
+        setMessage(errorMessage || t('errorDeleteFailed'));
       }
     } catch {
       setStatus('error');
-      setMessage('Network error. Please try again later.');
+      setMessage(t('errorNetwork'));
     }
   };
 
@@ -60,18 +62,18 @@ function DeleteAccountContent() {
           <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
         </div>
         <div className={styles.loginContainer}>
-          <h2>Confirm Account Deletion</h2>
+          <h2>{t('title')}</h2>
           {status === 'success' ? (
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <p style={{ color: 'green', marginBottom: '20px' }}>{message}</p>
               <button className={styles.submitButton} onClick={() => router.push('/login')}>
-                Go to Login
+                {t('goToLogin')}
               </button>
             </div>
           ) : (
             <div>
               <p style={{ color: '#d7292e', textAlign: 'center', marginTop: '40px', marginBottom: '20px', fontSize: '0.9rem' }}>
-                Are you sure you want to delete your account? This action cannot be undone.
+                {t('confirmText')}
               </p>
               {status === 'error' && <p style={{ color: '#d7292e', textAlign: 'center', marginBottom: '15px' }}>{message}</p>}
               <div style={{ display: 'flex', flexDirection: 'row', gap: '15px', width: '100%', marginTop: '10px' }}>
@@ -81,15 +83,15 @@ function DeleteAccountContent() {
                   disabled={status === 'loading'}
                   style={{ flex: 1 }}
                 >
-                  {status === 'loading' ? 'Deleting...' : 'Yes, Delete My Account'}
+                  {status === 'loading' ? t('deleting') : t('confirmDelete')}
                 </button>
-                <button 
-                  className={styles.secondaryButton} 
+                <button
+                  className={styles.secondaryButton}
                   onClick={() => router.push('/login')}
                   disabled={status === 'loading'}
                   style={{ flex: 1 }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
               </div>
             </div>
@@ -103,9 +105,14 @@ function DeleteAccountContent() {
   );
 }
 
+function DeleteAccountFallback() {
+  const t = useTranslations('DeleteAccount');
+  return <div>{t('loading')}</div>;
+}
+
 export default function DeleteAccountPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<DeleteAccountFallback />}>
       <DeleteAccountContent />
     </Suspense>
   );

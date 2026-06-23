@@ -405,15 +405,27 @@ body {
 
     .productDetails {
         justify-content: space-between;
+        /* Grow to fill the (equal-height) card so productInfo below can push
+           its icons row to the bottom. */
+        flex-grow: 1;
     }
 
     .productInfo {
         width: 100%;
+        /* Fill the card height so the spacer row can expand. */
+        height: 100%;
+        align-self: stretch;
         display: grid;
         grid-template-columns: 1fr 25%;
         grid-template-areas:
-            "title image"
-            "specs image";
+            "title  image"
+            "specs  image"
+            "spacer spacer"
+            "icons  icons";
+        /* The 1fr spacer row soaks up the leftover height, pushing the icons
+           row to the bottom so it lines up across cards regardless of how tall
+           the title/specs/image are. */
+        grid-template-rows: auto auto 1fr auto;
         column-gap: 30px;
         align-items: start;
     }
@@ -424,6 +436,10 @@ body {
 
     .productSpecs {
         grid-area: specs;
+    }
+
+    .cardIcons {
+        grid-area: icons;
     }
 
     .productImage {

@@ -9,9 +9,13 @@ interface ComboboxProps {
     options: string[];
     className?: string;
     containerClassName?: string;
+    // Optional display formatter: keeps `value`/`options` as stable internal keys
+    // while showing a translated label. Defaults to showing the raw value.
+    getLabel?: (value: string) => string;
 }
 
-export default function Combobox({ value, onChange, options, className, containerClassName }: ComboboxProps) {
+export default function Combobox({ value, onChange, options, className, containerClassName, getLabel }: ComboboxProps) {
+    const label = (v: string) => (getLabel ? getLabel(v) : v);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +42,7 @@ export default function Combobox({ value, onChange, options, className, containe
             <div className={styles.inputWrapper} onClick={() => setIsOpen(!isOpen)}>
                 <input
                     type="text"
-                    value={value}
+                    value={label(value)}
                     readOnly
                     className={`${styles.comboboxInput} ${className || ""}`}
                 />
@@ -63,7 +67,7 @@ export default function Combobox({ value, onChange, options, className, containe
                                 option === value ? styles.dropdownItemActive : ""
                             }`}
                         >
-                            {option}
+                            {label(option)}
                         </li>
                     ))}
                 </ul>

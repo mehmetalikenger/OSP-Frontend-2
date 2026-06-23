@@ -5,6 +5,7 @@ import styles from "../../add-unit/addUnit.module.css";
 import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
+import { useTranslations } from "next-intl";
 
 type FourWayReversingValve = {
     id: number;
@@ -12,6 +13,7 @@ type FourWayReversingValve = {
 }
 
 export default function AddFourWayReversingValvePage() {
+    const t = useTranslations("AdminComp");
     const [model, setModel] = useState("");
 
     // Specs states
@@ -44,7 +46,7 @@ export default function AddFourWayReversingValvePage() {
 
     const handleAddValve = async () => {
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -57,36 +59,36 @@ export default function AddFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve added successfully.", "success");
+                showToast(t("addedSuccess", { name: t("names.fourWayValve.cap") }), "success");
                 setModel("");
                 fetchValves(); // Refresh the list
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add valve.", "error");
+                    showToast(data.message || t("failedAdd", { name: t("names.fourWayValve.low") }), "error");
                 } catch {
-                    showToast("Failed to add valve.", "error");
+                    showToast(t("failedAdd", { name: t("names.fourWayValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleAddValveSpecs = async () => {
         if (fourWayReversingValve === "Select 4-Way Reversing Valve") {
-            showToast("Please select a valve.", "error");
+            showToast(t("pleaseSelect", { name: t("names.fourWayValve.low") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please enter capacity.", "error");
+            showToast(t("pleaseEnterCapacity"), "error");
             return;
         }
 
         const selectedValve = valvesList.find(v => v.model === fourWayReversingValve);
         if (!selectedValve) {
-            showToast("Invalid valve selected.", "error");
+            showToast(t("invalidSelected", { name: t("names.fourWayValve.low") }), "error");
             return;
         }
 
@@ -99,20 +101,20 @@ export default function AddFourWayReversingValvePage() {
             });
 
             if (res.ok) {
-                showToast("4-Way Reversing Valve Specs added successfully.", "success");
+                showToast(t("specsAddedSuccess", { name: t("names.fourWayValve.cap") }), "success");
                 setFourWayReversingValve("Select 4-Way Reversing Valve");
                 setCapacity("");
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to add valve specs.", "error");
+                    showToast(data.message || t("failedAddSpecs", { name: t("names.fourWayValve.low") }), "error");
                 } catch {
-                    showToast("Failed to add valve specs.", "error");
+                    showToast(t("failedAddSpecs", { name: t("names.fourWayValve.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -128,7 +130,7 @@ export default function AddFourWayReversingValvePage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        4-Way Reversing Valve
+                        {t("names.fourWayValve.cap")}
                     </span>
                 </div>
 
@@ -139,45 +141,46 @@ export default function AddFourWayReversingValvePage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
-                                        <input 
-                                            type="text" 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter model" 
+                                        <label>{t("model")}</label>
+                                        <input
+                                            type="text"
+                                            className={styles.inputElement}
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddValve}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddValve}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>4-Way Reversing Valve</label>
-                                        <Combobox 
+                                        <label>{t("names.fourWayValve.cap")}</label>
+                                        <Combobox
                                             options={valveOptions}
                                             value={fourWayReversingValve}
                                             onChange={setFourWayReversingValve}
+                                            getLabel={(v) => v === "Select 4-Way Reversing Valve" ? t("selectName", { name: t("names.fourWayValve.cap") }) : v}
                                             className={`${styles.comboBox} ${fourWayReversingValve.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddValveSpecs}>Add</button>
+                                <button className={styles.saveBtn} onClick={handleAddValveSpecs}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

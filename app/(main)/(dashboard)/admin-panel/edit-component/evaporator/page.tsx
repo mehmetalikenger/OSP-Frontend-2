@@ -6,6 +6,7 @@ import toastStyles from "../../toast.module.css";
 import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
+import { useTranslations } from "next-intl";
 
 type Evaporator = {
     id: number;
@@ -29,6 +30,7 @@ type EvaporatorSpecs = {
 }
 
 export default function EditEvaporatorPage() {
+    const t = useTranslations("AdminComp");
     const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Evaporator");
     const [model, setModel] = useState("");
     const [type, setType] = useState("Plate");
@@ -103,11 +105,11 @@ export default function EditEvaporatorPage() {
 
     const handleEditEvaporator = async () => {
         if (selectedItemToEdit === "Select Evaporator") {
-            showToast("Please select an evaporator to edit.", "error");
+            showToast(t("selectToEdit", { name: t("names.evaporator.low") }), "error");
             return;
         }
         if (!model) {
-            showToast("Please enter a model.", "error");
+            showToast(t("pleaseEnterModel"), "error");
             return;
         }
 
@@ -123,31 +125,31 @@ export default function EditEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator updated successfully.", "success");
+                showToast(t("updatedSuccess", { name: t("names.evaporator.cap") }), "success");
                 setSelectedItemToEdit("Select Evaporator");
                 fetchEvaporators();
                 fetchEvaporatorSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit evaporator.", "error");
+                    showToast(data.message || t("failedEdit", { name: t("names.evaporator.low") }), "error");
                 } catch {
-                    showToast("Failed to edit evaporator.", "error");
+                    showToast(t("failedEdit", { name: t("names.evaporator.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
     const handleEditEvaporatorSpecs = async () => {
         if (evaporator === "Select Evaporator") {
-            showToast("Please select evaporator specs.", "error");
+            showToast(t("selectSpecs", { name: t("names.evaporator.cap") }), "error");
             return;
         }
         if (!capacity) {
-            showToast("Please fill all fields.", "error");
+            showToast(t("fillAllFields"), "error");
             return;
         }
 
@@ -163,20 +165,20 @@ export default function EditEvaporatorPage() {
             });
 
             if (res.ok) {
-                showToast("Evaporator Specs updated successfully.", "success");
+                showToast(t("specsUpdatedSuccess", { name: t("names.evaporator.cap") }), "success");
                 setEvaporator("Select Evaporator");
                 fetchEvaporatorSpecs();
             } else {
                 try {
                     const data = await res.json();
-                    showToast(data.message || "Failed to edit evaporator specs.", "error");
+                    showToast(data.message || t("failedEditSpecs", { name: t("names.evaporator.low") }), "error");
                 } catch {
-                    showToast("Failed to edit evaporator specs.", "error");
+                    showToast(t("failedEditSpecs", { name: t("names.evaporator.low") }), "error");
                 }
             }
         } catch (error) {
             console.error(error);
-            showToast("Network error.", "error");
+            showToast(t("networkError"), "error");
         }
     };
 
@@ -184,22 +186,22 @@ export default function EditEvaporatorPage() {
     const specsOptions = ["Select Evaporator", ...evaporatorSpecsList.map(s => `${s.model} / C: ${s.capacity}`)];
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Evaporator") { showToast("Please select an evaporator to delete.", "error"); return; }
+        if (selectedItemToEdit === "Select Evaporator") { showToast(t("selectToDelete", { name: t("names.evaporator.low") }), "error"); return; }
         const item = evaporatorsList.find(e => e.model === selectedItemToEdit);
         if (!item) return;
-        const ok = await confirm({ title: "Delete evaporator", message: `This will hide "${selectedItemToEdit}" from all lists. Existing units that use it keep working.`, confirmText: "Delete" });
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.evaporator.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
         if (!ok) return;
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/evaporator/${item.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
-                showToast("Evaporator deleted.", "success");
+                showToast(t("deleted", { name: t("names.evaporator.cap") }), "success");
                 setSelectedItemToEdit("Select Evaporator");
                 fetchEvaporators();
                 fetchEvaporatorSpecs();
             } else {
-                showToast("Failed to delete evaporator.", "error");
+                showToast(t("failedDelete", { name: t("names.evaporator.low") }), "error");
             }
-        } catch (error) { console.error(error); showToast("Network error.", "error"); }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
     return (
@@ -213,7 +215,7 @@ export default function EditEvaporatorPage() {
             <div className={styles.sectionContent} style={{ maxWidth: '1200px', flex: 'none' }}>
                 <div className={styles.breadcrumbContainer}>
                     <span className={`${styles.breadcrumbItem} ${styles.breadcrumbActive}`}>
-                        Evaporator
+                        {t("names.evaporator.cap")}
                     </span>
                 </div>
 
@@ -224,27 +226,28 @@ export default function EditEvaporatorPage() {
                         <div className={styles.formSection}>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Evaporator</label>
-                                        <Combobox 
+                                        <label>{t("names.evaporator.cap")}</label>
+                                        <Combobox
                                             options={evaporatorOptions}
                                             value={selectedItemToEdit}
                                             onChange={setSelectedItemToEdit}
+                                            getLabel={(v) => v === "Select Evaporator" ? t("selectName", { name: t("names.evaporator.cap") }) : v}
                                             className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Model</label>
+                                        <label>{t("model")}</label>
                                         <input
                                             type="text"
                                             className={styles.inputElement}
-                                            placeholder="Enter model"
+                                            placeholder={t("enterModel")}
                                             value={model}
                                             onChange={(e) => setModel(e.target.value)}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Type</label>
+                                        <label>{t("type")}</label>
                                         <Combobox
                                             options={Object.keys(EVAPORATOR_TYPES)}
                                             value={type}
@@ -255,35 +258,36 @@ export default function EditEvaporatorPage() {
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>Delete</button>
-                                <button className={styles.saveBtn} onClick={handleEditEvaporator}>Save</button>
+                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                <button className={styles.saveBtn} onClick={handleEditEvaporator}>{t("save")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
                             <div className={styles.formGrid}>
                                     <div className={styles.formField}>
-                                        <label>Evaporator Specs</label>
-                                        <Combobox 
+                                        <label>{t("specsSuffix", { name: t("names.evaporator.cap") })}</label>
+                                        <Combobox
                                             options={specsOptions}
                                             value={evaporator}
                                             onChange={setEvaporator}
+                                            getLabel={(v) => v === "Select Evaporator" ? t("selectName", { name: t("names.evaporator.cap") }) : v}
                                             className={`${styles.comboBox} ${evaporator.startsWith('Select') ? styles.placeholderText : ''}`}
                                             containerClassName={styles.comboboxContainerOverride}
                                         />
                                     </div>
                                     <div className={styles.formField}>
-                                        <label>Capacity</label>
-                                        <input 
-                                            type="number" onWheel={(e) => e.currentTarget.blur()} 
-                                            className={styles.inputElement} 
-                                            placeholder="Enter capacity"
+                                        <label>{t("capacity")}</label>
+                                        <input
+                                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                                            className={styles.inputElement}
+                                            placeholder={t("enterCapacity")}
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
                                         />
                                     </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleEditEvaporatorSpecs}>Save</button>
+                                <button className={styles.saveBtn} onClick={handleEditEvaporatorSpecs}>{t("save")}</button>
                             </div>
                         </div>
                     </div>
