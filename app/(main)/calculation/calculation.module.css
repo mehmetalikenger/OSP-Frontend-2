@@ -745,6 +745,30 @@
     background-color: transparent;
 }
 
+/* Selected language button: filled with the main dark blue (white text). In dark mode it
+   uses the checkbox tick area's light blue as the fill with the main dark blue as the text. */
+.langSelected {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-color: #282f68;
+    color: #fff;
+    border: 1px solid #282f68;
+    transition: background-color 0.2s ease;
+}
+
+.langSelected:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+:global(.dark-mode) .langSelected {
+    background-color: rgb(196, 217, 255);
+    color: #282f68;
+    border-color: rgb(196, 217, 255);
+}
+
 .resultActions button {
     flex: 1;
 }
@@ -845,6 +869,29 @@
 
 .modalFooter button {
     width: 100%;
+}
+
+/* Language selector (add-to-project flow) */
+.langSelectRow {
+    margin-top: 18px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.langSelectRow button {
+    flex: 1;
+}
+
+.langSelectLabel {
+    font-size: 14px;
+    color: #444;
+    white-space: nowrap;
+}
+
+:global(.dark-mode) .langSelectLabel {
+    color: #cfcfcf;
 }
 
 /* Create Project Modal */

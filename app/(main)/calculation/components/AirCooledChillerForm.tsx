@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import styles from "../calculation.module.css";
 import CalculationModals from "./CalculationModals";
@@ -23,6 +23,8 @@ interface CalcResult {
     refrigeratingCapacity: number;
     powerInput: number;
     copEer: number;
+    flowRate: number;
+    pressureDrop: number;
 }
 
 interface Props {
@@ -32,6 +34,7 @@ interface Props {
 
 export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     const t = useTranslations("Calc");
+    const locale = useLocale();
     const glycolLabel = (v: string): string => (({
         "None": t("none"),
         "Ethylene Glycol": t("ethyleneGlycol"),
@@ -50,6 +53,8 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     const [error, setError] = useState<string | null>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    // The download flow asks the user which language to render the PDF in first.
+    const [langModalOpen, setLangModalOpen] = useState(false);
 
     // Seed the temperature fields from the unit's default cooling values once they load.
     useEffect(() => {
@@ -124,8 +129,10 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     };
 
     // Ask the backend to build the PDF report from the current inputs and download it.
-    const handleDownloadReport = async () => {
+    // `language` ("en"/"de") chooses which localized version of the report to render.
+    const handleDownloadReport = async (language: string) => {
         if (!unitId) return;
+        setLangModalOpen(false);
         setDownloading(true);
         setError(null);
         try {
@@ -140,6 +147,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     evapOut: parseFloat(evapOut) || 0,
                     glycolType: glycolType || null,
                     glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
+                    language,
                 }),
             });
 
@@ -311,13 +319,53 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                                 {fmt(result.copEer)}
                             </span>
                         </div>
+                        <div className={styles.resultMetric}>
+                            <span className={styles.resultMetricLabel}>{t("flowRate")}</span>
+                            <span className={styles.resultMetricValue}>
+                                {fmt(result.flowRate)}
+                                <span className={styles.resultMetricUnit}>m³/h</span>
+                            </span>
+                        </div>
+                        <div className={styles.resultMetric}>
+                            <span className={styles.resultMetricLabel}>{t("pressureDrop")}</span>
+                            <span className={styles.resultMetricValue}>
+                                {fmt(result.pressureDrop)}
+                                <span className={styles.resultMetricUnit}>kPa</span>
+                            </span>
+                        </div>
                     </div>
 
                     <div className={styles.resultsCardActions}>
-                        <button className={styles.btnSecondary} onClick={handleDownloadReport} disabled={downloading}>
+                        <button className={styles.btnSecondary} onClick={() => setLangModalOpen(true)} disabled={downloading}>
                             {downloading ? t("preparing") : t("downloadResultFile")}
                         </button>
                         <button className={styles.btnPrimary} onClick={() => setModalOpen(true)}>{t("addToProject")}</button>
+                    </div>
+                </div>
+            )}
+
+            {langModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalCloseBtn} onClick={() => setLangModalOpen(false)}>
+                            <img src="../../icons/closeBtn.png" className={styles.lightIcon} alt="Close" />
+                            <img src="../../icons/closeBtn-second.png" className={styles.darkIcon} alt="Close" />
+                        </div>
+                        <h2>{t("selectLanguage")}</h2>
+                        <div className={styles.modalFooter}>
+                            <button
+                                className={locale === "en" ? styles.langSelected : styles.btnSecondary}
+                                onClick={() => handleDownloadReport("en")}
+                            >
+                                {t("english")}
+                            </button>
+                            <button
+                                className={locale === "de" ? styles.langSelected : styles.btnSecondary}
+                                onClick={() => handleDownloadReport("de")}
+                            >
+                                {t("german")}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

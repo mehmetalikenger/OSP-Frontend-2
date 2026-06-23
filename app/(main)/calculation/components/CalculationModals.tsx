@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { fetchWithAuth } from "@/lib/api";
 import styles from "../calculation.module.css";
 import { Country, State } from "country-state-city";
@@ -36,7 +36,10 @@ interface ProjectItem {
 
 export default function CalculationModals({ isOpen, onClose, initialStep = 'result', calc }: CalculationModalsProps) {
     const t = useTranslations("Calc");
+    const locale = useLocale();
     const [step, setStep] = useState<'result' | 'projects' | 'create'>(initialStep);
+    // Language the stored project report PDF is rendered in; defaults to the current UI locale.
+    const [language, setLanguage] = useState(locale === "de" ? "de" : "en");
 
     const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]); // projects checked for this add
@@ -172,6 +175,7 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 evapOut: calc.evapOut,
                 glycolType: calc.glycolType ?? null,
                 glycolPercentage: calc.glycolPercentage ?? null,
+                language,
             }),
         });
         if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -294,6 +298,23 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                         </div>
                         {error && <p className={styles.calcError}>{error}</p>}
                         {added && !error && <p className={styles.calcSuccess}>{t("addedToProject")}</p>}
+                        <div className={styles.langSelectRow}>
+                            <span className={styles.langSelectLabel}>{t("languageLabel")}</span>
+                            <button
+                                className={language === "en" ? styles.langSelected : styles.btnSecondary}
+                                onClick={() => { setLanguage("en"); setAdded(false); }}
+                                disabled={busy}
+                            >
+                                {t("english")}
+                            </button>
+                            <button
+                                className={language === "de" ? styles.langSelected : styles.btnSecondary}
+                                onClick={() => { setLanguage("de"); setAdded(false); }}
+                                disabled={busy}
+                            >
+                                {t("german")}
+                            </button>
+                        </div>
                         <div className={styles.modalFooter}>
                             <button
                                 className={styles.btnPrimary}
