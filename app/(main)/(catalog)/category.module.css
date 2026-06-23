@@ -60,7 +60,7 @@ body {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    grid-auto-rows: 1fr;
+    grid-auto-rows: auto;
     gap: 30px;
     margin-top: 50px;
     max-width: 1400px;
@@ -80,12 +80,13 @@ body {
 
 .productDetails {
     display: flex;
-    flex-grow: 1;
+    flex-grow: 0;
     width: 100%;
 }
 
 .productInfo {
     width: 100%;
+    align-self: flex-start;
 }
 
 .productTitle {
@@ -174,7 +175,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 30px;
+    margin-top: 50px;
     width: 100%;
 }
 
@@ -480,15 +481,28 @@ body {
 
     .productDetails {
         justify-content: space-between;
+        /* Grow to fill the (equal-height) card so productInfo below can push
+           its icons row to the bottom. */
+        flex-grow: 1;
     }
 
     .productInfo {
         width: 100%;
+        /* Fill the card height and stretch (overrides the mobile
+           align-self: flex-start) so the spacer row can expand. */
+        height: 100%;
+        align-self: stretch;
         display: grid;
         grid-template-columns: 1fr 30%;
         grid-template-areas:
-            "title image"
-            "specs image";
+            "title  image"
+            "specs  image"
+            "spacer spacer"
+            "icons  icons";
+        /* The 1fr spacer row soaks up the leftover height, pushing the icons
+           row to the bottom so it lines up across cards regardless of how tall
+           the title/specs/image are. */
+        grid-template-rows: auto auto 1fr auto;
         column-gap: 30px;
         align-items: start;
     }
@@ -501,16 +515,34 @@ body {
         grid-area: specs;
     }
 
+    .cardIcons {
+        grid-area: icons;
+    }
+
     .productImage {
         grid-area: image;
         width: 100%;
+        /* Fixed image-area height: keeps the image block identical across
+           cards so the specs/icons rows align even when one card's image is
+           shorter than another's. */
+        height: 150px;
         margin-top: 0;
         align-self: center;
+        align-items: center;
         justify-content: center;
     }
 
     .productImage img {
         width: 100%;
+        height: 100%;
+        /* Fit (not crop) inside the fixed box and stay vertically centered,
+           so a short image no longer leaves empty space below it. */
+        object-fit: contain;
+    }
+
+    /* The larger mobile gap above the view button isn't needed on desktop. */
+    .productBottom {
+        margin-top: 30px;
     }
 
     .unitDetailContainer {
@@ -567,6 +599,8 @@ body {
 
     .products {
         grid-template-columns: 1fr 1fr;
+        /* Side-by-side cards: equalize heights so the bottom rows line up. */
+        grid-auto-rows: 1fr;
     }
 
     .product {

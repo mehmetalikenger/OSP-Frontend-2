@@ -17,7 +17,7 @@ body {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    grid-auto-rows: 1fr;
+    grid-auto-rows: auto;
     gap: 30px;
     margin-top: 0px;
     max-width: 1400px;
@@ -130,7 +130,7 @@ body {
 }
 
 .viewBtn {
-    margin-top: 15px;
+    margin-top: 40px;
     padding: 5px 20px;
     border: 1px solid #d7292e;
     border-radius: 5px;
@@ -429,13 +429,22 @@ body {
     .productImage {
         grid-area: image;
         width: 100%;
+        /* Fixed image-area height: keeps the image block identical across
+           cards so the specs/icons rows align even when one card's image is
+           shorter than another's. */
+        height: 150px;
         margin-top: 0;
         align-self: center;
+        align-items: center;
         justify-content: center;
     }
 
     .productImage img {
         width: 100%;
+        height: 100%;
+        /* Fit (not crop) inside the fixed box and stay vertically centered,
+           so a short image no longer leaves empty space below it. */
+        object-fit: contain;
     }
 
     .viewBtn {
@@ -480,6 +489,8 @@ body {
 @media screen and (min-width: 1024px) {
     .products {
         grid-template-columns: 1fr 1fr;
+        /* Side-by-side cards: equalize heights so the bottom rows line up. */
+        grid-auto-rows: 1fr;
     }
 
     .icons img,
