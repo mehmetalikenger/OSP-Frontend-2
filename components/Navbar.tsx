@@ -114,7 +114,7 @@ export default function Navbar({ initialDark = false }: { initialDark?: boolean 
         <nav className={`${styles.nav} ${isDarkMode ? styles.navDark : ''} ${!isVisible ? styles.navHidden : ''}`}>
             <div className={styles.navContent}>
                 <div className={styles.logo}>
-                    <Link href="/chiller" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link href="/products" style={{ textDecoration: 'none', color: 'inherit' }}>
                         <img src="/logo/logo-2.png" alt="OSP Logo" className={styles.logoLight} />
                         <img src="/logo/logo-1.png" alt="OSP Logo" className={styles.logoDark} />
                     </Link>

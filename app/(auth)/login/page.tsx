@@ -41,9 +41,9 @@ export default function LoginPage() {
         localStorage.setItem('userId', data.id);
         localStorage.setItem('userRole', data.role);
         if (data.reactivated) {
-            router.push('/chiller?reactivated=true');
+            router.push('/products?reactivated=true');
         } else {
-            router.push('/chiller');
+            router.push('/products');
         }
       } else {
         try {

@@ -68,6 +68,8 @@ body {
 
 .product {
     width: 100%;
+    max-width: 760px;
+    justify-self: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -489,7 +491,7 @@ body {
     .productInfo {
         width: 100%;
         /* Fill the card height and stretch (overrides the mobile
-           align-self: flex-start) so the spacer row can expand. */
+           align-self: flex-start). */
         height: 100%;
         align-self: stretch;
         display: grid;
@@ -497,12 +499,13 @@ body {
         grid-template-areas:
             "title  image"
             "specs  image"
-            "spacer spacer"
             "icons  icons";
-        /* The 1fr spacer row soaks up the leftover height, pushing the icons
-           row to the bottom so it lines up across cards regardless of how tall
-           the title/specs/image are. */
-        grid-template-rows: auto auto 1fr auto;
+        /* No spacer row: the icons sit directly beneath the fixed-height image
+           area, so they start on the same row across cards regardless of how
+           long the title/specs are. align-content: start keeps the rows packed
+           at the top instead of stretching to fill the card height. */
+        grid-template-rows: auto auto auto;
+        align-content: start;
         column-gap: 30px;
         align-items: start;
     }

@@ -24,7 +24,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
     useEffect(() => {
         const role = localStorage.getItem('userRole');
         if (role !== 'ADMIN') {
-            router.push('/chiller');
+            router.push('/products');
             return;
         }
         const userId = localStorage.getItem('userId');
