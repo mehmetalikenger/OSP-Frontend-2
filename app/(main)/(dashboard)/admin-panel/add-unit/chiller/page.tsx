@@ -11,9 +11,14 @@ import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type ComponentSpecs = { id: number; brand?: string | null; model: string; capacity: number };
-type CompressorSpecs = { id: number; brand?: string | null; model: string; type?: string | null; capacity: number; powerInput: number };
+// Flat compressor catalog row: one entry per refrigerant + brand + kind + model combination.
+type CompressorCatalogEntry = { ratingId: number; refrigerant: string; brand: string; kind: string; model: string };
 type Chassis = { id: number; brand?: string | null; model: string };
-type Refrigerant = { id: number; name: string; code: string };
+
+// Distinct + alphabetically sorted helper used to build the cascade option lists.
+const distinct = (arr: string[]) => Array.from(new Set(arr)).sort();
+// Friendly labels for the compressor-kind codes; the raw code stays the option value.
+const KIND_LABELS: Record<string, string> = { RC: "Reciprocating", SC: "Scroll", SCR: "Screw", ISCR: "Inverter" };
 
 type Upload = { file: File; url: string; id: string };
 let uidCounter = 0;
@@ -24,34 +29,38 @@ const MAX_TOTAL_BYTES = 25 * 1024 * 1024; // 25 MB for the whole upload
 
 const SELECT = {
     compressor: "Select Compressor",
+    refrigerant: "Select Refrigerant",
+    brand: "Select Brand",
+    kind: "Select Type",
     evaporator: "Select Evaporator",
     condenser: "Select Condenser",
     expansionValve: "Select Expansion Valve",
     reversingValve: "Select Reversing Valve",
     chassis: "Select Chasis",
-    refrigerant: "Select Refrigerant",
 };
 
 const specLabel = (s: ComponentSpecs) => `${s.model} / C: ${s.capacity}`;
-const compressorLabel = (s: CompressorSpecs) => `${[s.brand, s.model, s.type].filter(Boolean).join(" / ")} / C: ${s.capacity} / PI: ${s.powerInput}`;
 const chassisLabel = (c: Chassis) => c.model;
-const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
 
 
 export default function Page() {
     const t = useTranslations("AdminUnit");
     const display = (v: string): string => (({
       "Select Compressor": t("selectCompressor"),
+      "Select Refrigerant": t("selectRefrigerant"),
+      "Select Brand": t("selectBrand"),
+      "Select Type": t("selectCompressorKind"),
       "Select Evaporator": t("selectEvaporator"),
       "Select Condenser": t("selectCondenser"),
       "Select Expansion Valve": t("selectExpansionValve"),
       "Select Reversing Valve": t("selectReversingValve"),
       "Select Chasis": t("selectChasis"),
-      "Select Refrigerant": t("selectRefrigerant"),
       "Air to water": t("airToWater"),
       "Water to water": t("waterToWater"),
       "Cooling": t("cooling"),
     } as Record<string, string>)[v] ?? v);
+    // Compressor-kind options carry the raw code as value but show a friendly label.
+    const displayKind = (v: string): string => KIND_LABELS[v] ?? display(v);
     const [activeTab, setActiveTab] = useState("model");
     const [unitType, setUnitType] = useState("air_to_water");
     const [unitMod] = useState("cooling");
@@ -59,21 +68,23 @@ export default function Page() {
     const [model, setModel] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [compressor, setCompressor] = useState(SELECT.compressor);
+    const [refrigerant, setRefrigerant] = useState(SELECT.refrigerant);
+    const [brand, setBrand] = useState(SELECT.brand);
+    const [kind, setKind] = useState(SELECT.kind);
+    const [compressorModel, setCompressorModel] = useState(SELECT.compressor);
+    const [compressorRatingId, setCompressorRatingId] = useState<number | null>(null);
     const [evaporator, setEvaporator] = useState(SELECT.evaporator);
     const [condenser, setCondenser] = useState(SELECT.condenser);
     const [expansionValve, setExpansionValve] = useState(SELECT.expansionValve);
     const [reversingValve, setReversingValve] = useState(SELECT.reversingValve);
     const [chasis, setChasis] = useState(SELECT.chassis);
-    const [refrigerant, setRefrigerant] = useState(SELECT.refrigerant);
 
-    const [compressorList, setCompressorList] = useState<CompressorSpecs[]>([]);
+    const [compressorCatalog, setCompressorCatalog] = useState<CompressorCatalogEntry[]>([]);
     const [evaporatorList, setEvaporatorList] = useState<ComponentSpecs[]>([]);
     const [condenserList, setCondenserList] = useState<ComponentSpecs[]>([]);
     const [expansionValveList, setExpansionValveList] = useState<ComponentSpecs[]>([]);
     const [reversingValveList, setReversingValveList] = useState<ComponentSpecs[]>([]);
     const [chassisList, setChassisList] = useState<Chassis[]>([]);
-    const [refrigerantList, setRefrigerantList] = useState<Refrigerant[]>([]);
 
     const [ambient, setAmbient] = useState("");
     const [evapIn, setEvapIn] = useState("");
@@ -144,13 +155,12 @@ export default function Page() {
                 console.error(`Failed to load ${path}`, e);
             }
         };
-        load("/admin/component/allCompressorSpecs", setCompressorList);
+        load("/admin/component/compressor-catalog", setCompressorCatalog);
         load("/admin/component/allEvaporatorSpecs", setEvaporatorList);
         load("/admin/component/allCondenserSpecs", setCondenserList);
         load("/admin/component/allExpansionValveSpecs", setExpansionValveList);
         load("/admin/component/allFourWayReversingValveSpecs", setReversingValveList);
         load("/admin/component/chassis", setChassisList);
-        load("/admin/component/refrigerants", setRefrigerantList);
     }, []);
 
     const num = (v: string) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
@@ -197,9 +207,10 @@ export default function Page() {
 
     const resetForm = () => {
         setModel("");
-        setCompressor(SELECT.compressor); setEvaporator(SELECT.evaporator); setCondenser(SELECT.condenser);
+        setRefrigerant(SELECT.refrigerant); setBrand(SELECT.brand); setKind(SELECT.kind);
+        setCompressorModel(SELECT.compressor); setCompressorRatingId(null); setEvaporator(SELECT.evaporator); setCondenser(SELECT.condenser);
         setExpansionValve(SELECT.expansionValve); setReversingValve(SELECT.reversingValve);
-        setChasis(SELECT.chassis); setRefrigerant(SELECT.refrigerant);
+        setChasis(SELECT.chassis);
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
         setCapacity(""); setMaxCapacity(""); setCompressorQty(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
         setFanPI(""); setEer(""); setCondenserQty(""); setFanType("EC"); setNumberOfFans(""); setFanDiameter("");
@@ -217,15 +228,13 @@ export default function Page() {
             return;
         }
 
-        const compressorSpec = compressorList.find((s) => compressorLabel(s) === compressor);
         const evaporatorSpec = evaporatorList.find((s) => specLabel(s) === evaporator);
         const condenserSpec = condenserList.find((s) => specLabel(s) === condenser);
         const expansionValveSpec = expansionValveList.find((s) => specLabel(s) === expansionValve);
         const reversingValveSpec = reversingValveList.find((s) => specLabel(s) === reversingValve);
         const chassisItem = chassisList.find((c) => chassisLabel(c) === chasis);
-        const refrigerantItem = refrigerantList.find((r) => refrigerantLabel(r) === refrigerant);
 
-        if (!compressorSpec || !evaporatorSpec || !condenserSpec || !expansionValveSpec || !chassisItem || !refrigerantItem) {
+        if (compressorRatingId === null || !evaporatorSpec || !condenserSpec || !expansionValveSpec || !chassisItem) {
             showToast(t("selectAllComponents"), "error");
             setActiveTab("model");
             return;
@@ -241,7 +250,7 @@ export default function Page() {
             unitTechSpecsDTO: {
                 capacity: num(capacity),
                 maxCapacity: num(maxCapacity),
-                compressorSpecsId: compressorSpec.id,
+                compressorRatingId,
                 compressorQty: int(compressorQty),
                 condenserSpecsId: condenserSpec.id,
                 condenserQty: int(condenserQty),
@@ -250,7 +259,6 @@ export default function Page() {
                 evaporatorSpecsId: evaporatorSpec.id,
                 chassisId: chassisItem.id,
                 fourWayReversingValveSpecsId: reversingValveSpec ? reversingValveSpec.id : null,
-                refrigerantId: refrigerantItem.id,
                 condenserRequiredDuty: num(condenserRequiredDuty),
                 quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
                 fanPI: num(fanPI),
@@ -321,13 +329,20 @@ export default function Page() {
         });
     };
 
-    const compressorOptions = [SELECT.compressor, ...compressorList.map(compressorLabel)];
+    // 4-step cascade: Refrigerant -> Brand -> Kind -> Compressor model. Each level's
+    // options are the distinct values among rows matching the higher-level choices.
+    const refrigerantOptions = [SELECT.refrigerant, ...distinct(compressorCatalog.map((c) => c.refrigerant))];
+    const brandRows = compressorCatalog.filter((c) => c.refrigerant === refrigerant);
+    const brandOptions = [SELECT.brand, ...distinct(brandRows.map((c) => c.brand))];
+    const kindRows = brandRows.filter((c) => c.brand === brand);
+    const kindOptions = [SELECT.kind, ...distinct(kindRows.map((c) => c.kind))];
+    const modelRows = kindRows.filter((c) => c.kind === kind);
+    const compressorModelOptions = [SELECT.compressor, ...distinct(modelRows.map((c) => c.model))];
     const evaporatorOptions = [SELECT.evaporator, ...evaporatorList.map(specLabel)];
     const condenserOptions = [SELECT.condenser, ...condenserList.map(specLabel)];
     const expansionValveOptions = [SELECT.expansionValve, ...expansionValveList.map(specLabel)];
     const reversingValveOptions = [SELECT.reversingValve, ...reversingValveList.map(specLabel)];
     const chassisOptions = [SELECT.chassis, ...chassisList.map(chassisLabel)];
-    const refrigerantOptions = [SELECT.refrigerant, ...refrigerantList.map(refrigerantLabel)];
 
     const dropHandlers = (key: string, onFiles: (f: FileList | null) => void) => ({
         onDragOver: (e: React.DragEvent) => { e.preventDefault(); if (dragOver !== key) setDragOver(key); },
@@ -337,9 +352,9 @@ export default function Page() {
 
     const modelComplete =
         model.trim() !== "" &&
-        compressor !== SELECT.compressor && evaporator !== SELECT.evaporator &&
+        compressorRatingId !== null && evaporator !== SELECT.evaporator &&
         condenser !== SELECT.condenser && expansionValve !== SELECT.expansionValve &&
-        chasis !== SELECT.chassis && refrigerant !== SELECT.refrigerant;
+        chasis !== SELECT.chassis;
 
     return (
         <div className={styles.sectionsContainer}>
@@ -390,8 +405,20 @@ export default function Page() {
                                         <Combobox options={["Cooling"]} value="Cooling" onChange={() => {}} getLabel={display} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} />
                                     </div>
                                     <div className={styles.formField}>
+                                        <label>{t("refrigerant")}</label>
+                                        <Combobox options={refrigerantOptions} value={refrigerant} onChange={(val) => { setRefrigerant(val); setBrand(SELECT.brand); setKind(SELECT.kind); setCompressorModel(SELECT.compressor); setCompressorRatingId(null); }} getLabel={display} className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>{t("brand")}</label>
+                                        <Combobox options={brandOptions} value={brand} onChange={(val) => { setBrand(val); setKind(SELECT.kind); setCompressorModel(SELECT.compressor); setCompressorRatingId(null); }} getLabel={display} className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    </div>
+                                    <div className={styles.formField}>
+                                        <label>{t("compressorKind")}</label>
+                                        <Combobox options={kindOptions} value={kind} onChange={(val) => { setKind(val); setCompressorModel(SELECT.compressor); setCompressorRatingId(null); }} getLabel={displayKind} className={`${styles.comboBox} ${kind.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    </div>
+                                    <div className={styles.formField}>
                                         <label>{t("compressor")}</label>
-                                        <Combobox options={compressorOptions} value={compressor} onChange={setCompressor} getLabel={display} className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                        <Combobox options={compressorModelOptions} value={compressorModel} onChange={(val) => { setCompressorModel(val); setCompressorRatingId(compressorCatalog.find((c) => c.refrigerant === refrigerant && c.brand === brand && c.kind === kind && c.model === val)?.ratingId ?? null); }} getLabel={display} className={`${styles.comboBox} ${compressorModel.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                     </div>
                                     <div className={styles.formField}>
                                         <label>{t("evaporator")}</label>
@@ -412,10 +439,6 @@ export default function Page() {
                                     <div className={styles.formField}>
                                         <label>{t("chasis")}</label>
                                         <Combobox options={chassisOptions} value={chasis} onChange={setChasis} getLabel={display} className={`${styles.comboBox} ${chasis.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
-                                    </div>
-                                    <div className={styles.formField}>
-                                        <label>{t("refrigerant")}</label>
-                                        <Combobox options={refrigerantOptions} value={refrigerant} onChange={setRefrigerant} getLabel={display} className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                     </div>
                                 </div>
                             )}

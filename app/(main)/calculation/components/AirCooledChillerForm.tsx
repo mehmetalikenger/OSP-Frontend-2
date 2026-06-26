@@ -12,6 +12,8 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 // Glycol options shared by the mixture/ratio comboboxes.
 const GLYCOL_TYPES = ["None", "Ethylene Glycol", "Propylene Glycol"];
 const GLYCOL_RATIOS = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50"];
+const FREQUENCIES = ["50", "60"];
+const SUCTION_MODES = ["Superheat", "Suction Gas Temp"];
 
 interface CalcDefaults {
     ambient: number;
@@ -25,6 +27,11 @@ interface CalcResult {
     copEer: number;
     flowRate: number;
     pressureDrop: number;
+    massFlow: number;
+    condenserDuty: number;
+    dischargeTemp: number;
+    withinEnvelope: boolean;
+    faithfulEngine: boolean;
 }
 
 interface Props {
@@ -41,11 +48,20 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
         "Propylene Glycol": t("propyleneGlycol"),
         "Select Ratio": t("selectRatio"),
     } as Record<string, string>)[v] ?? v);
+    const suctionLabel = (v: string): string => (({
+        "Superheat": t("superheat"),
+        "Suction Gas Temp": t("suctionGasTemp"),
+    } as Record<string, string>)[v] ?? v);
     const [ambient, setAmbient] = useState("");
     const [evapIn, setEvapIn] = useState("");
     const [evapOut, setEvapOut] = useState("");
     const [glycolType, setGlycolType] = useState("");
     const [glycolRatio, setGlycolRatio] = useState("");
+    // Compressor / refrigerant-cycle inputs.
+    const [frequency, setFrequency] = useState("50");
+    const [subcooling, setSubcooling] = useState("5");
+    const [suctionMode, setSuctionMode] = useState("Superheat");
+    const [suctionValue, setSuctionValue] = useState("10");
 
     const [result, setResult] = useState<CalcResult | null>(null);
     const [loading, setLoading] = useState(false);
@@ -69,6 +85,20 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
     useEffect(() => {
         if (result) resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, [result]);
+
+    // Compressor-cycle fields shared by the calculate / report / add-to-project bodies.
+    const refrigerantInputs = (): Record<string, number> => {
+        const base: Record<string, number> = {
+            frequencyHz: parseFloat(frequency) || 50,
+            subcooling: parseFloat(subcooling) || 0,
+        };
+        if (suctionMode === "Suction Gas Temp") {
+            base.suctionGasTemp = parseFloat(suctionValue) || 0;
+        } else {
+            base.superheat = parseFloat(suctionValue) || 10;
+        }
+        return base;
+    };
 
     const handleCalculate = async () => {
         if (!unitId) {
@@ -114,6 +144,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     condOut: 0,
                     glycolType: glycolType || null,
                     glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
+                    ...refrigerantInputs(),
                 }),
             });
 
@@ -147,6 +178,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     evapOut: parseFloat(evapOut) || 0,
                     glycolType: glycolType || null,
                     glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
+                    ...refrigerantInputs(),
                     language,
                 }),
             });
@@ -248,6 +280,42 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                             onChange={(e) => onCalcInput(setEvapOut)(e.target.value)}
                         />
                     </div>
+                    <div className={styles.input}>
+                        <label>{t("frequency")}</label>
+                        <AdminCombobox
+                            value={frequency}
+                            options={FREQUENCIES}
+                            onChange={(v) => { setFrequency(v); setResult(null); }}
+                        />
+                    </div>
+                    <div className={styles.input}>
+                        <label htmlFor="subcooling">{t("subcooling")}</label>
+                        <input
+                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                            id="subcooling"
+                            min="0"
+                            value={subcooling}
+                            onChange={(e) => onCalcInput(setSubcooling)(e.target.value)}
+                        />
+                    </div>
+                    <div className={styles.input}>
+                        <label>{t("suctionMode")}</label>
+                        <AdminCombobox
+                            value={suctionMode}
+                            options={SUCTION_MODES}
+                            getLabel={suctionLabel}
+                            onChange={(v) => { setSuctionMode(v); setResult(null); }}
+                        />
+                    </div>
+                    <div className={styles.input}>
+                        <label htmlFor="suctionValue">{suctionMode === "Suction Gas Temp" ? t("suctionGasTemp") : t("superheat")}</label>
+                        <input
+                            type="number" onWheel={(e) => e.currentTarget.blur()}
+                            id="suctionValue"
+                            value={suctionValue}
+                            onChange={(e) => onCalcInput(setSuctionValue)(e.target.value)}
+                        />
+                    </div>
                     <div className={styles.divider}></div>
                     <div className={styles.input}>
                         <label htmlFor="calculationMethod">{t("calcMethod")}</label>
@@ -298,6 +366,10 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                         </button>
                     </div>
 
+                    {result.faithfulEngine && !result.withinEnvelope && (
+                        <p className={styles.calcError}>{t("envelopeWarning")}</p>
+                    )}
+
                     <div className={styles.resultsGrid}>
                         <div className={styles.resultMetric}>
                             <span className={styles.resultMetricLabel}>{t("refrigeratingCapacity")}</span>
@@ -331,6 +403,27 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                             <span className={styles.resultMetricValue}>
                                 {fmt(result.pressureDrop)}
                                 <span className={styles.resultMetricUnit}>kPa</span>
+                            </span>
+                        </div>
+                        <div className={styles.resultMetric}>
+                            <span className={styles.resultMetricLabel}>{t("massFlow")}</span>
+                            <span className={styles.resultMetricValue}>
+                                {fmt(result.massFlow)}
+                                <span className={styles.resultMetricUnit}>kg/h</span>
+                            </span>
+                        </div>
+                        <div className={styles.resultMetric}>
+                            <span className={styles.resultMetricLabel}>{t("condenserDuty")}</span>
+                            <span className={styles.resultMetricValue}>
+                                {fmt(result.condenserDuty)}
+                                <span className={styles.resultMetricUnit}>kW</span>
+                            </span>
+                        </div>
+                        <div className={styles.resultMetric}>
+                            <span className={styles.resultMetricLabel}>{t("dischargeTemp")}</span>
+                            <span className={styles.resultMetricValue}>
+                                {fmt(result.dischargeTemp)}
+                                <span className={styles.resultMetricUnit}>°C</span>
                             </span>
                         </div>
                     </div>
@@ -382,6 +475,7 @@ export default function AirCooledChillerForm({ unitId, defaults }: Props) {
                     evapOut: parseFloat(evapOut) || 0,
                     glycolType: glycolType || null,
                     glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
+                    ...refrigerantInputs(),
                 }}
             />
         </div>

@@ -10,12 +10,10 @@ import { fetchWithAuth } from "../../../../../../lib/api";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 type ComponentSpecs = { id: number; brand?: string | null; model: string; capacity: number };
-type CompressorSpecs = { id: number; brand?: string | null; model: string; type?: string | null; capacity: number; powerInput: number };
 type HeatPump = { id: number; model: string; type: string; mods: string[] };
 
 const SELECT = {
     heatPump: "Select Heat Pump",
-    compressor: "Select Compressor",
     evaporator: "Select Evaporator",
     condenser: "Select Condenser",
     expansionValve: "Select Expansion Valve",
@@ -23,14 +21,12 @@ const SELECT = {
 };
 
 const specLabel = (s: ComponentSpecs) => `${s.model} / C: ${s.capacity}`;
-const compressorLabel = (s: CompressorSpecs) => `${[s.brand, s.model, s.type].filter(Boolean).join(" / ")} / C: ${s.capacity} / PI: ${s.powerInput}`;
 const heatPumpLabel = (h: HeatPump) => `${h.model} (${h.type})`;
 
 export default function AddHeatPumpModPage() {
     const t = useTranslations("AdminUnit");
     const display = (v: string): string => (({
         "Select Heat Pump": t("selectHeatPump"),
-        "Select Compressor": t("selectCompressor"),
         "Select Evaporator": t("selectEvaporator"),
         "Select Condenser": t("selectCondenser"),
         "Select Expansion Valve": t("selectExpansionValve"),
@@ -46,13 +42,11 @@ export default function AddHeatPumpModPage() {
     const [unitMod, setUnitMod] = useState("cooling");
 
     // per-mode component selections
-    const [compressorSpecsId, setCompressorSpecsId] = useState<number | null>(null);
     const [evaporatorSpecsId, setEvaporatorSpecsId] = useState<number | null>(null);
     const [condenserSpecsId, setCondenserSpecsId] = useState<number | null>(null);
     const [expansionValveSpecsId, setExpansionValveSpecsId] = useState<number | null>(null);
     const [reversingValveSpecsId, setReversingValveSpecsId] = useState<number | null>(null);
 
-    const [compressorList, setCompressorList] = useState<CompressorSpecs[]>([]);
     const [evaporatorList, setEvaporatorList] = useState<ComponentSpecs[]>([]);
     const [condenserList, setCondenserList] = useState<ComponentSpecs[]>([]);
     const [expansionValveList, setExpansionValveList] = useState<ComponentSpecs[]>([]);
@@ -100,7 +94,6 @@ export default function AddHeatPumpModPage() {
                 console.error(`Failed to load ${path}`, e);
             }
         };
-        load("/admin/component/allCompressorSpecs", setCompressorList);
         load("/admin/component/allEvaporatorSpecs", setEvaporatorList);
         load("/admin/component/allCondenserSpecs", setCondenserList);
         load("/admin/component/allExpansionValveSpecs", setExpansionValveList);
@@ -116,7 +109,7 @@ export default function AddHeatPumpModPage() {
     const availableMods = ["Cooling", "Heating"].filter((m) => !existingMods.includes(m.toUpperCase()));
 
     const resetModeFields = () => {
-        setCompressorSpecsId(null); setEvaporatorSpecsId(null); setCondenserSpecsId(null);
+        setEvaporatorSpecsId(null); setCondenserSpecsId(null);
         setExpansionValveSpecsId(null); setReversingValveSpecsId(null);
         setCapacity(""); setMaxCapacity(""); setEer(""); setCop(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
@@ -147,7 +140,7 @@ export default function AddHeatPumpModPage() {
             showToast(t("bothModesExist"), "error");
             return;
         }
-        if (compressorSpecsId === null || evaporatorSpecsId === null || condenserSpecsId === null ||
+        if (evaporatorSpecsId === null || condenserSpecsId === null ||
             expansionValveSpecsId === null) {
             showToast(t("selectComponentsMod"), "error");
             setActiveTab("model");
@@ -163,7 +156,6 @@ export default function AddHeatPumpModPage() {
                 copErr: unitMod === "cooling" ? num(eer) : num(cop),
                 condenserRequiredDuty: num(condenserRequiredDuty),
                 quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
-                compressorSpecsId,
                 condenserSpecsId,
                 evaporatorSpecsId,
                 expansionValveSpecsId,
@@ -209,14 +201,13 @@ export default function AddHeatPumpModPage() {
     };
 
     const heatPumpOptions = [SELECT.heatPump, ...heatPumps.map(heatPumpLabel)];
-    const compressorValue = compressorList.find((s) => s.id === compressorSpecsId);
     const evaporatorValue = evaporatorList.find((s) => s.id === evaporatorSpecsId);
     const condenserValue = condenserList.find((s) => s.id === condenserSpecsId);
     const expansionValveValue = expansionValveList.find((s) => s.id === expansionValveSpecsId);
     const reversingValveValue = reversingValveList.find((s) => s.id === reversingValveSpecsId);
 
     const modelComplete =
-        selectedHeatPumpId !== null && compressorSpecsId !== null && evaporatorSpecsId !== null &&
+        selectedHeatPumpId !== null && evaporatorSpecsId !== null &&
         condenserSpecsId !== null && expansionValveSpecsId !== null;
 
     return (
@@ -285,17 +276,6 @@ export default function AddHeatPumpModPage() {
                                 <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
-                                <label>{t("compressor")}</label>
-                                <Combobox
-                                    options={[SELECT.compressor, ...compressorList.map(compressorLabel)]}
-                                    value={compressorValue ? compressorLabel(compressorValue) : SELECT.compressor}
-                                    onChange={(label) => setCompressorSpecsId(compressorList.find((s) => compressorLabel(s) === label)?.id ?? null)}
-                                    getLabel={display}
-                                    className={`${styles.comboBox} ${compressorSpecsId === null ? styles.placeholderText : ''}`}
-                                    containerClassName={styles.comboboxContainerOverride}
-                                />
-                            </div>
-                            <div className={styles.formField}>
                                 <label>{t("evaporator")}</label>
                                 <Combobox
                                     options={[SELECT.evaporator, ...evaporatorList.map(specLabel)]}
@@ -350,11 +330,11 @@ export default function AddHeatPumpModPage() {
                             </div>
                             <div className={styles.formField}>
                                 <label>{t("evapInlet")}</label>
-                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapIn} onChange={(e) => setEvapIn(e.target.value)} disabled={unitMod === 'heating'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>{t("evapOutlet")}</label>
-                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} />
+                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={evapOut} onChange={(e) => setEvapOut(e.target.value)} disabled={unitMod === 'heating'} />
                             </div>
                             <div className={styles.formField}>
                                 <label>{t("condInlet")}</label>

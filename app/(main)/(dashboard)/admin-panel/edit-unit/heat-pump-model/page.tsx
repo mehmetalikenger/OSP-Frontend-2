@@ -11,9 +11,15 @@ import { useConfirm } from "../../useConfirm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-type Refrigerant = { id: number; name: string; code: string };
 type Chassis = { id: number; brand?: string | null; model: string };
+// Flat compressor catalog row: one entry per refrigerant + brand + kind + model combination.
+type CompressorCatalogEntry = { ratingId: number; refrigerant: string; brand: string; kind: string; model: string };
 type HeatPumpSummary = { id: number; model: string; type: string; mods: string[] };
+
+// Distinct + alphabetically sorted helper used to build the cascade option lists.
+const distinct = (arr: string[]) => Array.from(new Set(arr)).sort();
+// Friendly labels for the compressor-kind codes; the raw code stays the option value.
+const KIND_LABELS: Record<string, string> = { RC: "Reciprocating", SC: "Scroll", SCR: "Screw", ISCR: "Inverter" };
 
 type Upload = {
     file?: File;
@@ -39,9 +45,11 @@ const fromServerAsset = (a: { id: number; url: string }) => ({
 } as Upload);
 
 const HP_SELECT = "Select Heat Pump";
-const REFRIG_SELECT = "Select Refrigerant";
 const CHASSIS_SELECT = "Select Chasis";
-const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
+const REFRIGERANT_SELECT = "Select Refrigerant";
+const BRAND_SELECT = "Select Brand";
+const KIND_SELECT = "Select Type";
+const COMPRESSOR_SELECT = "Select Compressor";
 const chassisLabel = (c: Chassis) => c.model;
 const heatPumpLabel = (h: HeatPumpSummary) => `${h.model} (${h.type})`;
 const str = (n: number | null | undefined) => (n === null || n === undefined ? "" : String(n));
@@ -51,13 +59,18 @@ export default function EditHeatPumpModelPage() {
     const display = (label: string) => {
         switch (label) {
             case HP_SELECT: return t("selectHeatPump");
-            case REFRIG_SELECT: return t("selectRefrigerant");
             case CHASSIS_SELECT: return t("selectChasis");
+            case REFRIGERANT_SELECT: return t("selectRefrigerant");
+            case BRAND_SELECT: return t("selectBrand");
+            case KIND_SELECT: return t("selectCompressorKind");
+            case COMPRESSOR_SELECT: return t("selectCompressor");
             case "Air to water": return t("airToWater");
             case "Water to water": return t("waterToWater");
             default: return label;
         }
     };
+    // Compressor-kind options carry the raw code as value but show a friendly label.
+    const displayKind = (v: string): string => KIND_LABELS[v] ?? display(v);
     const [heatPumps, setHeatPumps] = useState<HeatPumpSummary[]>([]);
     const [selectedHeatPumpId, setSelectedHeatPumpId] = useState<number | null>(null);
 
@@ -66,10 +79,16 @@ export default function EditHeatPumpModelPage() {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const [refrigerantList, setRefrigerantList] = useState<Refrigerant[]>([]);
-    const [refrigerantId, setRefrigerantId] = useState<number | null>(null);
     const [chassisList, setChassisList] = useState<Chassis[]>([]);
     const [chassisId, setChassisId] = useState<number | null>(null);
+
+    // Compressor cascade (Refrigerant -> Brand -> Kind -> Compressor model -> ratingId)
+    const [compressorCatalog, setCompressorCatalog] = useState<CompressorCatalogEntry[]>([]);
+    const [refrigerant, setRefrigerant] = useState(REFRIGERANT_SELECT);
+    const [brand, setBrand] = useState(BRAND_SELECT);
+    const [kind, setKind] = useState(KIND_SELECT);
+    const [compressorModel, setCompressorModel] = useState(COMPRESSOR_SELECT);
+    const [compressorRatingId, setCompressorRatingId] = useState<number | null>(null);
 
     const [fanType, setFanType] = useState("EC");
     const [waterInletConnection, setWaterInletConnection] = useState("");
@@ -185,8 +204,8 @@ export default function EditHeatPumpModelPage() {
                 if (res.ok) setter(await res.json());
             } catch (e) { console.error(`Failed to load ${path}`, e); }
         };
-        load("/admin/component/refrigerants", setRefrigerantList);
         load("/admin/component/chassis", setChassisList);
+        load("/admin/component/compressor-catalog", setCompressorCatalog);
         loadHeatPumps();
     }, []);
 
@@ -201,7 +220,7 @@ export default function EditHeatPumpModelPage() {
         dischargeLineDiameter: "", liquidLineDiameter: "", suctionLineDiameter: "", gasTank: "",
     };
 
-    const clearForm = () => { setModel(""); setName(""); setDescription(""); setUnitType("air_to_water"); setRefrigerantId(null); setChassisId(null); setFanType("EC"); setWaterInletConnection(""); setWaterOutletConnection(""); setF(emptyF); };
+    const clearForm = () => { setModel(""); setName(""); setDescription(""); setUnitType("air_to_water"); setChassisId(null); setRefrigerant(REFRIGERANT_SELECT); setBrand(BRAND_SELECT); setKind(KIND_SELECT); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); setFanType("EC"); setWaterInletConnection(""); setWaterOutletConnection(""); setF(emptyF); };
 
     const loadHeatPump = async (id: number) => {
         try {
@@ -212,8 +231,12 @@ export default function EditHeatPumpModelPage() {
             setName(d.name ?? "");
             setDescription(d.description ?? "");
             setUnitType(d.type === "WW" ? "water_to_water" : "air_to_water");
-            setRefrigerantId(d.refrigerantId ?? null);
             setChassisId(d.chassisId ?? null);
+            setCompressorRatingId(d.compressorRatingId ?? null);
+            // Reset the cascade to placeholders; the four dropdowns render-derive from
+            // compressorRatingId until the admin touches the picker.
+            setRefrigerant(REFRIGERANT_SELECT); setBrand(BRAND_SELECT); setKind(KIND_SELECT);
+            setCompressorModel(COMPRESSOR_SELECT);
             setFanType(d.fanType || "EC");
             setWaterInletConnection(d.waterInletConnection || "");
             setWaterOutletConnection(d.waterOutletConnection || "");
@@ -265,14 +288,15 @@ export default function EditHeatPumpModelPage() {
     const handleSave = async () => {
         if (selectedHeatPumpId === null) { showToast(t("pleaseSelectHeatPumpEdit"), "error"); return; }
         if (!model.trim()) { showToast(t("pleaseEnterModelName"), "error"); return; }
-        if (refrigerantId === null) { showToast(t("pleaseSelectRefrigerant"), "error"); return; }
         if (chassisId === null) { showToast(t("pleaseSelectChassis"), "error"); return; }
+        if (compressorRatingId === null) { showToast(t("selectAllComponents"), "error"); return; }
 
         const payload = {
             heatPumpDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW" },
             commonSpecsDto: {
+                compressorRatingId,
                 compressorQty: int(f.compressorQty), condenserQty: int(f.condenserQty),
-                expansionValveQty: int(f.expansionValveQty), refrigerantId, chassisId,
+                expansionValveQty: int(f.expansionValveQty), chassisId,
                 fanPI: num(f.fanPI), width: num(f.width), length: num(f.length), height: num(f.height),
                 numberOfFans: int(f.numberOfFans), fanType, fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
                 dischargeLineDiameter: f.dischargeLineDiameter, liquidLineDiameter: f.liquidLineDiameter,
@@ -336,10 +360,26 @@ export default function EditHeatPumpModelPage() {
         }
     };
 
-    const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
     const chassisValue = chassisList.find((c) => c.id === chassisId);
     const chassisOptions = [CHASSIS_SELECT, ...chassisList.map(chassisLabel)];
     const selectedHeatPump = heatPumps.find((h) => h.id === selectedHeatPumpId);
+
+    // 4-step cascade: Refrigerant -> Brand -> Kind -> Compressor model. Each level prefers
+    // the explicitly chosen value; otherwise it derives from the loaded compressorRatingId
+    // so a preloaded compressor preselects even before the admin touches the picker.
+    const ratingRow = compressorRatingId !== null ? compressorCatalog.find((c) => c.ratingId === compressorRatingId) : undefined;
+    const refrigerantValue = refrigerant !== REFRIGERANT_SELECT ? refrigerant : (ratingRow?.refrigerant ?? REFRIGERANT_SELECT);
+    const brandValue = brand !== BRAND_SELECT ? brand : (ratingRow?.brand ?? BRAND_SELECT);
+    const kindValue = kind !== KIND_SELECT ? kind : (ratingRow?.kind ?? KIND_SELECT);
+    const compressorModelValue = compressorModel !== COMPRESSOR_SELECT ? compressorModel : (ratingRow?.model ?? COMPRESSOR_SELECT);
+
+    const refrigerantOptions = [REFRIGERANT_SELECT, ...distinct(compressorCatalog.map((c) => c.refrigerant))];
+    const brandRows = compressorCatalog.filter((c) => c.refrigerant === refrigerantValue);
+    const brandOptions = [BRAND_SELECT, ...distinct(brandRows.map((c) => c.brand))];
+    const kindRows = brandRows.filter((c) => c.brand === brandValue);
+    const kindOptions = [KIND_SELECT, ...distinct(kindRows.map((c) => c.kind))];
+    const modelRows = kindRows.filter((c) => c.kind === kindValue);
+    const compressorModelOptions = [COMPRESSOR_SELECT, ...distinct(modelRows.map((c) => c.model))];
 
     return (
         <div className={styles.sectionsContainer}>
@@ -368,7 +408,10 @@ export default function EditHeatPumpModelPage() {
                                 <div className={styles.formField}><label>{t("name")}</label><input type="text" className={styles.inputElement} placeholder={t("enterDisplayName")} value={name} onChange={(e) => setName(e.target.value)} /></div>
                                 <div className={`${styles.formField} ${styles.formFieldFullWidth}`}><label>{t("description")}</label><textarea className={styles.inputElement} placeholder={t("enterUnitDescription")} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
                                 <div className={styles.formField}><label>{t("type")}</label><Combobox options={["Air to water", "Water to water"]} value={unitType === "air_to_water" ? "Air to water" : "Water to water"} getLabel={display} onChange={(val) => setUnitType(val === "Air to water" ? "air_to_water" : "water_to_water")} className={styles.comboBox} containerClassName={styles.comboboxContainerOverride} /></div>
-                                <div className={styles.formField}><label>{t("refrigerant")}</label><Combobox options={[REFRIG_SELECT, ...refrigerantList.map(refrigerantLabel)]} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} getLabel={display} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                <div className={styles.formField}><label>{t("refrigerant")}</label><Combobox options={refrigerantOptions} value={refrigerantValue} getLabel={display} onChange={(val) => { setRefrigerant(val); setBrand(BRAND_SELECT); setKind(KIND_SELECT); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} className={`${styles.comboBox} ${refrigerantValue.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                <div className={styles.formField}><label>{t("brand")}</label><Combobox options={brandOptions} value={brandValue} getLabel={display} onChange={(val) => { setRefrigerant(refrigerantValue); setBrand(val); setKind(KIND_SELECT); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} className={`${styles.comboBox} ${brandValue.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                <div className={styles.formField}><label>{t("compressorKind")}</label><Combobox options={kindOptions} value={kindValue} getLabel={displayKind} onChange={(val) => { setRefrigerant(refrigerantValue); setBrand(brandValue); setKind(val); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} className={`${styles.comboBox} ${kindValue.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
+                                <div className={styles.formField}><label>{t("compressor")}</label><Combobox options={compressorModelOptions} value={compressorModelValue} getLabel={display} onChange={(val) => { setRefrigerant(refrigerantValue); setBrand(brandValue); setKind(kindValue); setCompressorModel(val); setCompressorRatingId(compressorCatalog.find((c) => c.refrigerant === refrigerantValue && c.brand === brandValue && c.kind === kindValue && c.model === val)?.ratingId ?? null); }} className={`${styles.comboBox} ${compressorModelValue.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} /></div>
                                 <div className={styles.formField}><label>{t("compressorQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
                                 <div className={styles.formField}><label>{t("condenserQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
                                 <div className={styles.formField}><label>{t("fanPowerInput")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.fanPI} onChange={upd("fanPI")} /></div>

@@ -20,6 +20,10 @@ interface CalcContext {
     evapOut: number;
     glycolType?: string | null;
     glycolPercentage?: number | null;
+    frequencyHz?: number;
+    subcooling?: number;
+    superheat?: number;
+    suctionGasTemp?: number;
 }
 
 interface CalculationModalsProps {
@@ -175,6 +179,11 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 evapOut: calc.evapOut,
                 glycolType: calc.glycolType ?? null,
                 glycolPercentage: calc.glycolPercentage ?? null,
+                frequencyHz: calc.frequencyHz ?? 50,
+                subcooling: calc.subcooling ?? 0,
+                ...(calc.suctionGasTemp != null
+                    ? { suctionGasTemp: calc.suctionGasTemp }
+                    : { superheat: calc.superheat ?? 10 }),
                 language,
             }),
         });

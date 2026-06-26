@@ -53,11 +53,12 @@ export default function AirToWaterHeatPumpClient({
             specs={calcData?.specs}
             calculationForm={calcData ? (
                 <AirToWaterHeatPumpForm
+                    unitId={id}
                     coolingDefaults={calcData.coolingDefaults}
                     heatingDefaults={calcData.heatingDefaults}
                 />
             ) : (
-                <AirToWaterHeatPumpForm />
+                <AirToWaterHeatPumpForm unitId={id} />
             )}
         />
     );

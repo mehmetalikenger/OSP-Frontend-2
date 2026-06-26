@@ -51,9 +51,9 @@ export default function WaterCooledChillerClient({
             documents={calcData?.documents}
             specs={calcData?.specs}
             calculationForm={calcData ? (
-                <WaterCooledChillerForm defaults={calcData.coolingDefaults} />
+                <WaterCooledChillerForm unitId={id} defaults={calcData.coolingDefaults} />
             ) : (
-                <WaterCooledChillerForm />
+                <WaterCooledChillerForm unitId={id} />
             )}
         />
     );

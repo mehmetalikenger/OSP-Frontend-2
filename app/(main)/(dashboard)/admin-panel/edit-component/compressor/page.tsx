@@ -8,6 +8,16 @@ import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
 import { useTranslations } from "next-intl";
 
+type Refrigerant = {
+    id: number;
+    name: string;
+    code: string;
+}
+
+// Imported refrigerants have name === code, so show a single value; only show "name / code"
+// when they actually differ.
+const refrigerantLabel = (r: Refrigerant) => (r.name === r.code ? r.code : `${r.name} / ${r.code}`);
+
 type Compressor = {
     id: number;
     brand: string;
@@ -15,6 +25,8 @@ type Compressor = {
     type: string;
     moc: number;
     lra: number;
+    refrigerant?: Refrigerant | null;
+    imported?: boolean;
 }
 
 type CompressorSpecs = {
@@ -24,10 +36,16 @@ type CompressorSpecs = {
     type: string;
     capacity: number;
     powerInput: number;
+    refrigerantId?: number | null;
+    rpmBase?: number | null; rpmMin?: number | null; rpmMax?: number | null;
     qC1: number; qC2: number; qC3: number; qC4: number; qC5: number;
     qC6: number; qC7: number; qC8: number; qC9: number; qC10: number;
+    qC11?: number | null; qC12?: number | null; qC13?: number | null; qC14?: number | null; qC15?: number | null;
+    qC16?: number | null; qC17?: number | null; qC18?: number | null; qC19?: number | null; qC20?: number | null;
     pC1: number; pC2: number; pC3: number; pC4: number; pC5: number;
     pC6: number; pC7: number; pC8: number; pC9: number; pC10: number;
+    pC11?: number | null; pC12?: number | null; pC13?: number | null; pC14?: number | null; pC15?: number | null;
+    pC16?: number | null; pC17?: number | null; pC18?: number | null; pC19?: number | null; pC20?: number | null;
 }
 
 export default function EditCompressorPage() {
@@ -38,15 +56,21 @@ export default function EditCompressorPage() {
     const [model, setModel] = useState("");
     const [moc, setMoc] = useState("");
     const [lra, setLra] = useState("");
+    const [refrigerant, setRefrigerant] = useState("Select Refrigerant");
 
     const [compressor, setCompressor] = useState("Select Compressor");
     const [capacity, setCapacity] = useState("");
     const [powerInput, setPowerInput] = useState("");
-    const [qCoeffs, setQCoeffs] = useState<string[]>(Array(10).fill(""));
-    const [pCoeffs, setPCoeffs] = useState<string[]>(Array(10).fill(""));
+    // Coefficients hold up to 20 each: 1–10 for all compressors, 11–20 only for ISCR.
+    const [qCoeffs, setQCoeffs] = useState<string[]>(Array(20).fill(""));
+    const [pCoeffs, setPCoeffs] = useState<string[]>(Array(20).fill(""));
+    const [rpmBase, setRpmBase] = useState("");
+    const [rpmMin, setRpmMin] = useState("");
+    const [rpmMax, setRpmMax] = useState("");
 
     const [compressorsList, setCompressorsList] = useState<Compressor[]>([]);
     const [compressorSpecsList, setCompressorSpecsList] = useState<CompressorSpecs[]>([]);
+    const [refrigerantsList, setRefrigerantsList] = useState<Refrigerant[]>([]);
 
     const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
@@ -81,10 +105,29 @@ export default function EditCompressorPage() {
         }
     };
 
+    const fetchRefrigerants = async () => {
+        try {
+            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/refrigerants`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                setRefrigerantsList(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch refrigerants", e);
+        }
+    };
+
     useEffect(() => {
         fetchCompressors();
         fetchCompressorSpecs();
+        fetchRefrigerants();
     }, []);
+
+    // The selected spec's type drives the ISCR-only fields (RPM + Q11–Q20).
+    const selectedSpecObj = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
+    const isIscr = selectedSpecObj?.type === "ISCR";
+    const qCount = isIscr ? 20 : 10;
+    const pCount = isIscr ? 20 : 10;
 
     useEffect(() => {
         if (selectedItemToEdit !== "Select Compressor") {
@@ -95,6 +138,7 @@ export default function EditCompressorPage() {
                 setModel(comp.model);
                 setMoc(String(comp.moc ?? ""));
                 setLra(String(comp.lra ?? ""));
+                setRefrigerant(comp.refrigerant ? refrigerantLabel(comp.refrigerant) : "Select Refrigerant");
             }
         } else {
             setBrand("Select Brand");
@@ -102,6 +146,7 @@ export default function EditCompressorPage() {
             setModel("");
             setMoc("");
             setLra("");
+            setRefrigerant("Select Refrigerant");
         }
     }, [selectedItemToEdit, compressorsList]);
 
@@ -109,26 +154,37 @@ export default function EditCompressorPage() {
         if (compressor !== "Select Compressor") {
             const spec = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
             if (spec) {
+                const optStr = (v?: number | null) => (v === null || v === undefined ? "" : v.toString());
                 setCapacity(spec.capacity.toString());
                 setPowerInput(spec.powerInput.toString());
                 setQCoeffs([
                     spec.qC1.toString(), spec.qC2.toString(), spec.qC3.toString(),
                     spec.qC4.toString(), spec.qC5.toString(), spec.qC6.toString(),
                     spec.qC7.toString(), spec.qC8.toString(), spec.qC9.toString(),
-                    spec.qC10.toString()
+                    spec.qC10.toString(),
+                    optStr(spec.qC11), optStr(spec.qC12), optStr(spec.qC13), optStr(spec.qC14), optStr(spec.qC15),
+                    optStr(spec.qC16), optStr(spec.qC17), optStr(spec.qC18), optStr(spec.qC19), optStr(spec.qC20)
                 ]);
                 setPCoeffs([
                     spec.pC1.toString(), spec.pC2.toString(), spec.pC3.toString(),
                     spec.pC4.toString(), spec.pC5.toString(), spec.pC6.toString(),
                     spec.pC7.toString(), spec.pC8.toString(), spec.pC9.toString(),
-                    spec.pC10.toString()
+                    spec.pC10.toString(),
+                    optStr(spec.pC11), optStr(spec.pC12), optStr(spec.pC13), optStr(spec.pC14), optStr(spec.pC15),
+                    optStr(spec.pC16), optStr(spec.pC17), optStr(spec.pC18), optStr(spec.pC19), optStr(spec.pC20)
                 ]);
+                setRpmBase(optStr(spec.rpmBase));
+                setRpmMin(optStr(spec.rpmMin));
+                setRpmMax(optStr(spec.rpmMax));
             }
         } else {
             setCapacity("");
             setPowerInput("");
-            setQCoeffs(Array(10).fill(""));
-            setPCoeffs(Array(10).fill(""));
+            setQCoeffs(Array(20).fill(""));
+            setPCoeffs(Array(20).fill(""));
+            setRpmBase("");
+            setRpmMin("");
+            setRpmMax("");
         }
     }, [compressor, compressorSpecsList]);
 
@@ -137,7 +193,7 @@ export default function EditCompressorPage() {
             showToast(t("selectToEdit", { name: t("names.compressor.low") }), "error");
             return;
         }
-        if (brand === "Select Brand" || type === "Select Type" || !model) {
+        if (brand === "Select Brand" || type === "Select Type" || !model || refrigerant === "Select Refrigerant") {
             showToast(t("fillAllFields"), "error");
             return;
         }
@@ -145,11 +201,13 @@ export default function EditCompressorPage() {
         const comp = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
         if (!comp) return;
 
+        const refrigerantItem = refrigerantsList.find(r => refrigerantLabel(r) === refrigerant);
+
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressor/${comp.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand, type, model, moc: parseFloat(moc), lra: parseFloat(lra) }),
+                body: JSON.stringify({ brand, type, model, moc: parseFloat(moc), lra: parseFloat(lra), refrigerantId: refrigerantItem ? refrigerantItem.id : null }),
                 credentials: 'include'
             });
 
@@ -181,16 +239,24 @@ export default function EditCompressorPage() {
             showToast(t("fillAllFields"), "error");
             return;
         }
-        if (qCoeffs.some(v => v === "") || pCoeffs.some(v => v === "")) {
+        // Only the required coefficients must be filled: Q1–Q10 always, Q11–Q20 only for ISCR.
+        if (qCoeffs.slice(0, qCount).some(v => v === "") || pCoeffs.slice(0, pCount).some(v => v === "")) {
             showToast(t("fillCoefficients"), "error");
+            return;
+        }
+        if (isIscr && (!rpmBase || !rpmMin || !rpmMax)) {
+            showToast(t("fillRpm"), "error");
             return;
         }
 
         const selectedSpec = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
         if (!selectedSpec) return;
 
-        const qObj = Object.fromEntries(qCoeffs.map((v, i) => [`qC${i + 1}`, parseFloat(v)]));
-        const pObj = Object.fromEntries(pCoeffs.map((v, i) => [`pC${i + 1}`, parseFloat(v)]));
+        const qObj = Object.fromEntries(qCoeffs.slice(0, qCount).map((v, i) => [`qC${i + 1}`, parseFloat(v)]));
+        const pObj = Object.fromEntries(pCoeffs.slice(0, pCount).map((v, i) => [`pC${i + 1}`, parseFloat(v)]));
+        const rpmObj = isIscr
+            ? { rpmBase: parseFloat(rpmBase), rpmMin: parseFloat(rpmMin), rpmMax: parseFloat(rpmMax) }
+            : { rpmBase: null, rpmMin: null, rpmMax: null };
 
         try {
             const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressorSpecs/${selectedSpec.id}`, {
@@ -200,6 +266,7 @@ export default function EditCompressorPage() {
                     compressorId: 0,
                     capacity: parseFloat(capacity),
                     powerInput: parseFloat(powerInput),
+                    ...rpmObj,
                     ...qObj,
                     ...pObj
                 }),
@@ -224,7 +291,8 @@ export default function EditCompressorPage() {
         }
     };
 
-    const compressorOptions = ["Select Compressor", ...compressorsList.map(c => `${c.brand} / ${c.model} / ${c.type}`)];
+    // Imported Frascold catalogue compressors are managed via the import, not this page — hide them.
+    const compressorOptions = ["Select Compressor", ...compressorsList.filter(c => !c.imported).map(c => `${c.brand} / ${c.model} / ${c.type}`)];
     const specsOptions = ["Select Compressor", ...compressorSpecsList.map(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}`)];
 
     const handleDelete = async () => {
@@ -330,6 +398,17 @@ export default function EditCompressorPage() {
                                         onChange={(e) => setLra(e.target.value)}
                                     />
                                 </div>
+                                <div className={styles.formField}>
+                                    <label>{t("refrigerant")}</label>
+                                    <Combobox
+                                        options={["Select Refrigerant", ...refrigerantsList.map(refrigerantLabel)]}
+                                        value={refrigerant}
+                                        onChange={setRefrigerant}
+                                        getLabel={(v) => v === "Select Refrigerant" ? t("selectRefrigerant") : v}
+                                        className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
                             </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
                                 <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
@@ -374,10 +453,30 @@ export default function EditCompressorPage() {
 
                             <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
 
+                            {isIscr && (
+                                <fieldset className={styles.coeffGroup}>
+                                    <legend>{t("rpmSection")}</legend>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                                        <div className={styles.formField}>
+                                            <label>{t("rpmBase")}</label>
+                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmBase} onChange={(e) => setRpmBase(e.target.value)} />
+                                        </div>
+                                        <div className={styles.formField}>
+                                            <label>{t("rpmMin")}</label>
+                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMin} onChange={(e) => setRpmMin(e.target.value)} />
+                                        </div>
+                                        <div className={styles.formField}>
+                                            <label>{t("rpmMax")}</label>
+                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMax} onChange={(e) => setRpmMax(e.target.value)} />
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            )}
+
                             <fieldset className={styles.coeffGroup}>
                                 <legend>{t("capacityCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {qCoeffs.map((val, i) => (
+                                    {qCoeffs.slice(0, qCount).map((val, i) => (
                                         <div className={styles.formField} key={`q${i}`}>
                                             <label>Q-C{i + 1}</label>
                                             <input
@@ -399,7 +498,7 @@ export default function EditCompressorPage() {
                             <fieldset className={styles.coeffGroup}>
                                 <legend>{t("powerCoeffs")}</legend>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {pCoeffs.map((val, i) => (
+                                    {pCoeffs.slice(0, pCount).map((val, i) => (
                                         <div className={styles.formField} key={`p${i}`}>
                                             <label>P-C{i + 1}</label>
                                             <input

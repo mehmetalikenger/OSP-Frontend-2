@@ -10,37 +10,56 @@ import { uploadUnitAssets } from "../../../../../../lib/assetUpload";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-type Refrigerant = { id: number; name: string; code: string };
 type Chassis = { id: number; brand?: string | null; model: string };
+// Flat compressor catalog row: one entry per refrigerant + brand + kind + model combination.
+type CompressorCatalogEntry = { ratingId: number; refrigerant: string; brand: string; kind: string; model: string };
 type Upload = { file?: File; url: string; id: string; serverId?: number };
+
+// Distinct + alphabetically sorted helper used to build the cascade option lists.
+const distinct = (arr: string[]) => Array.from(new Set(arr)).sort();
+// Friendly labels for the compressor-kind codes; the raw code stays the option value.
+const KIND_LABELS: Record<string, string> = { RC: "Reciprocating", SC: "Scroll", SCR: "Screw", ISCR: "Inverter" };
 
 let uidCounter = 0;
 const uid = () => `u${Date.now()}_${uidCounter++}`;
 const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 const MAX_TOTAL_BYTES = 25 * 1024 * 1024;
 
-const REFRIG_SELECT = "Select Refrigerant";
 const CHASSIS_SELECT = "Select Chasis";
-const refrigerantLabel = (r: Refrigerant) => `${r.name} / ${r.code}`;
+const REFRIGERANT_SELECT = "Select Refrigerant";
+const BRAND_SELECT = "Select Brand";
+const KIND_SELECT = "Select Type";
+const COMPRESSOR_SELECT = "Select Compressor";
 const chassisLabel = (c: Chassis) => c.model;
 
 export default function AddHeatPumpModelPage() {
     const t = useTranslations("AdminUnit");
     const display = (v: string): string => (({
-      "Select Refrigerant": t("selectRefrigerant"),
       "Select Chasis": t("selectChasis"),
+      "Select Refrigerant": t("selectRefrigerant"),
+      "Select Brand": t("selectBrand"),
+      "Select Type": t("selectCompressorKind"),
+      "Select Compressor": t("selectCompressor"),
       "Air to water": t("airToWater"),
       "Water to water": t("waterToWater"),
     } as Record<string, string>)[v] ?? v);
+    // Compressor-kind options carry the raw code as value but show a friendly label.
+    const displayKind = (v: string): string => KIND_LABELS[v] ?? display(v);
     const [unitType, setUnitType] = useState("air_to_water");
     const [model, setModel] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const [refrigerantList, setRefrigerantList] = useState<Refrigerant[]>([]);
-    const [refrigerantId, setRefrigerantId] = useState<number | null>(null);
     const [chassisList, setChassisList] = useState<Chassis[]>([]);
     const [chassisId, setChassisId] = useState<number | null>(null);
+
+    // Compressor cascade (Refrigerant -> Brand -> Kind -> Compressor model -> ratingId)
+    const [compressorCatalog, setCompressorCatalog] = useState<CompressorCatalogEntry[]>([]);
+    const [refrigerant, setRefrigerant] = useState(REFRIGERANT_SELECT);
+    const [brand, setBrand] = useState(BRAND_SELECT);
+    const [kind, setKind] = useState(KIND_SELECT);
+    const [compressorModel, setCompressorModel] = useState(COMPRESSOR_SELECT);
+    const [compressorRatingId, setCompressorRatingId] = useState<number | null>(null);
 
     const [fanType, setFanType] = useState("EC");
     const [waterInletConnection, setWaterInletConnection] = useState("");
@@ -132,26 +151,35 @@ export default function AddHeatPumpModelPage() {
                 console.error(`Failed to load ${path}`, e);
             }
         };
-        load("/admin/component/refrigerants", setRefrigerantList);
         load("/admin/component/chassis", setChassisList);
+        load("/admin/component/compressor-catalog", setCompressorCatalog);
     }, []);
 
     const num = (v: string) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
     const int = (v: string) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
     const blockNeg = (e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); };
 
-    const refrigerantValue = refrigerantList.find((r) => r.id === refrigerantId);
-    const refrigerantOptions = [REFRIG_SELECT, ...refrigerantList.map(refrigerantLabel)];
     const chassisValue = chassisList.find((c) => c.id === chassisId);
     const chassisOptions = [CHASSIS_SELECT, ...chassisList.map(chassisLabel)];
+
+    // 4-step cascade: Refrigerant -> Brand -> Kind -> Compressor model. Each level's
+    // options are the distinct values among rows matching the higher-level choices.
+    const refrigerantOptions = [REFRIGERANT_SELECT, ...distinct(compressorCatalog.map((c) => c.refrigerant))];
+    const brandRows = compressorCatalog.filter((c) => c.refrigerant === refrigerant);
+    const brandOptions = [BRAND_SELECT, ...distinct(brandRows.map((c) => c.brand))];
+    const kindRows = brandRows.filter((c) => c.brand === brand);
+    const kindOptions = [KIND_SELECT, ...distinct(kindRows.map((c) => c.kind))];
+    const modelRows = kindRows.filter((c) => c.kind === kind);
+    const compressorModelOptions = [COMPRESSOR_SELECT, ...distinct(modelRows.map((c) => c.model))];
 
     const resetForm = () => {
         setModel("");
         setName("");
         setDescription("");
         setUnitType("air_to_water");
-        setRefrigerantId(null);
         setChassisId(null);
+        setRefrigerant(REFRIGERANT_SELECT); setBrand(BRAND_SELECT); setKind(KIND_SELECT);
+        setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null);
         setFanType("EC");
         setWaterInletConnection("");
         setWaterOutletConnection("");
@@ -179,14 +207,15 @@ export default function AddHeatPumpModelPage() {
 
     const handleAdd = async () => {
         if (!model.trim()) { showToast(t("pleaseEnterModelName"), "error"); return; }
-        if (refrigerantId === null) { showToast(t("pleaseSelectRefrigerant"), "error"); return; }
         if (chassisId === null) { showToast(t("pleaseSelectChassis"), "error"); return; }
+        if (compressorRatingId === null) { showToast(t("selectAllComponents"), "error"); return; }
 
         const payload = {
             heatPumpDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW" },
             commonSpecsDto: {
+                compressorRatingId,
                 compressorQty: int(f.compressorQty), condenserQty: int(f.condenserQty),
-                expansionValveQty: int(f.expansionValveQty), refrigerantId, chassisId,
+                expansionValveQty: int(f.expansionValveQty), chassisId,
                 fanPI: num(f.fanPI), width: num(f.width), length: num(f.length), height: num(f.height),
                 numberOfFans: int(f.numberOfFans), fanType, fanDiameter: num(f.fanDiameter), airflowRate: num(f.airflowRate),
                 dischargeLineDiameter: f.dischargeLineDiameter, liquidLineDiameter: f.liquidLineDiameter,
@@ -263,7 +292,19 @@ export default function AddHeatPumpModelPage() {
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("refrigerant")}</label>
-                                    <Combobox getLabel={display} options={refrigerantOptions} value={refrigerantValue ? refrigerantLabel(refrigerantValue) : REFRIG_SELECT} onChange={(label) => setRefrigerantId(refrigerantList.find((r) => refrigerantLabel(r) === label)?.id ?? null)} className={`${styles.comboBox} ${refrigerantId === null ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                    <Combobox options={refrigerantOptions} value={refrigerant} onChange={(val) => { setRefrigerant(val); setBrand(BRAND_SELECT); setKind(KIND_SELECT); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} getLabel={display} className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("brand")}</label>
+                                    <Combobox options={brandOptions} value={brand} onChange={(val) => { setBrand(val); setKind(KIND_SELECT); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} getLabel={display} className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("compressorKind")}</label>
+                                    <Combobox options={kindOptions} value={kind} onChange={(val) => { setKind(val); setCompressorModel(COMPRESSOR_SELECT); setCompressorRatingId(null); }} getLabel={displayKind} className={`${styles.comboBox} ${kind.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("compressor")}</label>
+                                    <Combobox options={compressorModelOptions} value={compressorModel} onChange={(val) => { setCompressorModel(val); setCompressorRatingId(compressorCatalog.find((c) => c.refrigerant === refrigerant && c.brand === brand && c.kind === kind && c.model === val)?.ratingId ?? null); }} getLabel={display} className={`${styles.comboBox} ${compressorModel.startsWith('Select') ? styles.placeholderText : ''}`} containerClassName={styles.comboboxContainerOverride} />
                                 </div>
                                 <div className={styles.formField}><label>{t("compressorQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.compressorQty} onChange={upd("compressorQty")} /></div>
                                 <div className={styles.formField}><label>{t("condenserQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={f.condenserQty} onChange={upd("condenserQty")} /></div>
