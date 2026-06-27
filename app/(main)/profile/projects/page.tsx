@@ -14,18 +14,26 @@ import { formatPhoneForStore, parseStoredPhone } from "@/lib/phone";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
+// One operating mode's inputs/outputs. A heat-pump detail has two (COOLING + HEATING); a chiller one.
+interface ModeResult {
+    mod: string | null;
+    ambient: number;
+    evapIn: number;
+    evapOut: number;
+    condIn: number;
+    condOut: number;
+    capacityKw: number;
+    powerInputKw: number;
+    copEer: number;
+}
+
 interface ProjectDetail {
     id: number;
     unitId: number | null;
     unitName: string | null;
     unitModel: string | null;
     primaryImageUrl: string | null;
-    ambient: number;
-    evapIn: number;
-    evapOut: number;
-    capacityKw: number;
-    powerInputKw: number;
-    copEer: number;
+    modes: ModeResult[];
     pdfUrl: string | null;
 }
 

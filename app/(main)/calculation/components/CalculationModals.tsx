@@ -24,6 +24,16 @@ interface CalcContext {
     subcooling?: number;
     superheat?: number;
     suctionGasTemp?: number;
+    // Heat pumps add both modes in one detail (one dual-mode PDF). When dualMode is set the
+    // fields above are the COOLING point and these are the HEATING point.
+    dualMode?: boolean;
+    heatingAmbient?: number;
+    heatingWaterInlet?: number;
+    heatingWaterOutlet?: number;
+    heatingFrequencyHz?: number;
+    heatingSubcooling?: number;
+    heatingSuperheat?: number;
+    heatingSuctionGasTemp?: number;
 }
 
 interface CalculationModalsProps {
@@ -184,6 +194,17 @@ export default function CalculationModals({ isOpen, onClose, initialStep = 'resu
                 ...(calc.suctionGasTemp != null
                     ? { suctionGasTemp: calc.suctionGasTemp }
                     : { superheat: calc.superheat ?? 10 }),
+                // Heat pumps: include the HEATING point so the detail stores both modes and the
+                // PDF covers both. dualMode tells the backend to compute/persist the heating row.
+                dualMode: calc.dualMode ?? false,
+                heatingAmbient: calc.heatingAmbient ?? 0,
+                heatingWaterInlet: calc.heatingWaterInlet ?? 0,
+                heatingWaterOutlet: calc.heatingWaterOutlet ?? 0,
+                heatingFrequencyHz: calc.heatingFrequencyHz ?? 50,
+                heatingSubcooling: calc.heatingSubcooling ?? 0,
+                ...(calc.heatingSuctionGasTemp != null
+                    ? { heatingSuctionGasTemp: calc.heatingSuctionGasTemp }
+                    : { heatingSuperheat: calc.heatingSuperheat ?? 10 }),
                 language,
             }),
         });

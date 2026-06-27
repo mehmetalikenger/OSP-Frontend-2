@@ -276,10 +276,14 @@ export default function AirToWaterHeatPumpForm({ unitId, coolingDefaults, heatin
                     <span className={styles.resultMetricLabel}>{t("massFlow")}</span>
                     <span className={styles.resultMetricValue}>{fmt(r.massFlow)}<span className={styles.resultMetricUnit}>kg/h</span></span>
                 </div>
-                <div className={styles.resultMetric}>
-                    <span className={styles.resultMetricLabel}>{t("condenserDuty")}</span>
-                    <span className={styles.resultMetricValue}>{fmt(r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
-                </div>
+                {/* In heating mode the condenser duty IS the heating capacity (shown above), so the
+                    separate tile would just duplicate it — only show it for cooling. */}
+                {!heating && (
+                    <div className={styles.resultMetric}>
+                        <span className={styles.resultMetricLabel}>{t("condenserDuty")}</span>
+                        <span className={styles.resultMetricValue}>{fmt(r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
+                    </div>
+                )}
                 <div className={styles.resultMetric}>
                     <span className={styles.resultMetricLabel}>{t("dischargeTemp")}</span>
                     <span className={styles.resultMetricValue}>{fmt(r.dischargeTemp)}<span className={styles.resultMetricUnit}>°C</span></span>
@@ -515,6 +519,17 @@ export default function AirToWaterHeatPumpForm({ unitId, coolingDefaults, heatin
                     glycolType: glycolType || null,
                     glycolPercentage: glycolRatio ? Number(glycolRatio) : null,
                     ...refrigerantInputs(coolFrequency, coolSubcooling, coolSuctionMode, coolSuctionValue),
+                    // Heat pump: also carry the HEATING point so the project detail stores both modes
+                    // and renders the dual-mode PDF.
+                    dualMode: true,
+                    heatingAmbient: parseFloat(heatAmbient) || 0,
+                    heatingWaterInlet: parseFloat(heatWaterIn) || 0,
+                    heatingWaterOutlet: parseFloat(heatWaterOut) || 0,
+                    heatingFrequencyHz: parseFloat(heatFrequency) || 50,
+                    heatingSubcooling: parseFloat(heatSubcooling) || 0,
+                    ...(heatSuctionMode === "Suction Gas Temp"
+                        ? { heatingSuctionGasTemp: parseFloat(heatSuctionValue) || 0 }
+                        : { heatingSuperheat: parseFloat(heatSuctionValue) || 10 }),
                 }}
             />
         </div>
