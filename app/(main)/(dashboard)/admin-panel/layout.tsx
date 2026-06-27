@@ -332,7 +332,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                             <div className={styles.subOptionsArea}>
                                 <div className={styles.optionsLine}></div>
                                 <div className={styles.options}>
-                                    {["compressor", "evaporator", "condenser", "expansion-valve", "4-way-reversing-valve", "chassis", "refrigerant"].map(item => (
+                                    {["compressor", "evaporator", "condenser", "expansion-valve", "4-way-reversing-valve", "chassis"].map(item => (
                                         <div 
                                             key={item}
                                             className={`${styles.subOption} ${pathname.includes(`/add-component/${item}`) ? styles.subOptionActive : ''}`}
@@ -372,7 +372,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
                             <div className={styles.subOptionsArea}>
                                 <div className={styles.optionsLine}></div>
                                 <div className={styles.options}>
-                                    {["compressor", "evaporator", "condenser", "expansion-valve", "4-way-reversing-valve", "chassis", "refrigerant"].map(item => (
+                                    {["compressor", "evaporator", "condenser", "expansion-valve", "4-way-reversing-valve", "chassis"].map(item => (
                                         <div 
                                             key={item}
                                             className={`${styles.subOption} ${pathname.includes(`/edit-component/${item}`) ? styles.subOptionActive : ''}`}

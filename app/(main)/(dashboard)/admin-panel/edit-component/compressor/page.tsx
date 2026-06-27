@@ -8,15 +8,13 @@ import { fetchWithAuth } from "../../../../../../lib/api";
 import { useConfirm } from "../../useConfirm";
 import { useTranslations } from "next-intl";
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+
 type Refrigerant = {
     id: number;
     name: string;
     code: string;
-}
-
-// Imported refrigerants have name === code, so show a single value; only show "name / code"
-// when they actually differ.
-const refrigerantLabel = (r: Refrigerant) => (r.name === r.code ? r.code : `${r.name} / ${r.code}`);
+};
 
 type Compressor = {
     id: number;
@@ -25,294 +23,296 @@ type Compressor = {
     type: string;
     moc: number;
     lra: number;
-    refrigerant?: Refrigerant | null;
     imported?: boolean;
-}
+};
 
-type CompressorSpecs = {
+type ModeCapacity = { id: number; mod: string; capacity: number; powerInput: number; maxCapacity: number };
+
+type CompressorRating = {
     id: number;
+    compressorId: number;
     brand: string;
-    model: string;
     type: string;
-    capacity: number;
-    powerInput: number;
-    refrigerantId?: number | null;
-    rpmBase?: number | null; rpmMin?: number | null; rpmMax?: number | null;
-    qC1: number; qC2: number; qC3: number; qC4: number; qC5: number;
-    qC6: number; qC7: number; qC8: number; qC9: number; qC10: number;
-    qC11?: number | null; qC12?: number | null; qC13?: number | null; qC14?: number | null; qC15?: number | null;
-    qC16?: number | null; qC17?: number | null; qC18?: number | null; qC19?: number | null; qC20?: number | null;
-    pC1: number; pC2: number; pC3: number; pC4: number; pC5: number;
-    pC6: number; pC7: number; pC8: number; pC9: number; pC10: number;
-    pC11?: number | null; pC12?: number | null; pC13?: number | null; pC14?: number | null; pC15?: number | null;
-    pC16?: number | null; pC17?: number | null; pC18?: number | null; pC19?: number | null; pC20?: number | null;
-}
+    model: string;
+    refrigerantId: number;
+    refrigerantCode: string;
+    capCoeffs: number[];
+    powerCoeffs: number[];
+    massCoeffs: number[];
+    ohRef: number;
+    scRef: number;
+    minFrequency: number;
+    maxFrequency: number;
+    minSpeed: number;
+    maxSpeed: number;
+    modeCapacities: ModeCapacity[];
+};
+
+// Imported refrigerants have name === code, so show a single value; only show "name / code"
+// when they actually differ.
+const refrigerantLabel = (r: Refrigerant) => (r.name === r.code ? r.code : `${r.name} / ${r.code}`);
+// RC compressors use 10 coefficients per group; ISCR use 20.
+const coeffCount = (type: string) => (type === "RC" ? 10 : 20);
+const str = (n: number | null | undefined) => (n === null || n === undefined ? "" : String(n));
+const padCoeffs = (arr: number[] | null | undefined) => {
+    const out = Array(20).fill("");
+    (arr ?? []).forEach((v, i) => { if (i < 20) out[i] = String(v); });
+    return out;
+};
 
 export default function EditCompressorPage() {
     const t = useTranslations("AdminComp");
-    const [selectedItemToEdit, setSelectedItemToEdit] = useState("Select Compressor");
-    const [brand, setBrand] = useState("Select Brand");
-    const [type, setType] = useState("Select Type");
+    const { confirm, confirmElement } = useConfirm();
+
+    const [compressorsList, setCompressorsList] = useState<Compressor[]>([]);
+    const [refrigerantsList, setRefrigerantsList] = useState<Refrigerant[]>([]);
+    const [ratingsList, setRatingsList] = useState<CompressorRating[]>([]);
+
+    const [filterBrand, setFilterBrand] = useState("All Brands");
+    const [filterType, setFilterType] = useState("All Types");
+    const [selectedRatingKey, setSelectedRatingKey] = useState("Select Rating");
+
+    // Identity (editCompressor)
+    const [brand, setBrand] = useState("");
+    const [ctype, setCtype] = useState("");
     const [model, setModel] = useState("");
     const [moc, setMoc] = useState("");
     const [lra, setLra] = useState("");
+
+    // Rating (editCompressorRating)
     const [refrigerant, setRefrigerant] = useState("Select Refrigerant");
+    const [capCoeffs, setCapCoeffs] = useState<string[]>(Array(20).fill(""));
+    const [powerCoeffs, setPowerCoeffs] = useState<string[]>(Array(20).fill(""));
+    const [ohRef, setOhRef] = useState("");
+    const [scRef, setScRef] = useState("");
+    const [minFrequency, setMinFrequency] = useState("");
+    const [maxFrequency, setMaxFrequency] = useState("");
+    const [minSpeed, setMinSpeed] = useState("");
+    const [maxSpeed, setMaxSpeed] = useState("");
 
-    const [compressor, setCompressor] = useState("Select Compressor");
-    const [capacity, setCapacity] = useState("");
-    const [powerInput, setPowerInput] = useState("");
-    // Coefficients hold up to 20 each: 1–10 for all compressors, 11–20 only for ISCR.
-    const [qCoeffs, setQCoeffs] = useState<string[]>(Array(20).fill(""));
-    const [pCoeffs, setPCoeffs] = useState<string[]>(Array(20).fill(""));
-    const [rpmBase, setRpmBase] = useState("");
-    const [rpmMin, setRpmMin] = useState("");
-    const [rpmMax, setRpmMax] = useState("");
+    // Mode capacities (upsert)
+    const [coolingCap, setCoolingCap] = useState("");
+    const [coolingPI, setCoolingPI] = useState("");
+    const [coolingMax, setCoolingMax] = useState("");
+    const [heatingCap, setHeatingCap] = useState("");
+    const [heatingPI, setHeatingPI] = useState("");
+    const [heatingMax, setHeatingMax] = useState("");
 
-    const [compressorsList, setCompressorsList] = useState<Compressor[]>([]);
-    const [compressorSpecsList, setCompressorSpecsList] = useState<CompressorSpecs[]>([]);
-    const [refrigerantsList, setRefrigerantsList] = useState<Refrigerant[]>([]);
-
-    const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
-
+    const [toastInfo, setToastInfo] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
         setToastInfo({ message: msg, type });
         setTimeout(() => setToastInfo(null), 3000);
     };
 
-    const { confirm, confirmElement } = useConfirm();
-
     const fetchCompressors = async () => {
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/compressors`, { credentials: 'include', cache: 'no-store' });
-            if (res.ok) {
-                const data = await res.json();
-                setCompressorsList(data);
-            }
-        } catch (e) {
-            console.error("Failed to fetch compressors", e);
-        }
+            const res = await fetchWithAuth(`${API}/admin/component/compressors`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setCompressorsList(await res.json());
+        } catch (e) { console.error("Failed to fetch compressors", e); }
     };
-
-    const fetchCompressorSpecs = async () => {
-        try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/allCompressorSpecs`, { credentials: 'include', cache: 'no-store' });
-            if (res.ok) {
-                const data = await res.json();
-                setCompressorSpecsList(data);
-            }
-        } catch (e) {
-            console.error("Failed to fetch compressor specs", e);
-        }
-    };
-
     const fetchRefrigerants = async () => {
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/refrigerants`, { credentials: 'include', cache: 'no-store' });
-            if (res.ok) {
-                const data = await res.json();
-                setRefrigerantsList(data);
-            }
-        } catch (e) {
-            console.error("Failed to fetch refrigerants", e);
-        }
+            const res = await fetchWithAuth(`${API}/admin/component/refrigerants`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setRefrigerantsList(await res.json());
+        } catch (e) { console.error("Failed to fetch refrigerants", e); }
+    };
+    const fetchRatings = async () => {
+        try {
+            const res = await fetchWithAuth(`${API}/admin/component/allCompressorRatings`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setRatingsList(await res.json());
+        } catch (e) { console.error("Failed to fetch compressor ratings", e); }
     };
 
     useEffect(() => {
         fetchCompressors();
-        fetchCompressorSpecs();
         fetchRefrigerants();
+        fetchRatings();
     }, []);
 
-    // The selected spec's type drives the ISCR-only fields (RPM + Q11–Q20).
-    const selectedSpecObj = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
-    const isIscr = selectedSpecObj?.type === "ISCR";
-    const qCount = isIscr ? 20 : 10;
-    const pCount = isIscr ? 20 : 10;
+    const num = (v: string) => parseFloat(v);
 
-    useEffect(() => {
-        if (selectedItemToEdit !== "Select Compressor") {
-            const comp = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
-            if (comp) {
-                setBrand(comp.brand);
-                setType(comp.type);
-                setModel(comp.model);
-                setMoc(String(comp.moc ?? ""));
-                setLra(String(comp.lra ?? ""));
-                setRefrigerant(comp.refrigerant ? refrigerantLabel(comp.refrigerant) : "Select Refrigerant");
-            }
-        } else {
-            setBrand("Select Brand");
-            setType("Select Type");
-            setModel("");
-            setMoc("");
-            setLra("");
-            setRefrigerant("Select Refrigerant");
-        }
-    }, [selectedItemToEdit, compressorsList]);
+    const ratingLabel = (r: CompressorRating) => `${r.brand} / ${r.model} / ${r.type} / ${r.refrigerantCode}`;
+    const brandOptions = ["All Brands", ...Array.from(new Set(ratingsList.map(r => r.brand)))];
+    const typeOptions = ["All Types", ...Array.from(new Set(ratingsList.map(r => r.type)))];
+    const filteredRatings = ratingsList.filter(r =>
+        (filterBrand === "All Brands" || r.brand === filterBrand) &&
+        (filterType === "All Types" || r.type === filterType)
+    );
+    const ratingOptions = ["Select Rating", ...filteredRatings.map(ratingLabel)];
 
-    useEffect(() => {
-        if (compressor !== "Select Compressor") {
-            const spec = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
-            if (spec) {
-                const optStr = (v?: number | null) => (v === null || v === undefined ? "" : v.toString());
-                setCapacity(spec.capacity.toString());
-                setPowerInput(spec.powerInput.toString());
-                setQCoeffs([
-                    spec.qC1.toString(), spec.qC2.toString(), spec.qC3.toString(),
-                    spec.qC4.toString(), spec.qC5.toString(), spec.qC6.toString(),
-                    spec.qC7.toString(), spec.qC8.toString(), spec.qC9.toString(),
-                    spec.qC10.toString(),
-                    optStr(spec.qC11), optStr(spec.qC12), optStr(spec.qC13), optStr(spec.qC14), optStr(spec.qC15),
-                    optStr(spec.qC16), optStr(spec.qC17), optStr(spec.qC18), optStr(spec.qC19), optStr(spec.qC20)
-                ]);
-                setPCoeffs([
-                    spec.pC1.toString(), spec.pC2.toString(), spec.pC3.toString(),
-                    spec.pC4.toString(), spec.pC5.toString(), spec.pC6.toString(),
-                    spec.pC7.toString(), spec.pC8.toString(), spec.pC9.toString(),
-                    spec.pC10.toString(),
-                    optStr(spec.pC11), optStr(spec.pC12), optStr(spec.pC13), optStr(spec.pC14), optStr(spec.pC15),
-                    optStr(spec.pC16), optStr(spec.pC17), optStr(spec.pC18), optStr(spec.pC19), optStr(spec.pC20)
-                ]);
-                setRpmBase(optStr(spec.rpmBase));
-                setRpmMin(optStr(spec.rpmMin));
-                setRpmMax(optStr(spec.rpmMax));
-            }
-        } else {
-            setCapacity("");
-            setPowerInput("");
-            setQCoeffs(Array(20).fill(""));
-            setPCoeffs(Array(20).fill(""));
-            setRpmBase("");
-            setRpmMin("");
-            setRpmMax("");
-        }
-    }, [compressor, compressorSpecsList]);
+    const selectedRating = filteredRatings.find(r => ratingLabel(r) === selectedRatingKey);
+    const selectedCompressor = selectedRating ? compressorsList.find(c => c.id === selectedRating.compressorId) : undefined;
+    const isFrascold = selectedRating?.brand === "Frascold";
+    const isIscr = selectedRating?.type === "ISCR";
+    const cCount = selectedRating ? coeffCount(selectedRating.type) : 0;
 
-    const handleEditCompressor = async () => {
-        if (selectedItemToEdit === "Select Compressor") {
-            showToast(t("selectToEdit", { name: t("names.compressor.low") }), "error");
-            return;
-        }
-        if (brand === "Select Brand" || type === "Select Type" || !model || refrigerant === "Select Refrigerant") {
-            showToast(t("fillAllFields"), "error");
-            return;
-        }
-
-        const comp = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
-        if (!comp) return;
-
-        const refrigerantItem = refrigerantsList.find(r => refrigerantLabel(r) === refrigerant);
-
-        try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressor/${comp.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand, type, model, moc: parseFloat(moc), lra: parseFloat(lra), refrigerantId: refrigerantItem ? refrigerantItem.id : null }),
-                credentials: 'include'
-            });
-
-            if (res.ok) {
-                showToast(t("updatedSuccess", { name: t("names.compressor.cap") }), "success");
-                setSelectedItemToEdit("Select Compressor");
-                fetchCompressors();
-                fetchCompressorSpecs();
-            } else {
-                try {
-                    const data = await res.json();
-                    showToast(data.message || t("failedEdit", { name: t("names.compressor.low") }), "error");
-                } catch {
-                    showToast(t("failedEdit", { name: t("names.compressor.low") }), "error");
-                }
-            }
-        } catch (error) {
-            console.error(error);
-            showToast(t("networkError"), "error");
-        }
+    const resetFields = () => {
+        setBrand(""); setCtype(""); setModel(""); setMoc(""); setLra("");
+        setRefrigerant("Select Refrigerant");
+        setCapCoeffs(Array(20).fill("")); setPowerCoeffs(Array(20).fill(""));
+        setOhRef(""); setScRef(""); setMinFrequency(""); setMaxFrequency(""); setMinSpeed(""); setMaxSpeed("");
+        setCoolingCap(""); setCoolingPI(""); setCoolingMax("");
+        setHeatingCap(""); setHeatingPI(""); setHeatingMax("");
     };
 
-    const handleEditCompressorSpecs = async () => {
-        if (compressor === "Select Compressor") {
-            showToast(t("selectSpecs", { name: t("names.compressor.cap") }), "error");
-            return;
-        }
-        if (!capacity || !powerInput) {
-            showToast(t("fillAllFields"), "error");
-            return;
-        }
-        // Only the required coefficients must be filled: Q1–Q10 always, Q11–Q20 only for ISCR.
-        if (qCoeffs.slice(0, qCount).some(v => v === "") || pCoeffs.slice(0, pCount).some(v => v === "")) {
+    // Populate all fields whenever a rating (or the loaded lists) changes.
+    useEffect(() => {
+        if (!selectedRating) { resetFields(); return; }
+        const comp = compressorsList.find(c => c.id === selectedRating.compressorId);
+        setBrand(comp?.brand ?? selectedRating.brand);
+        setCtype(comp?.type ?? selectedRating.type);
+        setModel(comp?.model ?? selectedRating.model);
+        setMoc(str(comp?.moc));
+        setLra(str(comp?.lra));
+        const ref = refrigerantsList.find(r => r.id === selectedRating.refrigerantId);
+        setRefrigerant(ref ? refrigerantLabel(ref) : "Select Refrigerant");
+        setCapCoeffs(padCoeffs(selectedRating.capCoeffs));
+        setPowerCoeffs(padCoeffs(selectedRating.powerCoeffs));
+        setOhRef(str(selectedRating.ohRef)); setScRef(str(selectedRating.scRef));
+        setMinFrequency(str(selectedRating.minFrequency)); setMaxFrequency(str(selectedRating.maxFrequency));
+        setMinSpeed(str(selectedRating.minSpeed)); setMaxSpeed(str(selectedRating.maxSpeed));
+        const cool = selectedRating.modeCapacities.find(m => m.mod === "COOLING");
+        const heat = selectedRating.modeCapacities.find(m => m.mod === "HEATING");
+        setCoolingCap(str(cool?.capacity)); setCoolingPI(str(cool?.powerInput)); setCoolingMax(str(cool?.maxCapacity));
+        setHeatingCap(str(heat?.capacity)); setHeatingPI(str(heat?.powerInput)); setHeatingMax(str(heat?.maxCapacity));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedRatingKey, ratingsList, compressorsList, refrigerantsList]);
+
+    const setCoeff = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (i: number, v: string) => {
+        setter(prev => { const next = [...prev]; next[i] = v; return next; });
+    };
+
+    // ----- Identity (editCompressor) -----
+    const handleEditCompressor = async () => {
+        if (!selectedCompressor) { showToast(t("selectToEdit", { name: t("names.compressor.low") }), "error"); return; }
+        try {
+            const res = await fetchWithAuth(`${API}/admin/component/editCompressor/${selectedCompressor.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ brand, type: ctype, model, moc: num(moc), lra: num(lra) }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                showToast(t("updatedSuccess", { name: t("names.compressor.cap") }), "success");
+                fetchCompressors();
+                fetchRatings();
+            } else {
+                const data = await res.json().catch(() => null);
+                showToast(data?.message || t("failedEdit", { name: t("names.compressor.low") }), "error");
+            }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
+    };
+
+    // ----- Rating (editCompressorRating) — Copeland only -----
+    const handleEditRating = async () => {
+        if (!selectedRating) { showToast(t("selectRatingError"), "error"); return; }
+        const refrigerantItem = refrigerantsList.find(r => refrigerantLabel(r) === refrigerant);
+        if (!refrigerantItem) { showToast(t("invalidSelected", { name: t("refrigerant") }), "error"); return; }
+        const filled = (arr: string[]) => arr.slice(0, cCount).every(v => v !== "");
+        if (!filled(capCoeffs) || !filled(powerCoeffs)) {
             showToast(t("fillCoefficients"), "error");
             return;
         }
-        if (isIscr && (!rpmBase || !rpmMin || !rpmMax)) {
-            showToast(t("fillRpm"), "error");
-            return;
-        }
-
-        const selectedSpec = compressorSpecsList.find(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}` === compressor);
-        if (!selectedSpec) return;
-
-        const qObj = Object.fromEntries(qCoeffs.slice(0, qCount).map((v, i) => [`qC${i + 1}`, parseFloat(v)]));
-        const pObj = Object.fromEntries(pCoeffs.slice(0, pCount).map((v, i) => [`pC${i + 1}`, parseFloat(v)]));
-        const rpmObj = isIscr
-            ? { rpmBase: parseFloat(rpmBase), rpmMin: parseFloat(rpmMin), rpmMax: parseFloat(rpmMax) }
-            : { rpmBase: null, rpmMin: null, rpmMax: null };
-
+        const body = {
+            compressorId: selectedRating.compressorId,
+            refrigerantId: refrigerantItem.id,
+            capCoeffs: capCoeffs.slice(0, cCount).map(num),
+            powerCoeffs: powerCoeffs.slice(0, cCount).map(num),
+            massCoeffs: (selectedRating.massCoeffs ?? []).slice(0, cCount),
+            ohRef: num(ohRef) || 0,
+            scRef: num(scRef) || 0,
+            minFrequency: num(minFrequency) || 0,
+            maxFrequency: num(maxFrequency) || 0,
+            minSpeed: num(minSpeed) || 0,
+            maxSpeed: num(maxSpeed) || 0,
+        };
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/editCompressorSpecs/${selectedSpec.id}`, {
+            const res = await fetchWithAuth(`${API}/admin/component/editCompressorRating/${selectedRating.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    compressorId: 0,
-                    capacity: parseFloat(capacity),
-                    powerInput: parseFloat(powerInput),
-                    ...rpmObj,
-                    ...qObj,
-                    ...pObj
-                }),
+                body: JSON.stringify(body),
                 credentials: 'include'
             });
-
             if (res.ok) {
-                showToast(t("specsUpdatedSuccess", { name: t("names.compressor.cap") }), "success");
-                setCompressor("Select Compressor");
-                fetchCompressorSpecs();
+                showToast(t("ratingUpdatedSuccess"), "success");
+                fetchRatings();
             } else {
-                try {
-                    const data = await res.json();
-                    showToast(data.message || t("failedEditSpecs", { name: t("names.compressor.low") }), "error");
-                } catch {
-                    showToast(t("failedEditSpecs", { name: t("names.compressor.low") }), "error");
-                }
+                const data = await res.json().catch(() => null);
+                showToast(data?.message || t("failedEditRating"), "error");
             }
-        } catch (error) {
-            console.error(error);
-            showToast(t("networkError"), "error");
-        }
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
 
-    // Imported Frascold catalogue compressors are managed via the import, not this page — hide them.
-    const compressorOptions = ["Select Compressor", ...compressorsList.filter(c => !c.imported).map(c => `${c.brand} / ${c.model} / ${c.type}`)];
-    const specsOptions = ["Select Compressor", ...compressorSpecsList.map(s => `${s.brand} / ${s.model} / ${s.type} / C: ${s.capacity} / PI: ${s.powerInput}`)];
+    // ----- Mode capacities (upsert) -----
+    const saveModeCapacity = async (mod: "COOLING" | "HEATING", cap: string, pi: string, max: string) => {
+        if (!selectedRating) { showToast(t("selectRatingError"), "error"); return false; }
+        if (!cap || !pi) { showToast(t("fillAllFields"), "error"); return false; }
+        const body = {
+            compressorRatingId: selectedRating.id,
+            mod,
+            capacity: num(cap),
+            powerInput: num(pi),
+            maxCapacity: isIscr && max ? num(max) : 0,
+        };
+        try {
+            const res = await fetchWithAuth(`${API}/admin/component/addCompressorModeCapacity`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+                credentials: 'include'
+            });
+            if (res.ok) return true;
+            const data = await res.json().catch(() => null);
+            showToast(data?.message || t("failedAddModeCapacity"), "error");
+            return false;
+        } catch (error) { console.error(error); showToast(t("networkError"), "error"); return false; }
+    };
+
+    const handleSaveModeCapacities = async () => {
+        let any = false;
+        if (coolingCap && coolingPI) { if (await saveModeCapacity("COOLING", coolingCap, coolingPI, coolingMax)) any = true; }
+        if (heatingCap && heatingPI) { if (await saveModeCapacity("HEATING", heatingCap, heatingPI, heatingMax)) any = true; }
+        if (!any) { showToast(t("fillAllFields"), "error"); return; }
+        showToast(t("modeCapacityAddedSuccess"), "success");
+        fetchRatings();
+    };
 
     const handleDelete = async () => {
-        if (selectedItemToEdit === "Select Compressor") { showToast(t("selectToDelete", { name: t("names.compressor.low") }), "error"); return; }
-        const item = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === selectedItemToEdit);
-        if (!item) return;
-        const ok = await confirm({ title: t("deleteTitle", { name: t("names.compressor.cap") }), message: t("deleteMessage", { item: selectedItemToEdit }), confirmText: t("delete") });
+        if (!selectedCompressor) { showToast(t("selectToDelete", { name: t("names.compressor.low") }), "error"); return; }
+        const ok = await confirm({ title: t("deleteTitle", { name: t("names.compressor.cap") }), message: t("deleteMessage", { item: selectedRatingKey }), confirmText: t("delete") });
         if (!ok) return;
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/compressor/${item.id}`, { method: "DELETE", credentials: 'include' });
+            const res = await fetchWithAuth(`${API}/admin/component/compressor/${selectedCompressor.id}`, { method: "DELETE", credentials: 'include' });
             if (res.ok) {
                 showToast(t("deleted", { name: t("names.compressor.cap") }), "success");
-                setSelectedItemToEdit("Select Compressor");
+                setSelectedRatingKey("Select Rating");
                 fetchCompressors();
-                fetchCompressorSpecs();
+                fetchRatings();
             } else {
                 showToast(t("failedDelete", { name: t("names.compressor.low") }), "error");
             }
         } catch (error) { console.error(error); showToast(t("networkError"), "error"); }
     };
+
+    const coeffGroupEl = (legend: string, values: string[], onSet: (i: number, v: string) => void, prefix: string) => (
+        <fieldset className={styles.coeffGroup}>
+            <legend>{legend}</legend>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+                {values.slice(0, cCount).map((val, i) => (
+                    <div className={styles.formField} key={`${prefix}${i}`}>
+                        <label>{prefix}{i + 1}</label>
+                        <input
+                            type="text" inputMode="decimal"
+                            className={styles.inputElement}
+                            placeholder="0"
+                            value={val}
+                            onChange={(e) => onSet(i, e.target.value)}
+                        />
+                    </div>
+                ))}
+            </div>
+        </fieldset>
+    );
 
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
@@ -334,192 +334,131 @@ export default function EditCompressorPage() {
                 <div className={styles.splitContent}>
                     <div className={styles.leftContent}>
                         <div className={styles.formSection}>
+                            {/* ---- Filters + selection ---- */}
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>{t("names.compressor.cap")}</label>
+                                    <label>{t("filterBrand")}</label>
                                     <Combobox
-                                        options={compressorOptions}
-                                        value={selectedItemToEdit}
-                                        onChange={setSelectedItemToEdit}
-                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
-                                        className={`${styles.comboBox} ${selectedItemToEdit.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        options={brandOptions}
+                                        value={filterBrand}
+                                        onChange={(v) => { setFilterBrand(v); setSelectedRatingKey("Select Rating"); }}
+                                        getLabel={(v) => v === "All Brands" ? t("allBrands") : v}
+                                        className={styles.comboBox}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>{t("brand")}</label>
+                                    <label>{t("filterType")}</label>
                                     <Combobox
-                                        options={["Select Brand", "Frascold", "Copelant"]}
-                                        value={brand}
-                                        onChange={setBrand}
-                                        getLabel={(v) => v === "Select Brand" ? t("selectName", { name: t("brand") }) : v}
-                                        className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        options={typeOptions}
+                                        value={filterType}
+                                        onChange={(v) => { setFilterType(v); setSelectedRatingKey("Select Rating"); }}
+                                        getLabel={(v) => v === "All Types" ? t("allTypes") : v}
+                                        className={styles.comboBox}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
-                                    <label>{t("type")}</label>
+                                    <label>{t("rating")}</label>
                                     <Combobox
-                                        options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
-                                        value={type}
-                                        onChange={setType}
-                                        getLabel={(v) => v === "Select Type" ? t("selectName", { name: t("type") }) : v}
-                                        className={`${styles.comboBox} ${type.startsWith('Select') ? styles.placeholderText : ''}`}
-                                        containerClassName={styles.comboboxContainerOverride}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("model")}</label>
-                                    <input
-                                        type="text"
-                                        className={styles.inputElement}
-                                        placeholder={t("enterModel")}
-                                        value={model}
-                                        onChange={(e) => setModel(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("mocA")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterMoc")}
-                                        value={moc}
-                                        onChange={(e) => setMoc(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("lraA")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterLra")}
-                                        value={lra}
-                                        onChange={(e) => setLra(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("refrigerant")}</label>
-                                    <Combobox
-                                        options={["Select Refrigerant", ...refrigerantsList.map(refrigerantLabel)]}
-                                        value={refrigerant}
-                                        onChange={setRefrigerant}
-                                        getLabel={(v) => v === "Select Refrigerant" ? t("selectRefrigerant") : v}
-                                        className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        options={ratingOptions}
+                                        value={selectedRatingKey}
+                                        onChange={setSelectedRatingKey}
+                                        getLabel={(v) => v === "Select Rating" ? t("selectRating") : v}
+                                        className={`${styles.comboBox} ${selectedRatingKey.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                             </div>
-                            <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
-                                <button className={styles.saveBtn} onClick={handleEditCompressor}>{t("save")}</button>
-                            </div>
 
-                            <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
+                            {selectedRating && (
+                                <>
+                                    {isFrascold && (
+                                        <p style={{ fontSize: '13px', opacity: 0.75, margin: '14px 0 0' }}>{t("frascoldNote")}</p>
+                                    )}
 
-                            <div className={styles.formGrid}>
-                                <div className={styles.formField}>
-                                    <label>{t("specsSuffix", { name: t("names.compressor.cap") })}</label>
-                                    <Combobox
-                                        options={specsOptions}
-                                        value={compressor}
-                                        onChange={setCompressor}
-                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
-                                        className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
-                                        containerClassName={styles.comboboxContainerOverride}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("capacity")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterCapacity")}
-                                        value={capacity}
-                                        onChange={(e) => setCapacity(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles.formField}>
-                                    <label>{t("powerInput")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterPowerInput")}
-                                        value={powerInput}
-                                        onChange={(e) => setPowerInput(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+                                    <div className={styles.horizontalSeperator} style={{ margin: '24px 0' }}></div>
 
-                            <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
-
-                            {isIscr && (
-                                <fieldset className={styles.coeffGroup}>
-                                    <legend>{t("rpmSection")}</legend>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                                    {/* ---- Identity (editCompressor) ---- */}
+                                    <h3 className={styles.breadcrumbItem} style={{ marginBottom: '12px' }}>{t("sectionIdentity")}</h3>
+                                    <div className={styles.formGrid}>
                                         <div className={styles.formField}>
-                                            <label>{t("rpmBase")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmBase} onChange={(e) => setRpmBase(e.target.value)} />
+                                            <label>{t("brand")}</label>
+                                            <input type="text" className={styles.inputElement} value={brand} onChange={(e) => setBrand(e.target.value)} disabled={isFrascold} />
                                         </div>
                                         <div className={styles.formField}>
-                                            <label>{t("rpmMin")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMin} onChange={(e) => setRpmMin(e.target.value)} />
+                                            <label>{t("type")}</label>
+                                            <input type="text" className={styles.inputElement} value={ctype} onChange={(e) => setCtype(e.target.value)} disabled={isFrascold} />
                                         </div>
                                         <div className={styles.formField}>
-                                            <label>{t("rpmMax")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMax} onChange={(e) => setRpmMax(e.target.value)} />
+                                            <label>{t("model")}</label>
+                                            <input type="text" className={styles.inputElement} value={model} onChange={(e) => setModel(e.target.value)} disabled={isFrascold} />
+                                        </div>
+                                        <div className={styles.formField}>
+                                            <label>{t("mocA")}</label>
+                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterMoc")} value={moc} onChange={(e) => setMoc(e.target.value)} />
+                                        </div>
+                                        <div className={styles.formField}>
+                                            <label>{t("lraA")}</label>
+                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterLra")} value={lra} onChange={(e) => setLra(e.target.value)} />
                                         </div>
                                     </div>
-                                </fieldset>
+                                    <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                        <button className={styles.cancelBtn} style={{ color: '#d7292e', borderColor: '#d7292e', marginRight: '12px' }} onClick={handleDelete}>{t("delete")}</button>
+                                        <button className={styles.saveBtn} onClick={handleEditCompressor}>{t("save")}</button>
+                                    </div>
+
+                                    {/* ---- Rating + coefficients (Copeland only) ---- */}
+                                    {!isFrascold && (
+                                        <>
+                                            <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
+                                            <h3 className={styles.breadcrumbItem} style={{ marginBottom: '12px' }}>{t("sectionRating")}</h3>
+                                            <div className={styles.formGrid}>
+                                                <div className={styles.formField}>
+                                                    <label>{t("refrigerant")}</label>
+                                                    <Combobox
+                                                        options={["Select Refrigerant", ...refrigerantsList.map(refrigerantLabel)]}
+                                                        value={refrigerant}
+                                                        onChange={setRefrigerant}
+                                                        getLabel={(v) => v === "Select Refrigerant" ? t("selectRefrigerant") : v}
+                                                        className={`${styles.comboBox} ${refrigerant.startsWith('Select') ? styles.placeholderText : ''}`}
+                                                        containerClassName={styles.comboboxContainerOverride}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className={styles.horizontalSeperator} style={{ margin: '24px 0' }}></div>
+                                            {coeffGroupEl(t("capacityCoeffs"), capCoeffs, setCoeff(setCapCoeffs), "Q-C")}
+                                            {coeffGroupEl(t("powerCoeffs"), powerCoeffs, setCoeff(setPowerCoeffs), "P-C")}
+                                            <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                                <button className={styles.saveBtn} onClick={handleEditRating}>{t("save")}</button>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* ---- Mode capacities (upsert) ---- */}
+                                    <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
+                                    <h3 className={styles.breadcrumbItem} style={{ marginBottom: '12px' }}>{t("sectionModeCapacity")}</h3>
+                                    <fieldset className={styles.coeffGroup}>
+                                        <legend>{t("cooling")}</legend>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                                            <div className={styles.formField}><label>{t("capacity")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterCapacity")} value={coolingCap} onChange={(e) => setCoolingCap(e.target.value)} /></div>
+                                            <div className={styles.formField}><label>{t("powerInput")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterPowerInput")} value={coolingPI} onChange={(e) => setCoolingPI(e.target.value)} /></div>
+                                            {isIscr && (<div className={styles.formField}><label>{t("maxCapacity")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterMaxCapacity")} value={coolingMax} onChange={(e) => setCoolingMax(e.target.value)} /></div>)}
+                                        </div>
+                                    </fieldset>
+                                    <fieldset className={styles.coeffGroup}>
+                                        <legend>{t("heating")}</legend>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                                            <div className={styles.formField}><label>{t("capacity")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterCapacity")} value={heatingCap} onChange={(e) => setHeatingCap(e.target.value)} /></div>
+                                            <div className={styles.formField}><label>{t("powerInput")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterPowerInput")} value={heatingPI} onChange={(e) => setHeatingPI(e.target.value)} /></div>
+                                            {isIscr && (<div className={styles.formField}><label>{t("maxCapacity")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterMaxCapacity")} value={heatingMax} onChange={(e) => setHeatingMax(e.target.value)} /></div>)}
+                                        </div>
+                                    </fieldset>
+                                    <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                        <button className={styles.saveBtn} onClick={handleSaveModeCapacities}>{t("save")}</button>
+                                    </div>
+                                </>
                             )}
-
-                            <fieldset className={styles.coeffGroup}>
-                                <legend>{t("capacityCoeffs")}</legend>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {qCoeffs.slice(0, qCount).map((val, i) => (
-                                        <div className={styles.formField} key={`q${i}`}>
-                                            <label>Q-C{i + 1}</label>
-                                            <input
-                                                type="number" onWheel={(e) => e.currentTarget.blur()}
-                                                className={styles.inputElement}
-                                                placeholder="0"
-                                                value={val}
-                                                onChange={(e) => {
-                                                    const next = [...qCoeffs];
-                                                    next[i] = e.target.value;
-                                                    setQCoeffs(next);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </fieldset>
-
-                            <fieldset className={styles.coeffGroup}>
-                                <legend>{t("powerCoeffs")}</legend>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {pCoeffs.slice(0, pCount).map((val, i) => (
-                                        <div className={styles.formField} key={`p${i}`}>
-                                            <label>P-C{i + 1}</label>
-                                            <input
-                                                type="number" onWheel={(e) => e.currentTarget.blur()}
-                                                className={styles.inputElement}
-                                                placeholder="0"
-                                                value={val}
-                                                onChange={(e) => {
-                                                    const next = [...pCoeffs];
-                                                    next[i] = e.target.value;
-                                                    setPCoeffs(next);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </fieldset>
-
-                            <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleEditCompressorSpecs}>{t("save")}</button>
-                            </div>
                         </div>
                     </div>
                 </div>

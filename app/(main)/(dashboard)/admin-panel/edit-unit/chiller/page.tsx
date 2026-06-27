@@ -120,8 +120,6 @@ export default function Page() {
     const [condIn, setCondIn] = useState("");
     const [condOut, setCondOut] = useState("");
 
-    const [capacity, setCapacity] = useState("");
-    const [maxCapacity, setMaxCapacity] = useState("");
     const [compressorQty, setCompressorQty] = useState("");
     const [condenserRequiredDuty, setCondenserRequiredDuty] = useState("");
     const [quietCondenserRequiredDuty, setQuietCondenserRequiredDuty] = useState("");
@@ -281,7 +279,7 @@ export default function Page() {
             setChassisId(d.chassisId ?? null);
             setAmbient(str(d.ambient)); setEvapIn(str(d.evapIn)); setEvapOut(str(d.evapOut));
             setCondIn(str(d.condIn)); setCondOut(str(d.condOut));
-            setCapacity(str(d.capacity)); setMaxCapacity(str(d.maxCapacity)); setCompressorQty(str(d.compressorQty));
+            setCompressorQty(str(d.compressorQty));
             setCondenserRequiredDuty(str(d.condenserRequiredDuty));
             setQuietCondenserRequiredDuty(str(d.quietCondenserRequiredDuty));
             setFanPI(str(d.fanPI)); setEer(str(d.copErr)); setCondenserQty(str(d.condenserQty));
@@ -348,7 +346,7 @@ export default function Page() {
             chillerDto: { model: model.trim(), name: name.trim(), description: description.trim(), type: unitType === "air_to_water" ? "AW" : "WW", mod: "COOLING" },
             unitDefCalcValuesDTO: { ambient: num(ambient), evapIn: num(evapIn), evapOut: num(evapOut), condIn: num(condIn), condOut: num(condOut) },
             unitTechSpecsDTO: {
-                capacity: num(capacity), maxCapacity: num(maxCapacity), compressorRatingId, compressorQty: int(compressorQty),
+                compressorRatingId, compressorQty: int(compressorQty),
                 condenserSpecsId, condenserQty: int(condenserQty), expansionValveSpecsId,
                 expansionValveQty: int(expansionValveQty), evaporatorSpecsId, chassisId,
                 fourWayReversingValveSpecsId: reversingValveSpecsId,
@@ -398,7 +396,7 @@ export default function Page() {
         setCompressorModel(SELECT.compressor); setCompressorRatingId(null); setEvaporatorSpecsId(null); setCondenserSpecsId(null);
         setExpansionValveSpecsId(null); setReversingValveSpecsId(null); setChassisId(null);
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
-        setCapacity(""); setMaxCapacity(""); setCompressorQty(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
+        setCompressorQty(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
         setFanPI(""); setEer(""); setCondenserQty(""); setFanType("EC"); setNumberOfFans(""); setFanDiameter("");
         setExpansionValveQty(""); setAirflowRate(""); setDischargeLineDiameter(""); setLiquidLineDiameter("");
         setSuctionLineDiameter(""); setGasTank(""); setWaterInletConnection(""); setWaterOutletConnection(""); setWidth(""); setHeight(""); setLength("");
@@ -512,8 +510,6 @@ export default function Page() {
                             )}
                             {activeTab === 'tech' && (
                                 <div className={styles.formGrid}>
-                                    <div className={styles.formField}><label>{t("capacityKw")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-                                    <div className={styles.formField}><label>{t("maxCapacityKw")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} /></div>
                                     <div className={styles.formField}><label>{t("compressorQty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={compressorQty} onChange={(e) => setCompressorQty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>{t("condenserRequiredDuty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={condenserRequiredDuty} onChange={(e) => setCondenserRequiredDuty(e.target.value)} /></div>
                                     <div className={styles.formField}><label>{t("quietCondenserRequiredDuty")}</label><input type="number" onWheel={(e) => e.currentTarget.blur()} min="0" onKeyDown={blockNeg} className={styles.inputElement} value={quietCondenserRequiredDuty} onChange={(e) => setQuietCondenserRequiredDuty(e.target.value)} /></div>

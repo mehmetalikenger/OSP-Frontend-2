@@ -7,45 +7,81 @@ import Combobox from "../../../../profile/saved-units/Combobox";
 import { fetchWithAuth } from "../../../../../../lib/api";
 import { useTranslations } from "next-intl";
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+// Backend stores the Copeland brand under this (legacy) value; imported Frascold use "Frascold".
+const COPELAND = "Copelant";
+
 type Compressor = {
     id: number;
     brand: string;
     model: string;
     type: string;
-}
+};
 
 type Refrigerant = {
     id: number;
     name: string;
     code: string;
-}
+};
+
+type ModeCapacity = { id: number; mod: string; capacity: number; powerInput: number; maxCapacity: number };
+
+type CompressorRating = {
+    id: number;
+    compressorId: number;
+    brand: string;
+    type: string;
+    model: string;
+    refrigerantId: number;
+    refrigerantCode: string;
+    capCoeffs: number[];
+    powerCoeffs: number[];
+    massCoeffs: number[];
+    ohRef: number;
+    scRef: number;
+    minFrequency: number;
+    maxFrequency: number;
+    minSpeed: number;
+    maxSpeed: number;
+    modeCapacities: ModeCapacity[];
+};
 
 // Imported refrigerants have name === code, so show a single value; only show "name / code"
 // when they actually differ.
 const refrigerantLabel = (r: Refrigerant) => (r.name === r.code ? r.code : `${r.name} / ${r.code}`);
+// RC compressors use 10 coefficients per group; ISCR use 20.
+const coeffCount = (type: string) => (type === "RC" ? 10 : 20);
 
 export default function AddCompressorPage() {
     const t = useTranslations("AdminComp");
-    const [brand, setBrand] = useState("Select Brand");
+
+    // --- Section 1: compressor identity (Copeland only) ---
+    const [brand] = useState(COPELAND);
     const [type, setType] = useState("Select Type");
     const [model, setModel] = useState("");
     const [moc, setMoc] = useState("");
     const [lra, setLra] = useState("");
-    const [refrigerant, setRefrigerant] = useState("Select Refrigerant");
 
-    const [compressor, setCompressor] = useState("Select Compressor");
-    const [capacity, setCapacity] = useState("");
-    const [powerInput, setPowerInput] = useState("");
-    // Coefficients hold up to 20 each: 1–10 for all compressors, 11–20 only for ISCR.
-    const [qCoeffs, setQCoeffs] = useState<string[]>(Array(20).fill(""));
-    const [pCoeffs, setPCoeffs] = useState<string[]>(Array(20).fill(""));
-    const [rpmBase, setRpmBase] = useState("");
-    const [rpmMin, setRpmMin] = useState("");
-    const [rpmMax, setRpmMax] = useState("");
+    // --- Section 2: rating + coefficients (Copeland only; selected via brand/type/model filters) ---
+    const [s2Type, setS2Type] = useState("All Types");
+    const [s2Model, setS2Model] = useState("Select Model");
+    const [refrigerant, setRefrigerant] = useState("Select Refrigerant");
+    const [capCoeffs, setCapCoeffs] = useState<string[]>(Array(20).fill(""));
+    const [powerCoeffs, setPowerCoeffs] = useState<string[]>(Array(20).fill(""));
+
+    // --- Section 3: mode capacity ---
+    const [mcFilterBrand, setMcFilterBrand] = useState("All Brands");
+    const [mcFilterType, setMcFilterType] = useState("All Types");
+    const [mcRating, setMcRating] = useState("Select Model");
+    const [mcMod, setMcMod] = useState("Select Mode");
+    const [mcCapacity, setMcCapacity] = useState("");
+    const [mcPowerInput, setMcPowerInput] = useState("");
+    const [mcMaxCapacity, setMcMaxCapacity] = useState("");
 
     const [compressorsList, setCompressorsList] = useState<Compressor[]>([]);
     const [refrigerantsList, setRefrigerantsList] = useState<Refrigerant[]>([]);
-    const [toastInfo, setToastInfo] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+    const [ratingsList, setRatingsList] = useState<CompressorRating[]>([]);
+    const [toastInfo, setToastInfo] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
         setToastInfo({ message: msg, type });
@@ -54,11 +90,8 @@ export default function AddCompressorPage() {
 
     const fetchCompressors = async () => {
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/compressors`, { credentials: 'include', cache: 'no-store' });
-            if (res.ok) {
-                const data = await res.json();
-                setCompressorsList(data);
-            }
+            const res = await fetchWithAuth(`${API}/admin/component/compressors`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setCompressorsList(await res.json());
         } catch (e) {
             console.error("Failed to fetch compressors", e);
         }
@@ -66,52 +99,49 @@ export default function AddCompressorPage() {
 
     const fetchRefrigerants = async () => {
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/refrigerants`, { credentials: 'include', cache: 'no-store' });
-            if (res.ok) {
-                const data = await res.json();
-                setRefrigerantsList(data);
-            }
+            const res = await fetchWithAuth(`${API}/admin/component/refrigerants`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setRefrigerantsList(await res.json());
         } catch (e) {
             console.error("Failed to fetch refrigerants", e);
+        }
+    };
+
+    const fetchRatings = async () => {
+        try {
+            const res = await fetchWithAuth(`${API}/admin/component/allCompressorRatings`, { credentials: 'include', cache: 'no-store' });
+            if (res.ok) setRatingsList(await res.json());
+        } catch (e) {
+            console.error("Failed to fetch compressor ratings", e);
         }
     };
 
     useEffect(() => {
         fetchCompressors();
         fetchRefrigerants();
+        fetchRatings();
     }, []);
 
-    // The specs sub-form's compressor is "brand / model / type"; ISCR compressors get the
-    // RPM fields and the extra Q11–Q20 capacity coefficients.
-    const selectedSpecCompressor = compressorsList.find(c => `${c.brand} / ${c.model} / ${c.type}` === compressor);
-    const isIscr = selectedSpecCompressor?.type === "ISCR";
-    const qCount = isIscr ? 20 : 10;
-    const pCount = isIscr ? 20 : 10;
+    const num = (v: string) => parseFloat(v);
 
+    // ----- Section 1: add compressor -----
     const handleAddCompressor = async () => {
-        if (brand === "Select Brand" || type === "Select Type" || !model || refrigerant === "Select Refrigerant") {
+        if (type === "Select Type" || !model) {
             showToast(t("fillAllFields"), "error");
             return;
         }
-
-        const refrigerantItem = refrigerantsList.find(r => refrigerantLabel(r) === refrigerant);
-
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/addCompressor`, {
+            const res = await fetchWithAuth(`${API}/admin/component/addCompressor`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ brand, type, model, moc: parseFloat(moc), lra: parseFloat(lra), refrigerantId: refrigerantItem ? refrigerantItem.id : null }),
+                body: JSON.stringify({ brand, type, model, moc: num(moc), lra: num(lra) }),
                 credentials: 'include'
             });
-
             if (res.ok) {
                 showToast(t("addedSuccess", { name: t("names.compressor.cap") }), "success");
-                setBrand("Select Brand");
                 setType("Select Type");
                 setModel("");
                 setMoc("");
                 setLra("");
-                setRefrigerant("Select Refrigerant");
                 fetchCompressors();
             } else if (res.status === 409) {
                 showToast(t("alreadyExists", { name: t("names.compressor.low") }), "error");
@@ -125,60 +155,63 @@ export default function AddCompressorPage() {
         }
     };
 
-    const handleAddCompressorSpecs = async () => {
-        if (compressor === "Select Compressor" || !capacity || !powerInput) {
+    // ----- Section 2: add rating (Copeland only, selected by type + model) -----
+    const copelandCompressors = compressorsList.filter(c => c.brand !== "Frascold");
+    const s2Filtered = copelandCompressors.filter(c => s2Type === "All Types" || c.type === s2Type);
+    const s2ModelOptions = ["Select Model", ...s2Filtered.map(c => c.model)];
+    const selectedRatingCompressor = s2Filtered.find(c => c.model === s2Model);
+    const ratingCoeffCount = selectedRatingCompressor ? coeffCount(selectedRatingCompressor.type) : 0;
+
+    const setCoeff = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (i: number, v: string) => {
+        setter(prev => { const next = [...prev]; next[i] = v; return next; });
+    };
+
+    const handleAddRating = async () => {
+        if (!selectedRatingCompressor) {
+            showToast(t("selectName", { name: t("names.compressor.cap") }), "error");
+            return;
+        }
+        if (refrigerant === "Select Refrigerant") {
             showToast(t("fillAllFields"), "error");
             return;
         }
-        // Only the required coefficients must be filled: Q1–Q10 always, Q11–Q20 only for ISCR.
-        if (qCoeffs.slice(0, qCount).some(v => v === "") || pCoeffs.slice(0, pCount).some(v => v === "")) {
+        const refrigerantItem = refrigerantsList.find(r => refrigerantLabel(r) === refrigerant);
+        if (!refrigerantItem) {
+            showToast(t("invalidSelected", { name: t("refrigerant") }), "error");
+            return;
+        }
+        const n = ratingCoeffCount;
+        const filled = (arr: string[]) => arr.slice(0, n).every(v => v !== "");
+        if (!filled(capCoeffs) || !filled(powerCoeffs)) {
             showToast(t("fillCoefficients"), "error");
             return;
         }
-        if (isIscr && (!rpmBase || !rpmMin || !rpmMax)) {
-            showToast(t("fillRpm"), "error");
-            return;
-        }
 
-        const selectedComp = selectedSpecCompressor;
-        if (!selectedComp) {
-            showToast(t("invalidSelected", { name: t("names.compressor.low") }), "error");
-            return;
-        }
-
-        const qObj = Object.fromEntries(qCoeffs.slice(0, qCount).map((v, i) => [`qC${i + 1}`, parseFloat(v)]));
-        const pObj = Object.fromEntries(pCoeffs.slice(0, pCount).map((v, i) => [`pC${i + 1}`, parseFloat(v)]));
-        const rpmObj = isIscr
-            ? { rpmBase: parseFloat(rpmBase), rpmMin: parseFloat(rpmMin), rpmMax: parseFloat(rpmMax) }
-            : {};
+        const body = {
+            compressorId: selectedRatingCompressor.id,
+            refrigerantId: refrigerantItem.id,
+            capCoeffs: capCoeffs.slice(0, n).map(num),
+            powerCoeffs: powerCoeffs.slice(0, n).map(num),
+        };
 
         try {
-            const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/admin/component/addCompressorSpecs`, {
+            const res = await fetchWithAuth(`${API}/admin/component/addCompressorRating`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    compressorId: selectedComp.id,
-                    capacity: parseFloat(capacity),
-                    powerInput: parseFloat(powerInput),
-                    ...rpmObj,
-                    ...qObj,
-                    ...pObj
-                }),
+                body: JSON.stringify(body),
                 credentials: 'include'
             });
-
             if (res.ok) {
-                showToast(t("specsAddedSuccess", { name: t("names.compressor.cap") }), "success");
-                setCompressor("Select Compressor");
-                setCapacity("");
-                setPowerInput("");
-                setQCoeffs(Array(20).fill(""));
-                setPCoeffs(Array(20).fill(""));
-                setRpmBase("");
-                setRpmMin("");
-                setRpmMax("");
+                showToast(t("ratingAddedSuccess"), "success");
+                setS2Type("All Types");
+                setS2Model("Select Model");
+                setRefrigerant("Select Refrigerant");
+                setCapCoeffs(Array(20).fill(""));
+                setPowerCoeffs(Array(20).fill(""));
+                fetchRatings();
             } else {
-                showToast(t("failedAddSpecs", { name: t("names.compressor.low") }), "error");
+                const data = await res.json().catch(() => null);
+                showToast(data?.message || t("failedAddRating"), "error");
             }
         } catch (error) {
             console.error(error);
@@ -186,7 +219,93 @@ export default function AddCompressorPage() {
         }
     };
 
-    const compressorOptions = ["Select Compressor", ...compressorsList.map(c => `${c.brand} / ${c.model} / ${c.type}`)];
+    // ----- Section 3: add mode capacity (Copeland only) -----
+    const copelandRatings = ratingsList.filter(r => r.brand !== "Frascold");
+    const mcBrandOptions = ["All Brands", ...Array.from(new Set(copelandRatings.map(r => r.brand)))];
+    const mcTypeOptions = ["All Types", ...Array.from(new Set(copelandRatings.map(r => r.type)))];
+    const filteredRatings = copelandRatings.filter(r =>
+        (mcFilterBrand === "All Brands" || r.brand === mcFilterBrand) &&
+        (mcFilterType === "All Types" || r.type === mcFilterType)
+    );
+    // Show only the model name per the spec.
+    const mcRatingOptions = ["Select Model", ...filteredRatings.map(r => r.model)];
+    const selectedMcRating = filteredRatings.find(r => r.model === mcRating);
+    const mcIsIscr = selectedMcRating?.type === "ISCR";
+    // A mode can hold only one capacity, so hide modes already filled on the selected model.
+    const existingMods = selectedMcRating ? selectedMcRating.modeCapacities.map(mc => mc.mod) : [];
+    const mcModOptions = ["Select Mode", ...["COOLING", "HEATING"].filter(m => !existingMods.includes(m))];
+
+    const handleAddModeCapacity = async () => {
+        if (!selectedMcRating) {
+            showToast(t("selectRatingError"), "error");
+            return;
+        }
+        if (mcMod === "Select Mode" || !mcCapacity || !mcPowerInput) {
+            showToast(t("fillAllFields"), "error");
+            return;
+        }
+        const body = {
+            compressorRatingId: selectedMcRating.id,
+            mod: mcMod,
+            capacity: num(mcCapacity),
+            powerInput: num(mcPowerInput),
+            maxCapacity: mcIsIscr && mcMaxCapacity ? num(mcMaxCapacity) : 0,
+        };
+        try {
+            const res = await fetchWithAuth(`${API}/admin/component/addCompressorModeCapacity`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                showToast(t("modeCapacityAddedSuccess"), "success");
+                setMcMod("Select Mode");
+                setMcCapacity("");
+                setMcPowerInput("");
+                setMcMaxCapacity("");
+                fetchRatings();
+            } else {
+                const data = await res.json().catch(() => null);
+                showToast(data?.message || t("failedAddModeCapacity"), "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(t("networkError"), "error");
+        }
+    };
+
+    // Paste a whole coefficient row/column from Excel into a group: splits the clipboard on any
+    // whitespace (tab/newline — Excel rows are tab-separated, columns newline-separated) or commas,
+    // and fills the group from the input that received the paste. A single value pastes normally.
+    const handleCoeffPaste = (onSet: (i: number, v: string) => void, startIndex: number) =>
+        (e: React.ClipboardEvent<HTMLInputElement>) => {
+            const parts = e.clipboardData.getData("text").split(/[\s,]+/).filter(p => p.trim() !== "");
+            if (parts.length <= 1) return; // normal single-value paste
+            e.preventDefault();
+            parts.forEach((v, k) => { if (startIndex + k < ratingCoeffCount) onSet(startIndex + k, v); });
+        };
+
+    const coeffGroup = (legend: string, values: string[], onSet: (i: number, v: string) => void, prefix: string) => (
+        <fieldset className={styles.coeffGroup}>
+            <legend>{legend}</legend>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
+                {values.slice(0, ratingCoeffCount).map((val, i) => (
+                    <div className={styles.formField} key={`${prefix}${i}`}>
+                        <label>{prefix}{i + 1}</label>
+                        <input
+                            type="text" inputMode="decimal"
+                            className={styles.inputElement}
+                            placeholder="0"
+                            value={val}
+                            onChange={(e) => onSet(i, e.target.value)}
+                            onPaste={handleCoeffPaste(onSet, i)}
+                        />
+                    </div>
+                ))}
+            </div>
+        </fieldset>
+    );
 
     return (
         <div className={styles.sectionsContainer} style={{ minHeight: 'fit-content', flex: 'none' }}>
@@ -207,22 +326,24 @@ export default function AddCompressorPage() {
                 <div className={styles.splitContent}>
                     <div className={styles.leftContent}>
                         <div className={styles.formSection}>
+                            {/* ---- Step 1: compressor identity ---- */}
+                            <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', cursor: 'default' }}>{t("sectionIdentity")}</h3>
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
                                     <label>{t("brand")}</label>
                                     <Combobox
-                                        options={["Select Brand", "Frascold", "Copelant"]}
+                                        options={[COPELAND]}
                                         value={brand}
-                                        onChange={setBrand}
-                                        getLabel={(v) => v === "Select Brand" ? t("selectName", { name: t("brand") }) : v}
-                                        className={`${styles.comboBox} ${brand.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        onChange={() => {}}
+                                        getLabel={(v) => v}
+                                        className={styles.comboBox}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("type")}</label>
                                     <Combobox
-                                        options={["Select Type", "RC", "SC", "SCR", "ISCR"]}
+                                        options={["Select Type", "RC", "ISCR"]}
                                         value={type}
                                         onChange={setType}
                                         getLabel={(v) => v === "Select Type" ? t("selectName", { name: t("type") }) : v}
@@ -232,34 +353,60 @@ export default function AddCompressorPage() {
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("model")}</label>
-                                    <input
-                                        type="text"
-                                        className={styles.inputElement}
-                                        placeholder={t("enterModel")}
-                                        value={model}
-                                        onChange={(e) => setModel(e.target.value)}
-                                    />
+                                    <input type="text" className={styles.inputElement} placeholder={t("enterModel")} value={model} onChange={(e) => setModel(e.target.value)} />
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("mocA")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterMoc")}
-                                        value={moc}
-                                        onChange={(e) => setMoc(e.target.value)}
-                                    />
+                                    <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterMoc")} value={moc} onChange={(e) => setMoc(e.target.value)} />
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("lraA")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterLra")}
-                                        value={lra}
-                                        onChange={(e) => setLra(e.target.value)}
+                                    <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterLra")} value={lra} onChange={(e) => setLra(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
+                                <button className={styles.saveBtn} onClick={handleAddCompressor}>{t("add")}</button>
+                            </div>
+
+                            <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
+
+                            {/* ---- Step 2: rating + coefficients ---- */}
+                            <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', cursor: 'default' }}>{t("sectionRating")}</h3>
+                            <div className={styles.formGrid}>
+                                <div className={styles.formField}>
+                                    <label>{t("filterBrand")}</label>
+                                    <Combobox
+                                        options={[COPELAND]}
+                                        value={brand}
+                                        onChange={() => {}}
+                                        getLabel={(v) => v}
+                                        className={styles.comboBox}
+                                        containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
+                                <div className={styles.formField}>
+                                    <label>{t("filterType")}</label>
+                                    <Combobox
+                                        options={["All Types", "RC", "ISCR"]}
+                                        value={s2Type}
+                                        onChange={(v) => { setS2Type(v); setS2Model("Select Model"); }}
+                                        getLabel={(v) => v === "All Types" ? t("allTypes") : v}
+                                        className={styles.comboBox}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("model")}</label>
+                                    <Combobox
+                                        options={s2ModelOptions}
+                                        value={s2Model}
+                                        onChange={setS2Model}
+                                        getLabel={(v) => v === "Select Model" ? t("selectName", { name: t("model") }) : v}
+                                        className={`${styles.comboBox} ${s2Model.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                {/* Refrigerant placed BEFORE the coefficient inputs */}
                                 <div className={styles.formField}>
                                     <label>{t("refrigerant")}</label>
                                     <Combobox
@@ -272,114 +419,85 @@ export default function AddCompressorPage() {
                                     />
                                 </div>
                             </div>
+
+                            {selectedRatingCompressor && (
+                                <>
+                                    <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
+                                    {coeffGroup(t("capacityCoeffs"), capCoeffs, setCoeff(setCapCoeffs), "Q-C")}
+                                    {coeffGroup(t("powerCoeffs"), powerCoeffs, setCoeff(setPowerCoeffs), "P-C")}
+                                </>
+                            )}
+
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCompressor}>{t("add")}</button>
+                                <button className={styles.saveBtn} onClick={handleAddRating}>{t("add")}</button>
                             </div>
 
                             <div className={styles.horizontalSeperator} style={{ margin: '30px 0' }}></div>
 
+                            {/* ---- Step 3: mode capacity ---- */}
+                            <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px', cursor: 'default' }}>{t("sectionModeCapacity")}</h3>
                             <div className={styles.formGrid}>
                                 <div className={styles.formField}>
-                                    <label>{t("names.compressor.cap")}</label>
+                                    <label>{t("filterBrand")}</label>
                                     <Combobox
-                                        options={compressorOptions}
-                                        value={compressor}
-                                        onChange={setCompressor}
-                                        getLabel={(v) => v === "Select Compressor" ? t("selectName", { name: t("names.compressor.cap") }) : v}
-                                        className={`${styles.comboBox} ${compressor.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        options={mcBrandOptions}
+                                        value={mcFilterBrand}
+                                        onChange={(v) => { setMcFilterBrand(v); setMcRating("Select Model"); }}
+                                        getLabel={(v) => v === "All Brands" ? t("allBrands") : v}
+                                        className={styles.comboBox}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("filterType")}</label>
+                                    <Combobox
+                                        options={mcTypeOptions}
+                                        value={mcFilterType}
+                                        onChange={(v) => { setMcFilterType(v); setMcRating("Select Model"); }}
+                                        getLabel={(v) => v === "All Types" ? t("allTypes") : v}
+                                        className={styles.comboBox}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("model")}</label>
+                                    <Combobox
+                                        options={mcRatingOptions}
+                                        value={mcRating}
+                                        onChange={setMcRating}
+                                        getLabel={(v) => v === "Select Model" ? t("selectName", { name: t("model") }) : v}
+                                        className={`${styles.comboBox} ${mcRating.startsWith('Select') ? styles.placeholderText : ''}`}
+                                        containerClassName={styles.comboboxContainerOverride}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label>{t("mod")}</label>
+                                    <Combobox
+                                        options={mcModOptions}
+                                        value={mcMod}
+                                        onChange={setMcMod}
+                                        getLabel={(v) => v === "Select Mode" ? t("selectMod") : v === "COOLING" ? t("cooling") : t("heating")}
+                                        className={`${styles.comboBox} ${mcMod.startsWith('Select') ? styles.placeholderText : ''}`}
                                         containerClassName={styles.comboboxContainerOverride}
                                     />
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("capacity")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterCapacity")}
-                                        value={capacity}
-                                        onChange={(e) => setCapacity(e.target.value)}
-                                    />
+                                    <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterCapacity")} value={mcCapacity} onChange={(e) => setMcCapacity(e.target.value)} />
                                 </div>
                                 <div className={styles.formField}>
                                     <label>{t("powerInput")}</label>
-                                    <input
-                                        type="number" onWheel={(e) => e.currentTarget.blur()}
-                                        className={styles.inputElement}
-                                        placeholder={t("enterPowerInput")}
-                                        value={powerInput}
-                                        onChange={(e) => setPowerInput(e.target.value)}
-                                    />
+                                    <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterPowerInput")} value={mcPowerInput} onChange={(e) => setMcPowerInput(e.target.value)} />
                                 </div>
-                            </div>
-
-                            <div className={styles.horizontalSeperator} style={{ margin: '28px 0' }}></div>
-
-                            {isIscr && (
-                                <fieldset className={styles.coeffGroup}>
-                                    <legend>{t("rpmSection")}</legend>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                                        <div className={styles.formField}>
-                                            <label>{t("rpmBase")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmBase} onChange={(e) => setRpmBase(e.target.value)} />
-                                        </div>
-                                        <div className={styles.formField}>
-                                            <label>{t("rpmMin")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMin} onChange={(e) => setRpmMin(e.target.value)} />
-                                        </div>
-                                        <div className={styles.formField}>
-                                            <label>{t("rpmMax")}</label>
-                                            <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterRpm")} value={rpmMax} onChange={(e) => setRpmMax(e.target.value)} />
-                                        </div>
+                                {mcIsIscr && (
+                                    <div className={styles.formField}>
+                                        <label>{t("maxCapacity")}</label>
+                                        <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} placeholder={t("enterMaxCapacity")} value={mcMaxCapacity} onChange={(e) => setMcMaxCapacity(e.target.value)} />
                                     </div>
-                                </fieldset>
-                            )}
-
-                            <fieldset className={styles.coeffGroup}>
-                                <legend>{t("capacityCoeffs")}</legend>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {qCoeffs.slice(0, qCount).map((val, i) => (
-                                        <div className={styles.formField} key={`q${i}`}>
-                                            <label>Q-C{i + 1}</label>
-                                            <input
-                                                type="number" onWheel={(e) => e.currentTarget.blur()}
-                                                className={styles.inputElement}
-                                                placeholder="0"
-                                                value={val}
-                                                onChange={(e) => {
-                                                    const next = [...qCoeffs];
-                                                    next[i] = e.target.value;
-                                                    setQCoeffs(next);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </fieldset>
-
-                            <fieldset className={styles.coeffGroup}>
-                                <legend>{t("powerCoeffs")}</legend>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
-                                    {pCoeffs.slice(0, pCount).map((val, i) => (
-                                        <div className={styles.formField} key={`p${i}`}>
-                                            <label>P-C{i + 1}</label>
-                                            <input
-                                                type="number" onWheel={(e) => e.currentTarget.blur()}
-                                                className={styles.inputElement}
-                                                placeholder="0"
-                                                value={val}
-                                                onChange={(e) => {
-                                                    const next = [...pCoeffs];
-                                                    next[i] = e.target.value;
-                                                    setPCoeffs(next);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </fieldset>
-
+                                )}
+                            </div>
                             <div className={styles.stepNavContainer} style={{ borderTop: 'none', marginTop: '15px', padding: '0', justifyContent: 'flex-end' }}>
-                                <button className={styles.saveBtn} onClick={handleAddCompressorSpecs}>{t("add")}</button>
+                                <button className={styles.saveBtn} onClick={handleAddModeCapacity}>{t("add")}</button>
                             </div>
                         </div>
                     </div>

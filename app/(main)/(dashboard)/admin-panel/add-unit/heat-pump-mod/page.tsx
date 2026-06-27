@@ -53,8 +53,6 @@ export default function AddHeatPumpModPage() {
     const [reversingValveList, setReversingValveList] = useState<ComponentSpecs[]>([]);
 
     // per-mode tech
-    const [capacity, setCapacity] = useState("");
-    const [maxCapacity, setMaxCapacity] = useState("");
     const [eer, setEer] = useState("");
     const [cop, setCop] = useState("");
     const [condenserRequiredDuty, setCondenserRequiredDuty] = useState("");
@@ -111,7 +109,7 @@ export default function AddHeatPumpModPage() {
     const resetModeFields = () => {
         setEvaporatorSpecsId(null); setCondenserSpecsId(null);
         setExpansionValveSpecsId(null); setReversingValveSpecsId(null);
-        setCapacity(""); setMaxCapacity(""); setEer(""); setCop(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
+        setEer(""); setCop(""); setCondenserRequiredDuty(""); setQuietCondenserRequiredDuty("");
         setAmbient(""); setEvapIn(""); setEvapOut(""); setCondIn(""); setCondOut("");
     };
 
@@ -151,8 +149,6 @@ export default function AddHeatPumpModPage() {
             heatPumpId: selectedHeatPumpId,
             mod: unitMod === "cooling" ? "COOLING" : "HEATING",
             modeSpecsDto: {
-                capacity: num(capacity),
-                maxCapacity: num(maxCapacity),
                 copErr: unitMod === "cooling" ? num(eer) : num(cop),
                 condenserRequiredDuty: num(condenserRequiredDuty),
                 quietCondenserRequiredDuty: num(quietCondenserRequiredDuty),
@@ -250,14 +246,6 @@ export default function AddHeatPumpModPage() {
                                     className={styles.comboBox}
                                     containerClassName={styles.comboboxContainerOverride}
                                 />
-                            </div>
-                            <div className={styles.formField}>
-                                <label>{t("capacityKw")}</label>
-                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
-                            </div>
-                            <div className={styles.formField}>
-                                <label>{t("maxCapacityKw")}</label>
-                                <input type="number" onWheel={(e) => e.currentTarget.blur()} className={styles.inputElement} value={maxCapacity} onChange={(e) => setMaxCapacity(e.target.value)} />
                             </div>
                             <div className={styles.formField}>
                                 <label>{t("eer")}</label>
