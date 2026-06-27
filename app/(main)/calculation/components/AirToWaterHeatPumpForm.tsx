@@ -31,6 +31,7 @@ interface CalcResult {
     pressureDrop: number;
     massFlow: number;
     condenserDuty: number;
+    evaporatorDuty: number;
     dischargeTemp: number;
     withinEnvelope: boolean;
     faithfulEngine: boolean;
@@ -243,7 +244,7 @@ export default function AirToWaterHeatPumpForm({ unitId, coolingDefaults, heatin
     };
 
     const fmt = (n: number) =>
-        n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+        (Number.isFinite(n) ? n : 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
 
     // One result panel for a mode. `heating` switches the capacity/efficiency labels.
     const resultPanel = (r: CalcResult, heating: boolean) => (
@@ -276,14 +277,13 @@ export default function AirToWaterHeatPumpForm({ unitId, coolingDefaults, heatin
                     <span className={styles.resultMetricLabel}>{t("massFlow")}</span>
                     <span className={styles.resultMetricValue}>{fmt(r.massFlow)}<span className={styles.resultMetricUnit}>kg/h</span></span>
                 </div>
-                {/* In heating mode the condenser duty IS the heating capacity (shown above), so the
-                    separate tile would just duplicate it — only show it for cooling. */}
-                {!heating && (
-                    <div className={styles.resultMetric}>
-                        <span className={styles.resultMetricLabel}>{t("condenserDuty")}</span>
-                        <span className={styles.resultMetricValue}>{fmt(r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
-                    </div>
-                )}
+                {/* The headline already shows the useful side (evaporator in cooling, condenser in
+                    heating). This tile shows the opposite side: condenser capacity in cooling,
+                    evaporator capacity in heating. */}
+                <div className={styles.resultMetric}>
+                    <span className={styles.resultMetricLabel}>{heating ? t("evaporatorDuty") : t("condenserDuty")}</span>
+                    <span className={styles.resultMetricValue}>{fmt(heating ? r.evaporatorDuty : r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
+                </div>
                 <div className={styles.resultMetric}>
                     <span className={styles.resultMetricLabel}>{t("dischargeTemp")}</span>
                     <span className={styles.resultMetricValue}>{fmt(r.dischargeTemp)}<span className={styles.resultMetricUnit}>°C</span></span>

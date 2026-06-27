@@ -30,6 +30,7 @@ interface CalcResult {
     pressureDrop: number;
     massFlow: number;
     condenserDuty: number;
+    evaporatorDuty: number;
     dischargeTemp: number;
     withinEnvelope: boolean;
     faithfulEngine: boolean;
@@ -256,7 +257,7 @@ export default function WaterToWaterHeatPumpForm({ unitId, coolingDefaults, heat
     };
 
     const fmt = (n: number) =>
-        n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+        (Number.isFinite(n) ? n : 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 });
 
     // One result panel for a mode. `heating` switches the capacity/efficiency labels.
     const resultPanel = (r: CalcResult, heating: boolean) => (
@@ -290,8 +291,8 @@ export default function WaterToWaterHeatPumpForm({ unitId, coolingDefaults, heat
                     <span className={styles.resultMetricValue}>{fmt(r.massFlow)}<span className={styles.resultMetricUnit}>kg/h</span></span>
                 </div>
                 <div className={styles.resultMetric}>
-                    <span className={styles.resultMetricLabel}>{t("condenserDuty")}</span>
-                    <span className={styles.resultMetricValue}>{fmt(r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
+                    <span className={styles.resultMetricLabel}>{heating ? t("evaporatorDuty") : t("condenserDuty")}</span>
+                    <span className={styles.resultMetricValue}>{fmt(heating ? r.evaporatorDuty : r.condenserDuty)}<span className={styles.resultMetricUnit}>kW</span></span>
                 </div>
                 <div className={styles.resultMetric}>
                     <span className={styles.resultMetricLabel}>{t("dischargeTemp")}</span>
